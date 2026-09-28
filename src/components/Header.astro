@@ -1,0 +1,51 @@
+---
+import Brand from './ui/Brand.astro';
+import ThemeToggle from './ui/ThemeToggle.astro';
+import { localeLabels, locales, publishedLocales, type Locale } from '../i18n/config';
+import type { Messages } from '../i18n/messages';
+import { getPageCopy } from '../i18n/pages';
+interface Props {
+  locale: Locale;
+  copy: Messages;
+}
+const { locale, copy } = Astro.props;
+const pages = getPageCopy(locale);
+const localizedPath = (target: Locale) =>
+  Astro.url.pathname.replace(/^\/(pt-br|en|es|de)(?=\/)/, `/${target}`);
+const home = `/${locale}/`;
+---
+
+<header class="site-header">
+  <div class="shell header-inner">
+    <Brand locale={locale} />
+    <nav aria-label="Navegação principal">
+      <a href={`${home}#experiencia`}>{copy.nav.experience}</a>
+      <a href={`${home}#ecossistema`}>{copy.nav.ecosystem}</a>
+      <a href={`${home}#equipe`}>{pages.team[0]}</a>
+      <a href={`${home}#perguntas`}>FAQ</a>
+      <a href={`/${locale}/artigos/`}>{copy.nav.journal}</a>
+    </nav>
+    <div class="header-actions">
+      <details class="locale-picker">
+        <summary aria-label="Selecionar idioma">
+          {localeLabels[locale]} <span aria-hidden="true">⌄</span>
+        </summary>
+        <div>
+          {locales.map((item) =>
+            publishedLocales.includes(item) ? (
+              <a href={localizedPath(item)} aria-current={item === locale ? 'page' : undefined}>
+                {localeLabels[item]}
+              </a>
+            ) : (
+              <span title="Tradução em preparação">{localeLabels[item]}</span>
+            ),
+          )}
+        </div>
+      </details>
+      <ThemeToggle lightLabel={copy.theme.light} darkLabel={copy.theme.dark} />
+      <a class="button button--small" href={`${home}#acompanhar`}>
+        {copy.nav.cta}
+      </a>
+    </div>
+  </div>
+</header>

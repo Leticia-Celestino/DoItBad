@@ -1,0 +1,37 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import { getMessages } from '../../i18n/messages';
+import { getPageCopy } from '../../i18n/pages';
+import { isLocale, publishedLocales } from '../../i18n/config';
+
+export function getStaticPaths() {
+  return publishedLocales.map((locale) => ({ params: { locale } }));
+}
+const rawLocale = Astro.params.locale;
+if (!isLocale(rawLocale)) return Astro.redirect('/pt-br/404/');
+const locale = rawLocale;
+const copy = getMessages(locale);
+const pages = getPageCopy(locale);
+---
+
+<BaseLayout
+  locale={locale}
+  title={`${pages.notFound[1]} — DoItBad`}
+  description={pages.notFound[2]}
+>
+  <Header locale={locale} copy={copy} />
+  <main class="not-found shell" id="conteudo">
+    <p class="eyebrow">
+      <span></span>
+      {pages.notFound[0]}
+    </p>
+    <h1>{pages.notFound[1]}</h1>
+    <p>{pages.notFound[2]}</p>
+    <a class="button" href={`/${locale}/`}>
+      {pages.notFound[3]}
+    </a>
+  </main>
+  <Footer locale={locale} copy={copy} />
+</BaseLayout>

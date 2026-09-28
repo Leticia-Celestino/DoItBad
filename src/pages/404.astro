@@ -1,0 +1,27 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { getMessages } from '../i18n/messages';
+
+const copy = getMessages('pt-br');
+---
+
+<BaseLayout
+  locale="pt-br"
+  title="Página não encontrada — DoItBad"
+  description="A página que você procurou não foi encontrada."
+>
+  <Header locale="pt-br" copy={copy} />
+  <main class="not-found shell" id="conteudo">
+    <p class="eyebrow">
+      <span></span>Um pequeno desvio
+    </p>
+    <h1>Essa página tomou outro caminho.</h1>
+    <p>Vamos voltar para um lugar conhecido e encontrar um próximo passo.</p>
+    <a class="button" href="/pt-br/">
+      Voltar para o início
+    </a>
+  </main>
+  <Footer locale="pt-br" copy={copy} />
+</BaseLayout>

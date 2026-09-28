@@ -1,0 +1,29 @@
+---
+interface Props {
+  lightLabel: string;
+  darkLabel: string;
+}
+const { lightLabel, darkLabel } = Astro.props;
+const lightValue =
+  lightLabel.replace(/^Usar |^Use |^Usar |^Hellen Modus verwenden$/i, '') || lightLabel;
+const darkValue = darkLabel.replace(/^Usar |^Use |^Nachtmodus verwenden$/i, '') || darkLabel;
+---
+
+<button
+  class="theme-toggle"
+  type="button"
+  data-theme-toggle
+  data-label-light={lightLabel}
+  data-label-dark={darkLabel}
+  data-value-light={lightValue}
+  data-value-dark={darkValue}
+  aria-label={darkLabel}
+  aria-pressed="false"
+>
+  <span class="theme-toggle__track" aria-hidden="true">
+    <i class="theme-toggle__sun">✦</i>
+    <i class="theme-toggle__moon">☾</i>
+    <b></b>
+  </span>
+  <span data-theme-label>{darkValue}</span>
+</button>

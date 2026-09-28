@@ -1,0 +1,25 @@
+---
+import Brand from './ui/Brand.astro';
+import type { Messages } from '../i18n/messages';
+import type { Locale } from '../i18n/config';
+interface Props {
+  copy: Messages;
+  locale?: Locale;
+}
+const { copy, locale = 'pt-br' } = Astro.props;
+---
+
+<footer class="site-footer">
+  <div class="shell footer-inner">
+    <div>
+      <Brand locale={locale} />
+      <p>{copy.footer.phrase}</p>
+    </div>
+    <div class="footer-meta">
+      <span>{copy.footer.status}</span>
+      <a href={`/${locale}/privacidade/`}>{copy.footer.privacy}</a>
+      <a href="mailto:contato@doitbad.tech">{copy.footer.contact}</a>
+      <span>© {new Date().getFullYear()} DoItBad</span>
+    </div>
+  </div>
+</footer>

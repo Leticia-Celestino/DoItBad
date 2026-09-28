@@ -1,0 +1,22 @@
+{
+  "name": "@doitbad/studio",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "sanity dev",
+    "build": "sanity build",
+    "check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@sanity/vision": "latest",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "sanity": "latest",
+    "styled-components": "latest"
+  },
+  "devDependencies": {
+    "@types/node": "24.5.2",
+    "@types/react": "19.2.14",
+    "typescript": "5.9.3"
+  }
+}

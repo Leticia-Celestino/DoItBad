@@ -1,0 +1,48 @@
+{
+  "name": "doitbad-landing-page",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "ASTRO_TELEMETRY_DISABLED=1 astro dev --host 127.0.0.1",
+    "build": "ASTRO_TELEMETRY_DISABLED=1 astro build",
+    "preview": "ASTRO_TELEMETRY_DISABLED=1 astro preview --host 127.0.0.1",
+    "check": "ASTRO_TELEMETRY_DISABLED=1 astro check",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test:e2e": "playwright test",
+    "verify": "pnpm lint && pnpm check && pnpm --filter @doitbad/web check && pnpm --filter @doitbad/studio check && pnpm build && pnpm --filter @doitbad/web build"
+  },
+  "dependencies": {
+    "@astrojs/react": "7.0.0",
+    "@astrojs/sitemap": "^3.7.4",
+    "@fontsource-variable/inter": "5.3.0",
+    "@fontsource-variable/quicksand": "5.3.0",
+    "@rive-app/canvas": "^2.43.1",
+    "@tailwindcss/vite": "4.3.3",
+    "astro": "7.3.5",
+    "oxc-transform-react": "0.145.0",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "tailwindcss": "4.3.3"
+  },
+  "devDependencies": {
+    "@astrojs/check": "0.9.10",
+    "@axe-core/playwright": "^4.13.0",
+    "@eslint/js": "10.0.1",
+    "@playwright/test": "1.58.2",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "eslint": "10.11.0",
+    "eslint-plugin-astro": "3.2.1",
+    "prettier": "3.8.2",
+    "prettier-plugin-astro": "1.1.0",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.70.1"
+  }
+}

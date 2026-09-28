@@ -1,0 +1,78 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Header from '../../../components/Header.astro';
+import Footer from '../../../components/Footer.astro';
+import { getMessages } from '../../../i18n/messages';
+import { getPageCopy } from '../../../i18n/pages';
+import { isLocale, publishedLocales } from '../../../i18n/config';
+import { getArticles } from '../../../content/articles';
+
+export function getStaticPaths() {
+  return publishedLocales.flatMap((locale) =>
+    getArticles(locale).map((article) => ({
+      params: { locale, slug: article.slug },
+      props: { article },
+    })),
+  );
+}
+
+const rawLocale = Astro.params.locale;
+if (!isLocale(rawLocale)) return Astro.redirect('/pt-br/artigos/');
+const locale = rawLocale;
+const copy = getMessages(locale);
+const pages = getPageCopy(locale);
+const { article } = Astro.props;
+const articleUrl = new URL(Astro.url.pathname, Astro.site).href;
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: article.title,
+  description: article.summary,
+  author: { '@type': 'Organization', name: article.author },
+  publisher: { '@type': 'Organization', name: 'DoItBad' },
+  datePublished: article.publishedAt,
+  dateModified: article.reviewedAt,
+  inLanguage: locale,
+  mainEntityOfPage: articleUrl,
+};
+---
+
+<BaseLayout
+  locale={locale}
+  title={`${article.title} — DoItBad`}
+  description={article.summary}
+  type="article"
+  structuredData={structuredData}
+>
+  <Header locale={locale} copy={copy} />
+  <main class="article-page" id="conteudo">
+    <article class="article-reader shell">
+      <a class="back-link" href={`/${locale}/artigos/`}>
+        ← {pages.editorial.all}
+      </a>
+      <p class="eyebrow">
+        <span></span>
+        {article.category} · {article.readingTime}
+      </p>
+      <h1>{article.title}</h1>
+      <p class="article-lede">{article.summary}</p>
+      <p class="article-meta">
+        {article.author} · <time datetime={article.publishedAt}>{article.publishedAt}</time> ·{' '}
+        {article.readingTime}
+      </p>
+      <div class="article-body">
+        {article.paragraphs.map((paragraph) => (
+          <p>{paragraph}</p>
+        ))}
+      </div>
+      <aside class="article-action">
+        <strong>{pages.demo.now}</strong>
+        <p>{article.action}</p>
+      </aside>
+      <a class="button" href={`/${locale}/artigos/`}>
+        {pages.editorial.another}
+      </a>
+    </article>
+  </main>
+  <Footer locale={locale} copy={copy} />
+</BaseLayout>

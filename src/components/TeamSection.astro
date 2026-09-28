@@ -1,0 +1,91 @@
+---
+type TeamMember = {
+  name: string;
+  role: string;
+  bio: string;
+  initials: string;
+  photo?: string;
+  links: { label: string; href: string }[];
+};
+interface Props {
+  copy: readonly [string, string, string, string];
+}
+const { copy } = Astro.props;
+
+const members: TeamMember[] = [
+  {
+    name: 'Carol Ferreira',
+    role: 'Cofundadora',
+    bio: 'Construindo o DoItBad da pesquisa à experiência de produto.',
+    initials: 'CF',
+    photo: '/team/carol.jpg',
+    links: [
+      { label: 'LinkedIn', href: 'https://www.linkedin.com/in/caroollfz/' },
+      { label: 'GitHub', href: 'https://github.com/caroollfz' },
+    ],
+  },
+  {
+    name: 'Lara Lima Mota',
+    role: 'Cofundadora',
+    bio: 'Criando uma experiência que respeita ritmos e contextos reais.',
+    initials: 'LM',
+    photo: '/team/lara.jpg',
+    links: [{ label: 'LinkedIn', href: 'https://www.linkedin.com/in/lara-lima-mota/' }],
+  },
+  {
+    name: 'Letícia Celestino',
+    role: 'Cofundadora',
+    bio: 'Transformando pequenos gestos em um ecossistema simples e confiável.',
+    initials: 'LC',
+    photo: '/team/leticia.png',
+    links: [
+      { label: 'LinkedIn', href: 'https://www.linkedin.com/in/leticiascelestino/' },
+      { label: 'GitHub', href: 'https://github.com/Leticia-Celestino' },
+    ],
+  },
+];
+---
+
+<section class="team shell" id="equipe" aria-labelledby="team-title">
+  <div class="team-intro">
+    <div class="section-heading">
+      <p class="eyebrow">
+        <span></span>
+        {copy[1]}
+      </p>
+      <h2 id="team-title">{copy[2]}</h2>
+    </div>
+    <p>{copy[3]}</p>
+  </div>
+
+  <div class="team-grid" tabindex="0" aria-label={copy[0]}>
+    {members.map((member) => (
+      <article class="team-card">
+        <div class="team-photo" aria-label={`Foto de ${member.name}`}>
+          {member.photo ? (
+            <img src={member.photo} alt={`Foto de ${member.name}`} />
+          ) : (
+            <span>{member.initials}</span>
+          )}
+        </div>
+        <div class="team-card__body">
+          <p class="team-role">{member.role}</p>
+          <h3>{member.name}</h3>
+          <p>{member.bio}</p>
+          <nav class="team-links" aria-label={`Links de ${member.name}`}>
+            {member.links.map((link) =>
+              link.href === '#' ? (
+                <span class="team-link-placeholder">{link.label}</span>
+              ) : (
+                <a href={link.href} target="_blank" rel="noreferrer">
+                  {link.label}
+                  <span aria-hidden="true">↗</span>
+                </a>
+              ),
+            )}
+          </nav>
+        </div>
+      </article>
+    ))}
+  </div>
+</section>

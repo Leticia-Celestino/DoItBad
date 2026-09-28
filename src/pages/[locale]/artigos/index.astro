@@ -1,0 +1,58 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Header from '../../../components/Header.astro';
+import Footer from '../../../components/Footer.astro';
+import { getMessages } from '../../../i18n/messages';
+import { getPageCopy } from '../../../i18n/pages';
+import { isLocale, publishedLocales } from '../../../i18n/config';
+import { getArticles } from '../../../content/articles';
+
+export function getStaticPaths() {
+  return publishedLocales.map((locale) => ({ params: { locale } }));
+}
+
+const rawLocale = Astro.params.locale;
+if (!isLocale(rawLocale)) return Astro.redirect('/pt-br/artigos/');
+const locale = rawLocale;
+const copy = getMessages(locale);
+const pages = getPageCopy(locale);
+const articles = getArticles(locale);
+---
+
+<BaseLayout
+  locale={locale}
+  title={`${pages.editorial.title} — DoItBad`}
+  description={copy.journal.body}
+>
+  <Header locale={locale} copy={copy} />
+  <main class="editorial-page" id="conteudo">
+    <header class="editorial-hero shell">
+      <p class="eyebrow">
+        <span></span>
+        {pages.editorial.title}
+      </p>
+      <h1>{pages.editorial.heading}</h1>
+      <p>{pages.editorial.intro}</p>
+    </header>
+    <section class="article-index shell" aria-label={pages.editorial.list}>
+      {articles.map((article, index) => (
+        <a class="article-index-card" href={`/${locale}/artigos/${article.slug}/`}>
+          <span class={`article-index-art article-index-art--${index}`} aria-hidden="true">
+            {index === 0 ? '↜' : index === 1 ? '◌' : '⌁'}
+          </span>
+          <div>
+            <small>
+              {article.category} · {article.readingTime}
+            </small>
+            <h2>{article.title}</h2>
+            <p>{article.summary}</p>
+            <span class="text-link">
+              {pages.editorial.read} <span aria-hidden="true">↗</span>
+            </span>
+          </div>
+        </a>
+      ))}
+    </section>
+  </main>
+  <Footer locale={locale} copy={copy} />
+</BaseLayout>

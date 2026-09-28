@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 360" role="img">
+  <title>DoItBad — poses do personagem para a intro</title>
+  <desc>
+    Quatro poses vetoriais: caminhada A, caminhada B, pausa na borda da cortina e chute.
+    Cada pose está em um grupo identificado para importação no Rive.
+  </desc>
+  <defs>
+    <style>
+      .ink { stroke: #343e31; stroke-linecap: round; stroke-linejoin: round; stroke-width: 3; }
+      .line { fill: none; }
+      .body { fill: #fbf6ec; }
+      .face { fill: #e8af8d; }
+      .accent { stroke: #bd7858; fill: none; }
+      .spark { stroke: #e8c77f; fill: none; }
+    </style>
+  </defs>
+
+  <!-- Pose 01: passo com a perna esquerda à frente -->
+  <g id="pose-walk-a" transform="translate(0 0)">
+    <g class="ink">
+      <path class="body" d="M91 113c13-12 42-14 60 0l23 158c-24 13-70 13-96 0Z" />
+      <path class="face" d="M98 111c-5-18 0-45 17-57 14-10 30-3 37 11l17 13-16 7c1 18-6 31-19 36-14 5-27 2-36-10Z" />
+      <circle cx="132" cy="79" r="3" fill="#343e31" stroke="none" />
+      <path class="line" d="M88 137c-14 17-19 34-24 55M152 139c17 13 27 27 36 44" />
+      <path class="line" d="M64 192l-12 10m12-10-2 15m2-15 10 7M188 183l13 8m-13-8 7 13" />
+      <path class="line" d="M100 271c-8 21-17 38-31 51M146 271c10 17 22 29 37 37" />
+      <path class="line" d="M69 322c-15 1-25 5-33 12m146-26c13 4 23 8 31 16" />
+    </g>
+    <path class="accent ink" d="M66 194c28 12 44 7 65 17 20 10 30 2 47-22" />
+    <path class="spark ink" d="m211 98 4 10 10 4-10 4-4 10-4-10-10-4 10-4Z" />
+  </g>
+
+  <!-- Pose 02: segundo passo, corpo avançando -->
+  <g id="pose-walk-b" transform="translate(260 0)">
+    <g class="ink">
+      <path class="body" d="M91 113c13-12 42-14 60 0l23 158c-24 13-70 13-96 0Z" />
+      <path class="face" d="M98 111c-5-18 0-45 17-57 14-10 30-3 37 11l17 13-16 7c1 18-6 31-19 36-14 5-27 2-36-10Z" />
+      <circle cx="132" cy="79" r="3" fill="#343e31" stroke="none" />
+      <path class="line" d="M88 137c17 13 27 27 36 44M152 139c-14 17-19 34-24 55" />
+      <path class="line" d="M124 181l13 8m-13-8 7 13m50-5-12 10m12-10-2 15m2-15 10 7" />
+      <path class="line" d="M100 271c10 17 22 29 37 37M146 271c-8 21-17 38-31 51" />
+      <path class="line" d="M139 308c13 4 23 8 31 16m-62-2c-15 1-25 5-33 12" />
+    </g>
+    <path class="accent ink" d="M66 194c28 12 44 7 65 17 20 10 30 2 47-22" />
+    <path class="spark ink" d="m211 98 4 10 10 4-10 4-4 10-4-10-10-4 10-4Z" />
+  </g>
+
+  <!-- Pose 03: pausa, pé de apoio plantado na borda -->
+  <g id="pose-pause" transform="translate(520 0)">
+    <g class="ink">
+      <path class="body" d="M91 113c13-12 42-14 60 0l23 158c-24 13-70 13-96 0Z" />
+      <path class="face" d="M98 111c-5-18 0-45 17-57 14-10 30-3 37 11l17 13-16 7c1 18-6 31-19 36-14 5-27 2-36-10Z" />
+      <circle cx="132" cy="79" r="3" fill="#343e31" stroke="none" />
+      <path class="line" d="M88 137c13 15 23 28 32 43M152 139c15 13 24 28 32 47" />
+      <path class="line" d="M119 182l13 7m-13-7 7 13m61-9 13 7m-13-7 7 13" />
+      <path class="line" d="M100 271c-4 20-5 39-2 54M146 271c4 20 5 39 2 54" />
+      <path class="line" d="M98 325c-14 2-23 7-30 14m78-14c14 2 23 7 30 14" />
+    </g>
+    <path class="accent ink" d="M66 194c28 12 44 7 65 17 20 10 30 2 47-22" />
+    <path class="spark ink" d="m211 98 4 10 10 4-10 4-4 10-4-10-10-4 10-4Z" />
+  </g>
+
+  <!-- Pose 04: chute, perna direita estendida para a cortina -->
+  <g id="pose-kick" transform="translate(780 0)">
+    <g class="ink">
+      <path class="body" d="M91 113c13-12 42-14 60 0l23 158c-24 13-70 13-96 0Z" transform="rotate(-9 130 190)" />
+      <path class="face" d="M98 111c-5-18 0-45 17-57 14-10 30-3 37 11l17 13-16 7c1 18-6 31-19 36-14 5-27 2-36-10Z" transform="rotate(-9 130 100)" />
+      <circle cx="132" cy="79" r="3" fill="#343e31" stroke="none" />
+      <path class="line" d="M88 137c7 16 17 29 28 40M152 139c18 5 34 12 49 23" />
+      <path class="line" d="M114 175l12 5m-12-5 4 14m75-7 14 4m-14-4 7 11" />
+      <path class="line" d="M100 271c-4 20-5 39-2 54" />
+      <path class="line" d="M146 271c25-10 49-20 77-25" transform="rotate(-8 146 271)" />
+      <path class="line" d="M98 325c-14 2-23 7-30 14m119-97c16-2 28-1 39 3" />
+    </g>
+    <path class="accent ink" d="M66 194c28 12 44 7 65 17 20 10 30 2 47-22" />
+    <path class="spark ink" d="m211 98 4 10 10 4-10 4-4 10-4-10-10-4 10-4Z" />
+    <path class="spark ink" d="M235 245h24m-12-12v24" />
+  </g>
+</svg>

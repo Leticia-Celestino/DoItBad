@@ -1,0 +1,50 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import { getMessages } from '../../i18n/messages';
+import { getPageCopy } from '../../i18n/pages';
+import { isLocale, publishedLocales } from '../../i18n/config';
+
+export function getStaticPaths() {
+  return publishedLocales.map((locale) => ({ params: { locale } }));
+}
+
+const rawLocale = Astro.params.locale;
+if (!isLocale(rawLocale)) return Astro.redirect('/pt-br/privacidade/');
+const locale = rawLocale;
+const copy = getMessages(locale);
+const pages = getPageCopy(locale);
+---
+
+<BaseLayout locale={locale} title={pages.legal.title} description={pages.legal.description}>
+  <Header locale={locale} copy={copy} />
+  <main class="legal-page shell" id="conteudo">
+    <a class="back-link" href={`/${locale}/`}>
+      ← {pages.legal.back}
+    </a>
+    <p class="eyebrow">
+      <span></span>
+      {pages.legal.eyebrow}
+    </p>
+    <h1>{pages.legal.heading}</h1>
+    <p class="legal-lede">{pages.legal.lead}</p>
+    <div class="legal-body">
+      {pages.legal.sections.map(([heading, body], index) => (
+        <>
+          <h2>{heading}</h2>
+          <p>
+            {index === 2 ? body.replace('contato@doitbad.tech', '') : body}
+            {index === 2 && (
+              <>
+                {' '}
+                <a href="mailto:contato@doitbad.tech">contato@doitbad.tech</a>
+              </>
+            )}
+          </p>
+        </>
+      ))}
+    </div>
+  </main>
+  <Footer locale={locale} copy={copy} />
+</BaseLayout>

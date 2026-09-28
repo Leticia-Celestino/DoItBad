@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 240" role="img">
+  <title>DoItBad</title>
+  <text
+    x="24"
+    y="168"
+    fill="#343e31"
+    font-family="Quicksand, Trebuchet MS, sans-serif"
+    font-size="154"
+    font-weight="700"
+    letter-spacing="-12"
+  >DoIt</text>
+  <text
+    x="360"
+    y="168"
+    fill="#bd7858"
+    font-family="Quicksand, Trebuchet MS, sans-serif"
+    font-size="154"
+    font-weight="700"
+    letter-spacing="-12"
+  >B</text>
+  <text
+    x="470"
+    y="168"
+    fill="#343e31"
+    font-family="Quicksand, Trebuchet MS, sans-serif"
+    font-size="154"
+    font-weight="700"
+    letter-spacing="-12"
+  >ad</text>
+  <text
+    x="790"
+    y="72"
+    fill="#e8c77f"
+    font-family="sans-serif"
+    font-size="54"
+  >✦</text>
+</svg>
