@@ -37,8 +37,16 @@ async function verifyTurnstile(token: string, remoteIp?: string) {
       ...(remoteIp ? { remoteip: remoteIp } : {}),
     }),
   });
-  const result = (await response.json()) as { success?: boolean };
-  return response.ok && result.success === true;
+  const result = (await response.json()) as {
+    success?: boolean;
+    hostname?: string;
+    'error-codes'?: string[];
+  };
+  return {
+    valid: response.ok && result.success === true,
+    hostname: result.hostname,
+    errors: result['error-codes'] ?? [],
+  };
 }
 
 async function saveSignup(input: { name: string | null; email: string; locale: string }) {
@@ -103,6 +111,10 @@ export default async function handler(request: ApiRequest, response: ApiResponse
     const token = typeof input.turnstileToken === 'string' ? input.turnstileToken : '';
 
     if (!EMAIL_PATTERN.test(email) || email.length > 254 || !token) {
+      console.warn('Waitlist input rejected', {
+        validEmail: EMAIL_PATTERN.test(email) && email.length <= 254,
+        hasTurnstileToken: Boolean(token),
+      });
       response.status(400).json({ ok: false });
       return;
     }
@@ -111,7 +123,12 @@ export default async function handler(request: ApiRequest, response: ApiResponse
     const remoteIp = Array.isArray(forwarded)
       ? forwarded[0]
       : forwarded?.split(',')[0]?.trim() || request.socket?.remoteAddress;
-    if (!(await verifyTurnstile(token, remoteIp))) {
+    const turnstile = await verifyTurnstile(token, remoteIp);
+    if (!turnstile.valid) {
+      console.warn('Turnstile validation rejected', {
+        hostname: turnstile.hostname,
+        errors: turnstile.errors,
+      });
       response.status(400).json({ ok: false });
       return;
     }
