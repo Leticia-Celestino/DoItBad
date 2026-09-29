@@ -142,8 +142,10 @@ export default async function handler(request: ApiRequest, response: ApiResponse
 
     await sendConfirmation({ name, email }).catch(() => undefined);
     response.status(201).json({ ok: true });
-  } catch (error) {
-    console.error('Waitlist request failed', error instanceof Error ? error.message : 'unknown');
+  } catch {
+    // Some runtime errors include request headers in their message. Never log the
+    // raw exception here because those headers contain the Supabase service key.
+    console.error('Waitlist request failed');
     response.status(500).json({ ok: false });
   }
 }
