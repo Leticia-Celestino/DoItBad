@@ -1,4 +1,4 @@
-import { buildConfirmationEmail } from './confirmation-email';
+import { buildConfirmationEmail } from './confirmation-email.js';
 
 type ApiRequest = {
   method?: string;

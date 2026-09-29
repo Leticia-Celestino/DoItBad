@@ -118,7 +118,7 @@ function siteUrl(locale: ConfirmationLocale) {
 }
 
 export function buildConfirmationEmail(input: { name: string | null; locale: string }) {
-  const locale: ConfirmationLocale = Object.hasOwn(COPY, input.locale)
+  const locale: ConfirmationLocale = Object.prototype.hasOwnProperty.call(COPY, input.locale)
     ? (input.locale as ConfirmationLocale)
     : 'pt-BR';
   const copy = COPY[locale];
