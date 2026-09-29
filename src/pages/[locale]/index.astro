@@ -274,7 +274,12 @@ const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY;
             />
           </label>
           {turnstileSiteKey && (
-            <div class="cf-turnstile" data-sitekey={turnstileSiteKey} data-size="flexible"></div>
+            <div
+              class="cf-turnstile"
+              data-sitekey={turnstileSiteKey}
+              data-action="waitlist"
+              data-size="flexible"
+            ></div>
           )}
           <button class="button" type="submit">
             {copy.waitlist.button}

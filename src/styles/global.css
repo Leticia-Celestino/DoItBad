@@ -65,11 +65,6 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
 }
-html.theme-transitioning body {
-  transition:
-    background-color 0.35s ease,
-    color 0.35s ease;
-}
 .intro-curtain {
   position: fixed;
   inset: 0;
@@ -1493,6 +1488,9 @@ html[data-theme='dark'] .theme-toggle__track b {
   color: #fffaf1;
   box-shadow: var(--shadow);
   transform: rotate(1.5deg);
+}
+html[data-theme='dark'] .action-card {
+  background: #526148;
 }
 .action-card > span {
   color: #d8e0cf;

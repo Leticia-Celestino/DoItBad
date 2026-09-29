@@ -76,6 +76,7 @@ test('has no serious or critical automated accessibility violations', async ({ p
 
 test('keeps the dark mobile theme accessible', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 800 });
+  await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.addInitScript(() => localStorage.setItem('doitbad-theme', 'dark'));
   await page.goto('/pt-br/');
 

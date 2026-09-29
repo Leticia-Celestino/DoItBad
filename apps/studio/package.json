@@ -8,10 +8,10 @@
     "check": "tsc --noEmit"
   },
   "dependencies": {
-    "@sanity/vision": "latest",
+    "@sanity/vision": "6.17.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",
-    "sanity": "latest",
+    "sanity": "6.17.0",
     "styled-components": "latest"
   },
   "devDependencies": {
