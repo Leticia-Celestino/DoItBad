@@ -1,3 +1,5 @@
+import { buildConfirmationEmail } from './confirmation-email';
+
 type ApiRequest = {
   method?: string;
   body?: unknown;
@@ -64,21 +66,11 @@ async function saveSignup(input: { name: string | null; email: string; locale: s
   return { ok: response.ok, duplicate: response.status === 409 };
 }
 
-async function sendConfirmation(input: { name: string | null; email: string }) {
+async function sendConfirmation(input: { name: string | null; email: string; locale: string }) {
   const apiKey = process.env.RESEND_API_KEY?.trim();
   const from = process.env.RESEND_FROM_EMAIL?.trim();
   if (!apiKey || !from) return;
-
-  const safeName = input.name?.replace(/[&<>"']/g, (character) => {
-    const entities: Record<string, string> = {
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      '"': '&quot;',
-      "'": '&#039;',
-    };
-    return entities[character];
-  });
+  const email = buildConfirmationEmail(input);
 
   await fetch('https://api.resend.com/emails', {
     method: 'POST',
@@ -87,8 +79,9 @@ async function sendConfirmation(input: { name: string | null; email: string }) {
       from,
       to: [input.email],
       reply_to: process.env.RESEND_REPLY_TO?.trim() || undefined,
-      subject: 'Você está na lista do DoItBad',
-      html: `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#34332f"><h1 style="font-size:24px">Um começo pequeno já conta.</h1><p>Olá${safeName ? `, ${safeName}` : ''}! Recebemos seu cadastro.</p><p>Vamos avisar quando houver novidades e quando o beta web estiver pronto para os primeiros testes.</p><p>Até logo,<br><strong>Equipe DoItBad</strong></p></div>`,
+      subject: email.subject,
+      html: email.html,
+      text: email.text,
     }),
   });
 }
@@ -140,7 +133,7 @@ export default async function handler(request: ApiRequest, response: ApiResponse
     }
     if (!saved.ok) throw new Error('Supabase insert failed');
 
-    await sendConfirmation({ name, email }).catch(() => undefined);
+    await sendConfirmation({ name, email, locale }).catch(() => undefined);
     response.status(201).json({ ok: true });
   } catch {
     // Some runtime errors include request headers in their message. Never log the

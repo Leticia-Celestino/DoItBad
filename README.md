@@ -53,6 +53,7 @@ Variáveis necessárias:
 - `RESEND_API_KEY`: privada; ativa o e-mail de confirmação.
 - `RESEND_FROM_EMAIL`: por exemplo `DoItBad <novidades@doitbad.tech>`; o domínio precisa estar verificado.
 - `RESEND_REPLY_TO`: endereço que receberá uma resposta direta do visitante, por exemplo `contato@doitbad.tech`.
+- `PUBLIC_SITE_URL`: origem pública usada no botão do e-mail de confirmação; por padrão, `https://doitbad.tech`.
 - `PUBLIC_ALLOW_INDEXING`: `false` em Preview e `true` em Production, depois da revisão final.
 
 Preview é cada URL temporária criada pela Vercel para testar uma alteração antes de publicá-la. Production é a versão ligada ao domínio oficial. O mesmo projeto Supabase pode atender a landing e o beta no MVP, com tabelas e políticas separadas; desenvolvimento/testes devem usar outro projeto para não misturar cadastros reais.
