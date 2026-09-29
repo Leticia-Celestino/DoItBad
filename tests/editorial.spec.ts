@@ -38,6 +38,20 @@ test('preserves the equivalent article when changing language', async ({ page })
     'href',
     `/de/artigos/${slug}/`,
   );
+  await expect(page.locator('.article-cover img')).toBeVisible();
+});
+
+test('presents the editorial index with optimized photographic covers', async ({ page }) => {
+  await page.goto('/pt-br/artigos/');
+  const cards = page.locator('.article-index-card');
+
+  await expect(cards).toHaveCount(3);
+  await expect(cards.first()).toHaveClass(/article-index-card--featured/);
+  await expect(page.locator('.article-index-art img')).toHaveCount(3);
+  await expect(page.locator('.article-index-art img').first()).toHaveAttribute(
+    'src',
+    /\/editorial\/.+\.webp$/,
+  );
 });
 
 test('opens internal pages immediately without the cinematic intro', async ({ page }) => {

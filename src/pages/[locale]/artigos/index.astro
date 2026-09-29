@@ -27,26 +27,40 @@ const articles = getArticles(locale);
   <Header locale={locale} copy={copy} />
   <main class="editorial-page" id="conteudo">
     <header class="editorial-hero shell">
-      <p class="eyebrow">
-        <span></span>
-        {pages.editorial.title}
-      </p>
-      <h1>{pages.editorial.heading}</h1>
-      <p>{pages.editorial.intro}</p>
+      <div>
+        <p class="eyebrow">
+          <span></span>
+          {pages.editorial.title}
+        </p>
+        <h1>{pages.editorial.heading}</h1>
+      </div>
+      <div class="editorial-hero__intro">
+        <p>{pages.editorial.intro}</p>
+        <span aria-hidden="true">↘</span>
+      </div>
     </header>
     <section class="article-index shell" aria-label={pages.editorial.list}>
       {articles.map((article, index) => (
-        <a class="article-index-card" href={`/${locale}/artigos/${article.slug}/`}>
-          <span class={`article-index-art article-index-art--${index}`} aria-hidden="true">
-            {index === 0 ? '↜' : index === 1 ? '◌' : '⌁'}
-          </span>
-          <div>
-            <small>
-              {article.category} · {article.readingTime}
-            </small>
+        <a
+          class:list={['article-index-card', { 'article-index-card--featured': index === 0 }]}
+          href={`/${locale}/artigos/${article.slug}/`}
+        >
+          <figure class="article-index-art">
+            <img
+              src={article.cover.src}
+              alt={article.cover.alt}
+              loading={index ? 'lazy' : 'eager'}
+            />
+            <span aria-hidden="true">0{index + 1}</span>
+          </figure>
+          <div class="article-index-card__copy">
+            <p class="article-kicker">
+              <span>{article.category}</span>
+              <span>{article.readingTime}</span>
+            </p>
             <h2>{article.title}</h2>
             <p>{article.summary}</p>
-            <span class="text-link">
+            <span class="article-index-link">
               {pages.editorial.read} <span aria-hidden="true">↗</span>
             </span>
           </div>

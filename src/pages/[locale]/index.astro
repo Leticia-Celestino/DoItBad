@@ -200,8 +200,12 @@ const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY;
         <div class="journal-grid">
           {copy.journal.posts.map((post, index) => (
             <a class="journal-card" href={`/${locale}/artigos/${articles[index].slug}/`}>
-              <div class={`article-art article-art--${index}`}>
-                <span aria-hidden="true">{index === 0 ? '↜' : index === 1 ? '◌' : '⌁'}</span>
+              <div class="article-art">
+                <img
+                  src={articles[index].cover.src}
+                  alt={articles[index].cover.alt}
+                  loading="lazy"
+                />
               </div>
               <small>
                 0{index + 1} · {copy.journal.read}

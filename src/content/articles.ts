@@ -9,6 +9,10 @@ export type Article = {
   author: string;
   publishedAt: string;
   reviewedAt: string;
+  cover: {
+    src: string;
+    alt: string;
+  };
   paragraphs: string[];
   action: string;
 };
@@ -28,6 +32,10 @@ export const articlesByLocale: Record<Locale, Article[]> = {
       summary: 'Retomar não começa reconstruindo tudo. Começa encontrando um fio visível.',
       category: 'Retomar',
       readingTime: '4 min de leitura',
+      cover: {
+        src: '/editorial/retomar-projeto.webp',
+        alt: 'Caderno aberto atravessado por um fio terracota sobre uma mesa clara.',
+      },
       paragraphs: [
         'Quando um projeto fica parado, a primeira vontade costuma ser compensar o tempo perdido. Abrimos todas as abas, refazemos o plano e tentamos recuperar a versão de nós mesmos que estava em movimento.',
         'Um retorno mais gentil pode começar por uma pergunta menor: qual é a última coisa que ainda faz sentido aqui? Às vezes é uma frase, um arquivo ou uma dúvida anotada no canto.',
@@ -42,6 +50,10 @@ export const articlesByLocale: Record<Locale, Article[]> = {
       summary: 'Planejar pode acolher uma tarefa. Em excesso, pode escondê-la.',
       category: 'Começar',
       readingTime: '3 min de leitura',
+      cover: {
+        src: '/editorial/comecar-imperfeito.webp',
+        alt: 'Primeiro traço a lápis em um pequeno papel artesanal.',
+      },
       paragraphs: [
         'Preparar dá uma sensação de avanço porque organiza possibilidades. Mas chega um momento em que a preparação passa a proteger a gente do primeiro contato com o trabalho real.',
         'Um teste simples é trocar “o que preciso organizar?” por “o que posso abrir?”. O arquivo, a página ou a ferramenta já são um começo — mesmo que nada esteja pronto para ser mostrado.',
@@ -56,6 +68,10 @@ export const articlesByLocale: Record<Locale, Article[]> = {
       summary: 'Uma nota curta pode transformar uma pausa em continuidade.',
       category: 'Cotidiano',
       readingTime: '3 min de leitura',
+      cover: {
+        src: '/editorial/guardar-o-fio.webp',
+        alt: 'Fio terracota preservado sob uma pedra ao lado de um caderno verde.',
+      },
       paragraphs: [
         'Antes de fechar tudo, experimente deixar uma frase para a sua próxima versão: “eu estava olhando para…”. Não é um relatório. É uma pequena ponte.',
         'Anote também qual seria o movimento seguinte, mesmo que pareça óbvio. O óbvio de hoje pode não estar disponível depois de uma semana cheia.',
@@ -72,6 +88,10 @@ export const articlesByLocale: Record<Locale, Article[]> = {
       summary: 'Returning begins by finding one visible thread, rather than rebuilding everything.',
       category: 'Returning',
       readingTime: '4 min read',
+      cover: {
+        src: '/editorial/retomar-projeto.webp',
+        alt: 'An open notebook crossed by a terracotta thread on a light desk.',
+      },
       paragraphs: [
         'When a project has been still, the first impulse is often to make up for lost time. We open every tab and rebuild the plan.',
         'A gentler return begins with a smaller question: what is the last thing here that still makes sense? It may be a sentence, a file or a note.',
@@ -86,6 +106,10 @@ export const articlesByLocale: Record<Locale, Article[]> = {
       summary: 'Planning can support a task. In excess, it can hide it.',
       category: 'Starting',
       readingTime: '3 min read',
+      cover: {
+        src: '/editorial/comecar-imperfeito.webp',
+        alt: 'A first pencil mark on a small sheet of handmade paper.',
+      },
       paragraphs: [
         'Preparation feels like progress because it organizes possibilities. At some point, it can protect us from the real work.',
         'Replace “what do I need to organize?” with “what can I open?”. A file, page or tool is already a beginning.',
@@ -100,6 +124,10 @@ export const articlesByLocale: Record<Locale, Article[]> = {
       summary: 'A short note can turn a pause into continuity.',
       category: 'Everyday life',
       readingTime: '3 min read',
+      cover: {
+        src: '/editorial/guardar-o-fio.webp',
+        alt: 'A terracotta thread held under a stone beside a green notebook.',
+      },
       paragraphs: [
         'Before closing everything, leave a sentence for your future self: “I was looking at…”. It is a small bridge.',
         'Also note the next move. Today’s obvious detail may be unavailable after a busy week.',
@@ -116,6 +144,10 @@ export const articlesByLocale: Record<Locale, Article[]> = {
       summary: 'Retomar empieza encontrando un hilo visible, no reconstruyendo todo.',
       category: 'Retomar',
       readingTime: '4 min de lectura',
+      cover: {
+        src: '/editorial/retomar-projeto.webp',
+        alt: 'Un cuaderno abierto atravesado por un hilo terracota sobre una mesa clara.',
+      },
       paragraphs: [
         'Cuando un proyecto lleva tiempo parado, solemos intentar compensar el tiempo perdido y rehacer todo el plan.',
         'Un regreso más amable empieza con una pregunta menor: ¿qué es lo último que todavía tiene sentido aquí? Puede ser una frase, un archivo o una nota.',
@@ -130,6 +162,10 @@ export const articlesByLocale: Record<Locale, Article[]> = {
       summary: 'Planificar puede sostener una tarea. En exceso, puede esconderla.',
       category: 'Empezar',
       readingTime: '3 min de lectura',
+      cover: {
+        src: '/editorial/comecar-imperfeito.webp',
+        alt: 'El primer trazo a lápiz sobre una pequeña hoja de papel artesanal.',
+      },
       paragraphs: [
         'Preparar parece avanzar porque organiza posibilidades. En algún momento puede protegernos del trabajo real.',
         'Cambia “¿qué necesito organizar?” por “¿qué puedo abrir?”. Un archivo, una página o una herramienta ya son un comienzo.',
@@ -144,6 +180,10 @@ export const articlesByLocale: Record<Locale, Article[]> = {
       summary: 'Una nota breve puede transformar una pausa en continuidad.',
       category: 'Cotidiano',
       readingTime: '3 min de lectura',
+      cover: {
+        src: '/editorial/guardar-o-fio.webp',
+        alt: 'Un hilo terracota guardado bajo una piedra junto a un cuaderno verde.',
+      },
       paragraphs: [
         'Antes de cerrar todo, deja una frase para tu yo futuro: “estaba mirando…”. Es un pequeño puente.',
         'Anota también el siguiente movimiento. Lo obvio de hoy puede no estar disponible después de una semana intensa.',
@@ -161,6 +201,10 @@ export const articlesByLocale: Record<Locale, Article[]> = {
         'Zurückkehren beginnt mit einem sichtbaren Faden, nicht mit einem vollständigen Neubau.',
       category: 'Zurückkehren',
       readingTime: '4 Min. Lesezeit',
+      cover: {
+        src: '/editorial/retomar-projeto.webp',
+        alt: 'Ein offenes Notizbuch mit einem Terrakottafaden auf einem hellen Tisch.',
+      },
       paragraphs: [
         'Nach einer Pause wollen wir oft verlorene Zeit aufholen und den ganzen Plan neu bauen.',
         'Eine sanftere Rückkehr beginnt mit einer kleineren Frage: Was ergibt hier zuletzt noch Sinn? Vielleicht ein Satz, eine Datei oder eine Notiz.',
@@ -175,6 +219,10 @@ export const articlesByLocale: Record<Locale, Article[]> = {
       summary: 'Planung kann eine Aufgabe tragen. Zu viel davon kann sie verstecken.',
       category: 'Anfangen',
       readingTime: '3 Min. Lesezeit',
+      cover: {
+        src: '/editorial/comecar-imperfeito.webp',
+        alt: 'Ein erster Bleistiftstrich auf einem kleinen Blatt Büttenpapier.',
+      },
       paragraphs: [
         'Vorbereitung fühlt sich wie Fortschritt an. Irgendwann kann sie uns vor der eigentlichen Arbeit schützen.',
         'Ersetze „Was muss ich organisieren?“ durch „Was kann ich öffnen?“. Datei, Seite oder Werkzeug sind bereits ein Anfang.',
@@ -189,6 +237,10 @@ export const articlesByLocale: Record<Locale, Article[]> = {
       summary: 'Eine kurze Notiz kann aus einer Pause Kontinuität machen.',
       category: 'Alltag',
       readingTime: '3 Min. Lesezeit',
+      cover: {
+        src: '/editorial/guardar-o-fio.webp',
+        alt: 'Ein Terrakottafaden unter einem Stein neben einem grünen Notizbuch.',
+      },
       paragraphs: [
         'Hinterlasse deinem zukünftigen Ich vor dem Schließen einen Satz: „Ich war gerade bei…“. Das ist eine kleine Brücke.',
         'Notiere auch den nächsten Schritt. Nach einer vollen Woche ist das heute Offensichtliche vielleicht nicht mehr greifbar.',

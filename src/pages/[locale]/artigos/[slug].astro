@@ -50,28 +50,40 @@ const structuredData = {
       <a class="back-link" href={`/${locale}/artigos/`}>
         ← {pages.editorial.all}
       </a>
-      <p class="eyebrow">
-        <span></span>
-        {article.category} · {article.readingTime}
-      </p>
-      <h1>{article.title}</h1>
-      <p class="article-lede">{article.summary}</p>
-      <p class="article-meta">
-        {article.author} · <time datetime={article.publishedAt}>{article.publishedAt}</time> ·{' '}
-        {article.readingTime}
-      </p>
-      <div class="article-body">
-        {article.paragraphs.map((paragraph) => (
-          <p>{paragraph}</p>
-        ))}
+      <header class="article-header">
+        <div class="article-header__copy">
+          <p class="eyebrow">
+            <span></span>
+            {article.category} · {article.readingTime}
+          </p>
+          <h1>{article.title}</h1>
+          <p class="article-lede">{article.summary}</p>
+          <p class="article-meta">
+            {article.author} · <time datetime={article.publishedAt}>{article.publishedAt}</time>
+          </p>
+        </div>
+        <figure class="article-cover">
+          <img src={article.cover.src} alt={article.cover.alt} />
+        </figure>
+      </header>
+      <div class="article-content">
+        <aside class="article-aside" aria-hidden="true">
+          <span>✦</span>
+          <i></i>
+        </aside>
+        <div class="article-body">
+          {article.paragraphs.map((paragraph, index) => (
+            <p class:list={{ 'article-body__opening': index === 0 }}>{paragraph}</p>
+          ))}
+          <aside class="article-action">
+            <strong>{pages.demo.now}</strong>
+            <p>{article.action}</p>
+          </aside>
+          <a class="button" href={`/${locale}/artigos/`}>
+            {pages.editorial.another}
+          </a>
+        </div>
       </div>
-      <aside class="article-action">
-        <strong>{pages.demo.now}</strong>
-        <p>{article.action}</p>
-      </aside>
-      <a class="button" href={`/${locale}/artigos/`}>
-        {pages.editorial.another}
-      </a>
     </article>
   </main>
   <Footer locale={locale} copy={copy} />

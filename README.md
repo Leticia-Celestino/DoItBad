@@ -24,6 +24,7 @@ desenvolvimento; autenticação e banco aguardam o projeto Supabase de teste.
 
 O Studio editorial está preparado em `apps/studio`. Copie o `.env.example`, informe o projeto Sanity e use
 `pnpm --filter @doitbad/studio dev`. Consulte `docs/SPRINT-3.md` e `docs/LAUNCH-PLAN.md` antes de publicar.
+O fluxo atual e o caminho para integrar o Studio estão descritos em `docs/EDITORIAL.md`.
 
 ## Decisões desta fundação
 
