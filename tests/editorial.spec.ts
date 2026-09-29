@@ -40,6 +40,12 @@ test('preserves the equivalent article when changing language', async ({ page })
   );
 });
 
+test('opens internal pages immediately without the cinematic intro', async ({ page }) => {
+  await page.goto('/pt-br/artigos/');
+  await expect(page.locator('.intro-curtain')).toHaveCount(0);
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+});
+
 test('has no serious or critical automated accessibility violations', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   for (const [locale] of locales) {
@@ -51,5 +57,47 @@ test('has no serious or critical automated accessibility violations', async ({ p
       ({ impact }) => impact === 'serious' || impact === 'critical',
     );
     expect(blocking, `${locale}: ${blocking.map((item) => item.id).join(', ')}`).toEqual([]);
+  }
+});
+
+test('keeps the dark mobile theme accessible', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 800 });
+  await page.addInitScript(() => localStorage.setItem('doitbad-theme', 'dark'));
+  await page.goto('/pt-br/');
+
+  const results = await new AxeBuilder({ page })
+    .withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'])
+    .analyze();
+  const blocking = results.violations.filter(
+    ({ impact }) => impact === 'serious' || impact === 'critical',
+  );
+
+  expect(blocking, blocking.map((item) => item.id).join(', ')).toEqual([]);
+});
+
+test('keeps every localized public page inside a narrow mobile viewport', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 800 });
+
+  for (const [locale] of locales) {
+    const routes = [
+      `/${locale}/`,
+      `/${locale}/artigos/`,
+      `/${locale}/artigos/voltar-a-um-projeto-depois-de-semanas/`,
+      `/${locale}/privacidade/`,
+      `/${locale}/nao-existe/`,
+    ];
+
+    for (const route of routes) {
+      await page.goto(route);
+      const layout = await page.evaluate(() => ({
+        viewportWidth: document.documentElement.clientWidth,
+        documentWidth: document.documentElement.scrollWidth,
+        mainRight: Math.ceil(document.querySelector('main')?.getBoundingClientRect().right ?? 0),
+      }));
+
+      expect(layout.documentWidth, route).toBeLessThanOrEqual(layout.viewportWidth);
+      expect(layout.mainRight, route).toBeLessThanOrEqual(layout.viewportWidth);
+      await expect(page.locator('main')).toBeVisible();
+    }
   }
 });

@@ -93,3 +93,42 @@ test('submits the updates form and shows a success state', async ({ page }) => {
 
   await expect(form.locator('[data-form-status]')).toHaveText('Pronto! Seu cadastro foi recebido.');
 });
+
+test('keeps the landing inside a narrow mobile viewport', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 800 });
+  await page.addInitScript(() => sessionStorage.setItem('doitbad-intro-seen', 'true'));
+  await page.goto('/pt-br/');
+
+  const layout = await page.evaluate(() => {
+    const email = document.querySelector<HTMLInputElement>(
+      '[data-waitlist-form] input[type="email"]',
+    );
+    const bounds = email?.getBoundingClientRect();
+    return {
+      viewportWidth: document.documentElement.clientWidth,
+      documentWidth: document.documentElement.scrollWidth,
+      emailLeft: bounds?.left ?? -1,
+      emailRight: bounds?.right ?? Number.POSITIVE_INFINITY,
+    };
+  });
+
+  expect(layout.documentWidth).toBeLessThanOrEqual(layout.viewportWidth);
+  expect(layout.emailLeft).toBeGreaterThanOrEqual(0);
+  expect(layout.emailRight).toBeLessThanOrEqual(layout.viewportWidth);
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+});
+
+test('offers the complete navigation in the mobile header', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 800 });
+  await page.addInitScript(() => sessionStorage.setItem('doitbad-intro-seen', 'true'));
+  await page.goto('/pt-br/');
+
+  await page.locator('.mobile-nav > summary').click();
+  const menu = page.locator('.mobile-nav__panel');
+  await expect(menu.getByRole('link', { name: 'A experiência' })).toBeVisible();
+  await expect(menu.getByRole('link', { name: 'Ecossistema' })).toBeVisible();
+  await expect(menu.getByRole('link', { name: 'Equipe' })).toBeVisible();
+  await expect(menu.getByRole('link', { name: 'FAQ', exact: true })).toBeVisible();
+  await expect(menu.getByRole('link', { name: 'Pequenos começos' })).toBeVisible();
+  await expect(menu.getByRole('link', { name: 'Acompanhar', exact: true })).toBeVisible();
+});

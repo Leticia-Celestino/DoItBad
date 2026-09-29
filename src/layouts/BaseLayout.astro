@@ -85,24 +85,23 @@ const defaultStructuredData = {
       })();
     </script>
   </head>
-  <body>
-    <div
-      class:list={['intro-curtain', { 'intro-curtain--cinematic': cinematicIntro }]}
-      aria-hidden="true"
-    >
-      <div class="intro-curtain__scene">
-        <span class="intro-curtain__mark">
-          DoIt<span class="brand-b">B</span>ad<i>✦</i>
-        </span>
-        <span class="intro-curtain__whisper" lang="pt-BR">
-          peraí…
-        </span>
-        <div class="intro-curtain__character">
-          <CharacterSketch />
+  <body class:list={{ 'has-cinematic-intro': cinematicIntro }}>
+    {cinematicIntro && (
+      <div class="intro-curtain intro-curtain--cinematic" aria-hidden="true">
+        <div class="intro-curtain__scene">
+          <span class="intro-curtain__mark">
+            DoIt<span class="brand-b">B</span>ad<i>✦</i>
+          </span>
+          <span class="intro-curtain__whisper" lang="pt-BR">
+            peraí…
+          </span>
+          <div class="intro-curtain__character">
+            <CharacterSketch />
+          </div>
+          <div class="intro-curtain__edge" />
         </div>
-        <div class="intro-curtain__edge"></div>
       </div>
-    </div>
+    )}
     <a class="skip-link" href="#conteudo">
       {pages.skip}
     </a>
@@ -169,9 +168,14 @@ const defaultStructuredData = {
           });
         });
       }
+      const hasCinematicIntro = document.body.classList.contains('has-cinematic-intro');
       const introSeen = sessionStorage.getItem('doitbad-intro-seen');
       const replayIntro = new URLSearchParams(location.search).get('intro') === '1';
-      if ((!replayIntro && introSeen) || matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      if (
+        !hasCinematicIntro ||
+        (!replayIntro && introSeen) ||
+        matchMedia('(prefers-reduced-motion: reduce)').matches
+      ) {
         document.body.classList.add('intro-skip');
       } else {
         sessionStorage.setItem('doitbad-intro-seen', 'true');

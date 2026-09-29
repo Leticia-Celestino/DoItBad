@@ -13,12 +13,19 @@ const pages = getPageCopy(locale);
 const localizedPath = (target: Locale) =>
   Astro.url.pathname.replace(/^\/(pt-br|en|es|de)(?=\/)/, `/${target}`);
 const home = `/${locale}/`;
+const menuLabels: Record<Locale, { navigation: string; open: string; label: string }> = {
+  'pt-br': { navigation: 'Navegação principal', open: 'Abrir menu de navegação', label: 'Menu' },
+  en: { navigation: 'Main navigation', open: 'Open navigation menu', label: 'Menu' },
+  es: { navigation: 'Navegación principal', open: 'Abrir menú de navegación', label: 'Menú' },
+  de: { navigation: 'Hauptnavigation', open: 'Navigationsmenü öffnen', label: 'Menü' },
+};
+const menu = menuLabels[locale];
 ---
 
 <header class="site-header">
   <div class="shell header-inner">
     <Brand locale={locale} />
-    <nav aria-label="Navegação principal">
+    <nav class="desktop-nav" aria-label={menu.navigation}>
       <a href={`${home}#experiencia`}>{copy.nav.experience}</a>
       <a href={`${home}#ecossistema`}>{copy.nav.ecosystem}</a>
       <a href={`${home}#equipe`}>{pages.team[0]}</a>
@@ -46,6 +53,37 @@ const home = `/${locale}/`;
       <a class="button button--small" href={`${home}#acompanhar`}>
         {copy.nav.cta}
       </a>
+      <details class="mobile-nav">
+        <summary aria-label={menu.open}>
+          <span>{menu.label}</span>
+          <i aria-hidden="true"></i>
+        </summary>
+        <div class="mobile-nav__panel">
+          <nav aria-label={menu.navigation}>
+            <a href={`${home}#experiencia`}>{copy.nav.experience}</a>
+            <a href={`${home}#ecossistema`}>{copy.nav.ecosystem}</a>
+            <a href={`${home}#equipe`}>{pages.team[0]}</a>
+            <a href={`${home}#perguntas`}>FAQ</a>
+            <a href={`/${locale}/artigos/`}>{copy.nav.journal}</a>
+          </nav>
+          <a class="button" href={`${home}#acompanhar`}>
+            {copy.nav.cta}
+          </a>
+        </div>
+      </details>
     </div>
   </div>
 </header>
+
+<script>
+  document.querySelectorAll<HTMLDetailsElement>('.mobile-nav').forEach((menu) => {
+    menu.querySelectorAll('a').forEach((link) => {
+      link.addEventListener('click', () => menu.removeAttribute('open'));
+    });
+    document.addEventListener('pointerdown', (event) => {
+      if (menu.open && event.target instanceof Node && !menu.contains(event.target)) {
+        menu.removeAttribute('open');
+      }
+    });
+  });
+</script>
