@@ -129,7 +129,12 @@ const defaultStructuredData = {
         button.addEventListener('click', () => {
           const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
           localStorage.setItem('doitbad-theme', next);
+          document.documentElement.classList.add('theme-transitioning');
           syncTheme(next);
+          window.setTimeout(
+            () => document.documentElement.classList.remove('theme-transitioning'),
+            400,
+          );
         });
       });
 

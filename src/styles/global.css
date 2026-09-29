@@ -64,6 +64,8 @@ body {
   font-size: 16px;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+}
+html.theme-transitioning body {
   transition:
     background-color 0.35s ease,
     color 0.35s ease;
