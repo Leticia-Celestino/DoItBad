@@ -1,4 +1,5 @@
 import { NavLink, Outlet } from 'react-router-dom';
+import { signOut } from '../lib/auth';
 
 export default function AppShell() {
   return (
@@ -7,7 +8,7 @@ export default function AppShell() {
         <a className="brand" href="/atividade" aria-label="DoItBad — atividade">
           DoIt<span>B</span>ad<i>✦</i>
         </a>
-        <span className="beta-label">Beta local</span>
+        <button className="text-button" type="button" onClick={() => void signOut()}>Sair</button>
       </header>
       <main id="conteudo" className="app-content">
         <Outlet />

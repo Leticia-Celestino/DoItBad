@@ -26,6 +26,15 @@ button,
 textarea {
   font: inherit;
 }
+input {
+  width: 100%;
+  margin: 0.4rem 0 1rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: 0.8rem;
+  color: var(--ink);
+  background: white;
+}
 a {
   color: inherit;
 }
@@ -247,6 +256,10 @@ h2 {
   margin-top: 1rem;
   color: var(--muted);
 }
+.entry-card form { margin-top: 2rem; }
+.entry-card form label { display: block; font-weight: 700; }
+.entry-card form .button { margin-top: 0.5rem; }
+.entry-links { display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1.25rem; }
 
 @media (max-width: 520px) {
   .form-actions {

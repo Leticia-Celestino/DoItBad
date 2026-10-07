@@ -1,0 +1,41 @@
+import type { Session, User } from '@supabase/supabase-js';
+import { supabase } from './supabase';
+
+export type AuthState = { session: Session | null; user: User | null; loading: boolean };
+
+export async function getSession() {
+  if (!supabase) return null;
+  const { data, error } = await supabase.auth.getSession();
+  if (error) throw error;
+  return data.session;
+}
+
+export function subscribeToAuth(callback: (session: Session | null) => void) {
+  if (!supabase) return () => undefined;
+  const { data } = supabase.auth.onAuthStateChange((_event, session) => callback(session));
+  return () => data.subscription.unsubscribe();
+}
+
+export async function signIn(email: string, password: string) {
+  if (!supabase) throw new Error('Autenticação não está configurada neste ambiente.');
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) throw error;
+}
+
+export async function signUp(email: string, password: string) {
+  if (!supabase) throw new Error('Autenticação não está configurada neste ambiente.');
+  const { error } = await supabase.auth.signUp({ email, password });
+  if (error) throw error;
+}
+
+export async function requestPasswordReset(email: string) {
+  if (!supabase) throw new Error('Autenticação não está configurada neste ambiente.');
+  const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/entrar` });
+  if (error) throw error;
+}
+
+export async function signOut() {
+  if (!supabase) return;
+  const { error } = await supabase.auth.signOut();
+  if (error) throw error;
+}

@@ -14,9 +14,15 @@ O beta é uma aplicação separada da landing, construída com React 19, TypeScr
 - Migração Supabase inicial para perfis e intenções.
 - RLS que restringe leitura e escrita ao proprietário autenticado; o papel anônimo não recebe acesso às tabelas.
 
-## Limites atuais
+## Entrega concluída
 
-A tela de entrada não aceita credenciais ainda. Autenticação, recuperação e logout dependem do projeto Supabase do ambiente de desenvolvimento. A migração foi criada, mas não foi aplicada remotamente. O armazenamento local será removido quando a persistência integrada estiver disponível.
+- Login, criação de conta, recuperação de senha e logout via Supabase Auth.
+- Rotas do beta protegidas quando as variáveis `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY` estão configuradas.
+- Intenções persistidas remotamente e ordenadas por atualização; o fallback local permanece apenas para desenvolvimento sem configuração.
+- RLS aplicada na migração remota: cada conta só lê e altera as próprias intenções e perfil.
+- Sessão restaurada automaticamente e falhas de autenticação, rede e banco exibidas na interface.
+
+O ambiente sem variáveis continua abrindo o modo local para testes e desenvolvimento visual.
 
 ## Verificação
 
@@ -24,6 +30,6 @@ A tela de entrada não aceita credenciais ainda. Autenticação, recuperação e
 - `pnpm test:e2e`: 16/16 testes passaram em desktop e Pixel 7.
 - Os testes do beta cobrem estado vazio, salvamento, persistência após recarregar, rotas e histórico sem dados fictícios.
 
-## Próxima entrega
+## Validação manual recomendada
 
-Configurar o projeto Supabase de desenvolvimento, aplicar a migração, implementar login/recuperação/logout e conectar o repositório de intenções. Validar isolamento com duas contas e tornar falhas de sessão, rede e banco visíveis.
+Criar duas contas de teste no ambiente conectado, salvar uma intenção em cada uma e confirmar que nenhuma conta enxerga a intenção da outra. Remover as contas de teste após a validação.

@@ -17,6 +17,13 @@ const locale = rawLocale;
 const copy = getMessages(locale);
 const pages = getPageCopy(locale);
 const articles = await getArticles(locale);
+const blogUi = {
+  'pt-br': { search: 'Buscar artigos', all: 'Todos', empty: 'Nenhum artigo encontrado.' },
+  en: { search: 'Search articles', all: 'All', empty: 'No articles found.' },
+  es: { search: 'Buscar artículos', all: 'Todos', empty: 'No se encontraron artículos.' },
+  de: { search: 'Artikel suchen', all: 'Alle', empty: 'Keine Artikel gefunden.' },
+}[locale];
+const categories = [...new Set(articles.map((article) => article.category))];
 ---
 
 <BaseLayout
@@ -39,10 +46,23 @@ const articles = await getArticles(locale);
         <span aria-hidden="true">↘</span>
       </div>
     </header>
+    <div class="article-tools shell" aria-label={blogUi.search}>
+      <label class="article-search">
+        <span>{blogUi.search}</span>
+        <input type="search" data-article-search placeholder={blogUi.search} />
+      </label>
+      <div class="article-filters" role="group" aria-label={blogUi.search}>
+        <button type="button" class="article-filter is-active" data-article-filter="all">{blogUi.all}</button>
+        {categories.map((category) => <button type="button" class="article-filter" data-article-filter={category}>{category}</button>)}
+      </div>
+    </div>
     <section class="article-index shell" aria-label={pages.editorial.list}>
       {articles.map((article, index) => (
         <a
           class:list={['article-index-card', { 'article-index-card--featured': index === 0 }]}
+          data-article-card
+          data-category={article.category}
+          data-search={`${article.title} ${article.summary} ${article.category}`.toLowerCase()}
           href={`/${locale}/artigos/${article.slug}/`}
         >
           <figure class="article-index-art">
@@ -68,7 +88,34 @@ const articles = await getArticles(locale);
           </div>
         </a>
       ))}
+      <p class="article-empty" data-article-empty hidden>{blogUi.empty}</p>
     </section>
   </main>
   <Footer locale={locale} copy={copy} />
 </BaseLayout>
+
+<script>
+  const search = document.querySelector('[data-article-search]');
+  const filters = [...document.querySelectorAll('[data-article-filter]')];
+  const cards = [...document.querySelectorAll('[data-article-card]')];
+  const empty = document.querySelector('[data-article-empty]');
+  let category = 'all';
+  function updateArticles() {
+    const query = (search instanceof HTMLInputElement ? search.value : '').trim().toLowerCase();
+    let visible = 0;
+    cards.forEach((card) => {
+      const matchesCategory = category === 'all' || card.getAttribute('data-category') === category;
+      const matchesSearch = !query || (card.getAttribute('data-search') ?? '').includes(query);
+      const show = matchesCategory && matchesSearch;
+      card.toggleAttribute('hidden', !show);
+      if (show) visible += 1;
+    });
+    empty?.toggleAttribute('hidden', visible > 0);
+  }
+  search?.addEventListener('input', updateArticles);
+  filters.forEach((filter) => filter.addEventListener('click', () => {
+    category = filter.getAttribute('data-article-filter') ?? 'all';
+    filters.forEach((item) => item.classList.toggle('is-active', item === filter));
+    updateArticles();
+  }));
+</script>
