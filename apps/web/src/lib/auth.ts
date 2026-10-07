@@ -24,7 +24,12 @@ export async function signIn(email: string, password: string) {
 
 export async function signUp(email: string, password: string) {
   if (!supabase) throw new Error('Autenticação não está configurada neste ambiente.');
-  const { error } = await supabase.auth.signUp({ email, password });
+  const redirectTo = (import.meta.env.VITE_SITE_URL as string | undefined) ?? window.location.origin;
+  const { error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: { emailRedirectTo: `${redirectTo.replace(/\/$/, '')}/entrar` },
+  });
   if (error) throw error;
 }
 
