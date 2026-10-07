@@ -66,6 +66,7 @@ export const articleType = defineType({
           validation: (rule) => rule.required(),
         }),
       ],
+      validation: (rule) => rule.required(),
     }),
     defineField({
       name: 'author',
@@ -81,7 +82,13 @@ export const articleType = defineType({
       of: [defineArrayMember({ type: 'block' })],
       validation: (rule) => rule.required(),
     }),
-    defineField({ name: 'practicalAction', title: 'Ação prática', type: 'text', rows: 2 }),
+    defineField({
+      name: 'practicalAction',
+      title: 'Ação prática',
+      type: 'text',
+      rows: 2,
+      validation: (rule) => rule.required().max(240),
+    }),
     defineField({
       name: 'references',
       title: 'Referências',
@@ -95,6 +102,13 @@ export const articleType = defineType({
       validation: (rule) => rule.required(),
     }),
     defineField({ name: 'reviewedAt', title: 'Revisão', type: 'datetime' }),
+  ],
+  orderings: [
+    {
+      title: 'Publicação, mais recente',
+      name: 'publishedAtDesc',
+      by: [{ field: 'publishedAt', direction: 'desc' }],
+    },
   ],
   preview: { select: { title: 'title', subtitle: 'language', media: 'cover' } },
 });

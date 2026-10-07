@@ -1,0 +1,144 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import { getMessages } from '../../i18n/messages';
+import { isLocale, publishedLocales, type Locale } from '../../i18n/config';
+
+export function getStaticPaths() {
+  return publishedLocales.map((locale) => ({ params: { locale } }));
+}
+
+const rawLocale = Astro.params.locale;
+if (!isLocale(rawLocale)) return Astro.redirect('/pt-br/preferencias/');
+const locale = rawLocale;
+const messages = getMessages(locale);
+const copy: Record<
+  Locale,
+  {
+    title: string;
+    lead: string;
+    confirm: string;
+    unsubscribe: string;
+    working: string;
+    confirmed: string;
+    unsubscribed: string;
+    error: string;
+    invalid: string;
+  }
+> = {
+  'pt-br': {
+    title: 'Preferências de e-mail',
+    lead: 'Confirme sua inscrição ou escolha sair da lista com um clique.',
+    confirm: 'Confirmar meu e-mail',
+    unsubscribe: 'Cancelar inscrição',
+    working: 'Atualizando…',
+    confirmed: 'E-mail confirmado. Agora você receberá as novidades do DoItBad.',
+    unsubscribed: 'Inscrição cancelada. Você não receberá novos envios.',
+    error: 'Não foi possível atualizar agora. Tente novamente.',
+    invalid: 'Este link é inválido ou já foi utilizado.',
+  },
+  en: {
+    title: 'Email preferences',
+    lead: 'Confirm your subscription or choose to leave the list.',
+    confirm: 'Confirm my email',
+    unsubscribe: 'Unsubscribe',
+    working: 'Updating…',
+    confirmed: 'Email confirmed. You will now receive DoItBad updates.',
+    unsubscribed: 'You have unsubscribed and will not receive new messages.',
+    error: 'We could not update this now. Please try again.',
+    invalid: 'This link is invalid or has already been used.',
+  },
+  es: {
+    title: 'Preferencias de correo',
+    lead: 'Confirma tu suscripción o elige salir de la lista.',
+    confirm: 'Confirmar mi correo',
+    unsubscribe: 'Cancelar suscripción',
+    working: 'Actualizando…',
+    confirmed: 'Correo confirmado. Ahora recibirás novedades de DoItBad.',
+    unsubscribed: 'Suscripción cancelada. No recibirás nuevos envíos.',
+    error: 'No pudimos actualizarlo. Inténtalo de nuevo.',
+    invalid: 'Este enlace no es válido o ya fue utilizado.',
+  },
+  de: {
+    title: 'E-Mail-Einstellungen',
+    lead: 'Bestätige deine Anmeldung oder melde dich von der Liste ab.',
+    confirm: 'E-Mail bestätigen',
+    unsubscribe: 'Abmelden',
+    working: 'Wird aktualisiert…',
+    confirmed: 'E-Mail bestätigt. Du erhältst jetzt DoItBad-Neuigkeiten.',
+    unsubscribed: 'Du wurdest abgemeldet und erhältst keine weiteren Nachrichten.',
+    error: 'Die Änderung war nicht möglich. Bitte versuche es erneut.',
+    invalid: 'Dieser Link ist ungültig oder wurde bereits verwendet.',
+  },
+};
+const page = copy[locale];
+---
+
+<BaseLayout locale={locale} title={`${page.title} — DoItBad`} description={page.lead}>
+  <Header locale={locale} copy={messages} />
+  <main
+    class="preference-page shell"
+    id="conteudo"
+    data-preference-page
+    data-copy={JSON.stringify(page)}
+  >
+    <p class="eyebrow">
+      <span></span>
+      {messages.waitlist.eyebrow}
+    </p>
+    <h1>{page.title}</h1>
+    <p class="preference-lead">{page.lead}</p>
+    <p class="form-status" data-preference-status aria-live="polite"></p>
+    <button class="button" data-preference-submit hidden></button>
+  </main>
+  <Footer locale={locale} copy={messages} />
+  <script>
+    const page = document.querySelector<HTMLElement>('[data-preference-page]');
+    const status = page?.querySelector<HTMLElement>('[data-preference-status]');
+    const button = page?.querySelector<HTMLButtonElement>('[data-preference-submit]');
+    const copy = JSON.parse(page?.dataset.copy || '{}');
+    const params = new URLSearchParams(location.search);
+    const action = params.get('action');
+    const token = params.get('token');
+
+    async function submitPreference() {
+      if (!status || !button || !token || (action !== 'confirm' && action !== 'unsubscribe'))
+        return;
+      button.disabled = true;
+      status.textContent = copy.working;
+      try {
+        const response = await fetch('/api/waitlist-preferences', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action, token }),
+        });
+        if (response.status === 404) {
+          status.dataset.state = 'error';
+          status.textContent = copy.invalid;
+          button.hidden = true;
+          history.replaceState({}, '', location.pathname);
+          return;
+        }
+        if (!response.ok) throw new Error('preference_failed');
+        status.dataset.state = 'success';
+        status.textContent = action === 'confirm' ? copy.confirmed : copy.unsubscribed;
+        button.hidden = true;
+        history.replaceState({}, '', location.pathname);
+      } catch {
+        status.dataset.state = 'error';
+        status.textContent = copy.error;
+        button.disabled = false;
+      }
+    }
+
+    if (!status || !button || !token || (action !== 'confirm' && action !== 'unsubscribe')) {
+      if (status) status.textContent = copy.invalid;
+    } else {
+      button.textContent = action === 'confirm' ? copy.confirm : copy.unsubscribe;
+      button.hidden = false;
+      if (action === 'confirm') void submitPreference();
+      button.addEventListener('click', submitPreference);
+    }
+  </script>
+</BaseLayout>

@@ -40,6 +40,7 @@ export const pageCopy = {
       read: 'Ler artigo',
       all: 'Todos os artigos',
       another: 'Encontrar outro começo',
+      related: 'Continue por aqui',
     },
     legal: {
       title: 'Privacidade — DoItBad',
@@ -135,6 +136,7 @@ export const pageCopy = {
       read: 'Read article',
       all: 'All articles',
       another: 'Find another beginning',
+      related: 'Keep reading',
     },
     legal: {
       title: 'Privacy — DoItBad',
@@ -227,6 +229,7 @@ export const pageCopy = {
       read: 'Leer artículo',
       all: 'Todos los artículos',
       another: 'Encontrar otro comienzo',
+      related: 'Sigue por aquí',
     },
     legal: {
       title: 'Privacidad — DoItBad',
@@ -319,6 +322,7 @@ export const pageCopy = {
       read: 'Artikel lesen',
       all: 'Alle Artikel',
       another: 'Einen anderen Anfang finden',
+      related: 'Weiterlesen',
     },
     legal: {
       title: 'Datenschutz — DoItBad',

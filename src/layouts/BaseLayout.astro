@@ -13,6 +13,8 @@ interface Props {
   cinematicIntro?: boolean;
   type?: 'website' | 'article';
   structuredData?: Record<string, unknown>;
+  localizedPaths?: Partial<Record<Locale, string>>;
+  image?: string;
 }
 
 const {
@@ -22,6 +24,8 @@ const {
   cinematicIntro = false,
   type = 'website',
   structuredData,
+  localizedPaths,
+  image = '/og-image.svg',
 } = Astro.props;
 const pages = getPageCopy(locale);
 const canonical = new URL(Astro.url.pathname, Astro.site);
@@ -32,8 +36,8 @@ const alternates = [
   ['es', 'es'],
   ['de', 'de'],
 ] as const;
-const localePath = (target: string) =>
-  Astro.url.pathname.replace(/^\/(pt-br|en|es|de)(?=\/)/, `/${target}`);
+const localePath = (target: Locale) =>
+  localizedPaths?.[target] ?? Astro.url.pathname.replace(/^\/(pt-br|en|es|de)(?=\/)/, `/${target}`);
 const defaultStructuredData = {
   '@context': 'https://schema.org',
   '@type': 'WebSite',
@@ -62,11 +66,11 @@ const defaultStructuredData = {
     <meta property="og:locale" content={locale === 'pt-br' ? 'pt_BR' : locale} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:image" content={new URL('/og-image.svg', Astro.site)} />
+    <meta property="og:image" content={new URL(image, Astro.site)} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
-    <meta name="twitter:image" content={new URL('/og-image.svg', Astro.site)} />
+    <meta name="twitter:image" content={new URL(image, Astro.site)} />
     <script
       type="application/ld+json"
       set:html={JSON.stringify(structuredData ?? defaultStructuredData).replace(/</g, '\\u003c')}

@@ -7,11 +7,12 @@ import { getPageCopy } from '../i18n/pages';
 interface Props {
   locale: Locale;
   copy: Messages;
+  localizedPaths?: Partial<Record<Locale, string>>;
 }
-const { locale, copy } = Astro.props;
+const { locale, copy, localizedPaths } = Astro.props;
 const pages = getPageCopy(locale);
 const localizedPath = (target: Locale) =>
-  Astro.url.pathname.replace(/^\/(pt-br|en|es|de)(?=\/)/, `/${target}`);
+  localizedPaths?.[target] ?? Astro.url.pathname.replace(/^\/(pt-br|en|es|de)(?=\/)/, `/${target}`);
 const home = `/${locale}/`;
 const menuLabels: Record<Locale, { navigation: string; open: string; label: string }> = {
   'pt-br': { navigation: 'Navegação principal', open: 'Abrir menu de navegação', label: 'Menu' },

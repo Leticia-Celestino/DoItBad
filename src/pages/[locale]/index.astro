@@ -7,7 +7,7 @@ import TeamSection from '../../components/TeamSection.astro';
 import CharacterSketch from '../../components/CharacterSketch.astro';
 import FaqSection from '../../components/FaqSection.astro';
 import IntroRive from '../../components/IntroRive';
-import { getArticles } from '../../content/articles';
+import { getArticles } from '../../content/editorial';
 import { getMessages } from '../../i18n/messages';
 import { getPageCopy } from '../../i18n/pages';
 import { isLocale, publishedLocales } from '../../i18n/config';
@@ -21,7 +21,7 @@ if (!isLocale(rawLocale)) return Astro.redirect('/pt-br/');
 const locale = rawLocale;
 const copy = getMessages(locale);
 const pages = getPageCopy(locale);
-const articles = getArticles(locale);
+const articles = await getArticles(locale);
 const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY;
 ---
 
@@ -204,6 +204,8 @@ const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY;
                 <img
                   src={articles[index].cover.src}
                   alt={articles[index].cover.alt}
+                  width="1280"
+                  height="853"
                   loading="lazy"
                 />
               </div>

@@ -19,7 +19,7 @@ type ConfirmationCopy = {
 
 const COPY: Record<ConfirmationLocale, ConfirmationCopy> = {
   'pt-BR': {
-    subject: 'Seu lugar está guardado ✦ DoItBad',
+    subject: 'Confirme seu e-mail ✦ DoItBad',
     preheader: 'Um começo pequeno já conta — e o seu chegou até aqui.',
     eyebrow: 'UM PEQUENO COMEÇO',
     greeting: 'Olá',
@@ -29,14 +29,14 @@ const COPY: Record<ConfirmationLocale, ConfirmationCopy> = {
     note: 'Sem pressa, sem barulho desnecessário. Só novidades que ajudam a começar, pausar e voltar.',
     stepLabel: 'ENQUANTO ISSO',
     step: 'Escolha algo que você vem adiando e reduza até caber em dez minutos. Esse já pode ser o primeiro passo.',
-    button: 'Conhecer o DoItBad',
+    button: 'Confirmar meu e-mail',
     signoff: 'Até o próximo pequeno começo,',
     team: 'Equipe DoItBad',
     footer: 'Feito com intenção para dias reais.',
-    unsubscribe: 'Para sair da lista, basta responder este e-mail com “sair”.',
+    unsubscribe: 'Não quer receber novidades? Cancele a inscrição.',
   },
   en: {
-    subject: 'Your place is saved ✦ DoItBad',
+    subject: 'Confirm your email ✦ DoItBad',
     preheader: 'A small start still counts — and yours made it here.',
     eyebrow: 'A SMALL BEGINNING',
     greeting: 'Hello',
@@ -46,14 +46,14 @@ const COPY: Record<ConfirmationLocale, ConfirmationCopy> = {
     note: 'No rush, no unnecessary noise. Just updates that help you start, pause and return.',
     stepLabel: 'IN THE MEANTIME',
     step: 'Choose something you have been postponing and make it small enough for ten minutes. That can already be the first step.',
-    button: 'Discover DoItBad',
+    button: 'Confirm my email',
     signoff: 'Until the next small beginning,',
     team: 'The DoItBad team',
     footer: 'Made with intention for real days.',
-    unsubscribe: 'To leave the list, simply reply to this email with “unsubscribe”.',
+    unsubscribe: 'Do not want updates? Unsubscribe.',
   },
   es: {
-    subject: 'Tu lugar está guardado ✦ DoItBad',
+    subject: 'Confirma tu correo ✦ DoItBad',
     preheader: 'Un comienzo pequeño también cuenta — y el tuyo llegó hasta aquí.',
     eyebrow: 'UN PEQUEÑO COMIENZO',
     greeting: 'Hola',
@@ -63,14 +63,14 @@ const COPY: Record<ConfirmationLocale, ConfirmationCopy> = {
     note: 'Sin prisa y sin ruido innecesario. Solo novedades que ayudan a empezar, pausar y volver.',
     stepLabel: 'MIENTRAS TANTO',
     step: 'Elige algo que vienes aplazando y redúcelo hasta que quepa en diez minutos. Ese ya puede ser el primer paso.',
-    button: 'Conocer DoItBad',
+    button: 'Confirmar mi correo',
     signoff: 'Hasta el próximo pequeño comienzo,',
     team: 'Equipo DoItBad',
     footer: 'Hecho con intención para días reales.',
-    unsubscribe: 'Para salir de la lista, responde este correo con “salir”.',
+    unsubscribe: '¿No quieres recibir novedades? Cancela la suscripción.',
   },
   de: {
-    subject: 'Dein Platz ist reserviert ✦ DoItBad',
+    subject: 'Bestätige deine E-Mail ✦ DoItBad',
     preheader: 'Ein kleiner Anfang zählt — und deiner ist bei uns angekommen.',
     eyebrow: 'EIN KLEINER ANFANG',
     greeting: 'Hallo',
@@ -80,11 +80,11 @@ const COPY: Record<ConfirmationLocale, ConfirmationCopy> = {
     note: 'Ohne Eile und ohne unnötigen Lärm. Nur Neuigkeiten, die beim Anfangen, Pausieren und Zurückkehren helfen.',
     stepLabel: 'BIS DAHIN',
     step: 'Wähle etwas, das du aufschiebst, und verkleinere es auf zehn Minuten. Das kann schon der erste Schritt sein.',
-    button: 'DoItBad entdecken',
+    button: 'E-Mail bestätigen',
     signoff: 'Bis zum nächsten kleinen Anfang,',
     team: 'Das DoItBad-Team',
     footer: 'Mit Bedacht für echte Tage gemacht.',
-    unsubscribe: 'Um die Liste zu verlassen, antworte einfach mit „abmelden“.',
+    unsubscribe: 'Du möchtest keine Neuigkeiten? Abmelden.',
   },
 };
 
@@ -117,7 +117,33 @@ function siteUrl(locale: ConfirmationLocale) {
   return `${origin}/${path}/`;
 }
 
-export function buildConfirmationEmail(input: { name: string | null; locale: string }) {
+function preferenceUrl(
+  locale: ConfirmationLocale,
+  action: 'confirm' | 'unsubscribe',
+  token: string,
+) {
+  const url = new URL(siteUrl(locale));
+  url.pathname = `${url.pathname}preferencias/`;
+  url.searchParams.set('action', action);
+  url.searchParams.set('token', token);
+  return url.href;
+}
+
+function oneClickUnsubscribeUrl(token: string) {
+  const url = new URL(siteUrl('pt-BR'));
+  url.pathname = '/api/waitlist-preferences';
+  url.search = '';
+  url.searchParams.set('action', 'unsubscribe');
+  url.searchParams.set('token', token);
+  return url.href;
+}
+
+export function buildConfirmationEmail(input: {
+  name: string | null;
+  locale: string;
+  confirmationToken?: string;
+  unsubscribeToken?: string;
+}) {
   const locale: ConfirmationLocale = Object.prototype.hasOwnProperty.call(COPY, input.locale)
     ? (input.locale as ConfirmationLocale)
     : 'pt-BR';
@@ -125,7 +151,15 @@ export function buildConfirmationEmail(input: { name: string | null; locale: str
   const name = input.name ? escapeHtml(input.name) : '';
   const greeting = `${copy.greeting}${name ? `, ${name}` : ''}!`;
   const title = copy.title.replace('\n', '<br>');
-  const url = siteUrl(locale);
+  const url = input.confirmationToken
+    ? preferenceUrl(locale, 'confirm', input.confirmationToken)
+    : siteUrl(locale);
+  const unsubscribeUrl = input.unsubscribeToken
+    ? preferenceUrl(locale, 'unsubscribe', input.unsubscribeToken)
+    : siteUrl(locale);
+  const oneClickUrl = input.unsubscribeToken
+    ? oneClickUnsubscribeUrl(input.unsubscribeToken)
+    : unsubscribeUrl;
 
   const html = `<!doctype html>
 <html lang="${locale}">
@@ -196,7 +230,7 @@ export function buildConfirmationEmail(input: { name: string | null; locale: str
                 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
                   <tr>
                     <td valign="top" style="font-family:'Trebuchet MS',Arial,sans-serif;font-size:13px;font-weight:600;line-height:1.5;color:#f8f0df;">${copy.footer}</td>
-                    <td align="right" valign="top" style="padding-left:18px;font-size:10px;line-height:1.55;color:#cfc8ba;">${copy.unsubscribe}</td>
+                    <td align="right" valign="top" style="padding-left:18px;font-size:10px;line-height:1.55;color:#cfc8ba;"><a href="${unsubscribeUrl}" style="color:#cfc8ba;">${copy.unsubscribe}</a></td>
                   </tr>
                 </table>
               </td>
@@ -225,8 +259,15 @@ export function buildConfirmationEmail(input: { name: string | null; locale: str
     copy.signoff,
     copy.team,
     '',
-    copy.unsubscribe,
+    `${copy.unsubscribe}: ${unsubscribeUrl}`,
   ].join('\n');
 
-  return { subject: copy.subject, html, text };
+  return {
+    subject: copy.subject,
+    html,
+    text,
+    confirmationUrl: url,
+    unsubscribeUrl,
+    oneClickUnsubscribeUrl: oneClickUrl,
+  };
 }

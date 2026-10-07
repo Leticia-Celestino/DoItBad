@@ -1,28 +1,36 @@
-# Sprint 3 — conteúdo, idiomas e preparação de lançamento
+# Sprint 3A/3B — operação editorial e acabamento do blog
 
-## Entregue localmente
+## Implementação concluída localmente
 
-- Home, demo, FAQ, privacidade, índice editorial, artigos e 404 em português, inglês, espanhol e alemão.
-- Três artigos por idioma com autoria, publicação, revisão e ação prática.
-- Seletor de idioma preserva a rota equivalente.
-- Canonical, `hreflang`, `x-default`, Open Graph, Twitter Cards e JSON-LD por página.
-- Sitemap internacionalizado e `robots.txt`.
-- Sanity Studio preparado em `apps/studio`, com schemas de autor e artigo, conteúdo por documento/idioma e chave para relacionar traduções.
-- Auditoria axe em desktop e Pixel 7; correções de contraste e navegação por teclado aplicadas.
+- Home, índice, artigos, privacidade, preferências e 404 nos quatro idiomas.
+- Studio Sanity com artigos, autores, tradução, capa, ação prática, referências e datas.
+- Repositório editorial de build que lê documentos publicados do Sanity quando
+  `PUBLIC_SANITY_PROJECT_ID` e `PUBLIC_SANITY_DATASET` estão definidos.
+- Builds de preview podem ler rascunhos com token exclusivamente no servidor; produção usa a perspectiva publicada.
+- Fallback versionado para os artigos locais quando o CMS não está configurado ou está indisponível.
+- `translationKey` relaciona traduções sem obrigar a mesma URL.
+- Slugs próprios em português, inglês, espanhol e alemão.
+- Seletor de idioma, canonical e `hreflang` apontam para a tradução equivalente.
+- Redirecionamentos permanentes preservam as URLs antigas.
+- Capas por artigo em Open Graph, Twitter Card e dados estruturados.
+- Datas localizadas, tempo de leitura e artigos relacionados.
+- Sitemap internacionalizado e previews `noindex`.
 
-## Verificação
+## Ativação do Sanity — concluída em 07/10/2026
 
-- `pnpm verify` cobre lint, Astro check, typecheck do beta e Studio e builds da landing e do beta.
-- Playwright cobre os quatro idiomas, canonical/alternates, troca equivalente de idioma, JSON-LD, conteúdo central, Rive, demo e beta.
-- O build gera 30 páginas e `sitemap-index.xml`.
-- Artefatos principais da abertura: `intro.riv` com cerca de 66 KiB, runtime JavaScript Rive com cerca de 188 KiB e WebAssembly com cerca de 1,9 MiB. O runtime é descartado após a abertura; medir Core Web Vitals no preview publicado antes de liberar indexação.
+1. Projeto `xqfqfioy`, dataset público `production` e Studio hospedado configurados.
+2. CORS local autorizado e identidade administrativa confirmada.
+3. `PUBLIC_SANITY_PROJECT_ID`, `PUBLIC_SANITY_DATASET` e `SANITY_PREVIEW=false` configurados na Vercel.
+4. Um autor e 12 artigos publicados, com três versões em cada idioma e `translationKey` preservada.
+5. Build real consultou o conteúdo publicado; o fallback continua disponível para indisponibilidade.
+6. Capas do CDN Sanity foram incluídas na CSP e recebem transformação `auto=format`.
 
-## Dependências externas restantes
+## Revisões externas antes da indexação
 
-- Definir `SANITY_STUDIO_PROJECT_ID`, escolher o dataset e configurar usuários/CORS para iniciar e publicar o Studio.
-- Migrar os artigos locais para o dataset e trocar a leitura local pela consulta GROQ publicada.
-- Revisar inglês, espanhol e alemão com pessoas fluentes antes de liberar indexação.
-- Confirmar o endereço `contato@doitbad.tech`, política final, domínio e projeto de hospedagem.
-- Medir Lighthouse/Core Web Vitals no preview, pois o ambiente local não representa CDN, rede ou dispositivo reais.
+- Revisão humana de português, inglês, espanhol e alemão.
+- Aprovação de autoria, capas, textos alternativos, referências e política editorial.
+- Lighthouse/Core Web Vitals no preview publicado.
+- Teste de rascunho, publicação, atualização, remoção e retorno de deploy.
 
-Essas dependências mantêm a Sprint 3 em revisão; não impedem o uso e a avaliação local das páginas.
+O código de 3A/3B e a ativação do CMS estão concluídos. O Studio permanece disponível para novas
+revisões e publicações editoriais.

@@ -32,14 +32,14 @@ O fluxo atual e o caminho para integrar o Studio estão descritos em `docs/EDITO
 - Tailwind está instalado para a futura composição de componentes. A direção visual inicial usa tokens CSS explícitos para facilitar revisão.
 - Quicksand é a fonte de marca/interface e Inter atende textos longos.
 - O tema segue o sistema na primeira visita, pode ser alterado manualmente e fica salvo em `localStorage`.
-- Português é o único idioma publicado nesta etapa. Inglês, espanhol e alemão aparecem como “em preparação” e não geram páginas com conteúdo falso.
+- Português, inglês, espanhol e alemão geram páginas próprias. As traduções ainda exigem revisão humana antes da indexação pública.
 - Previews ficam `noindex` até `PUBLIC_ALLOW_INDEXING=true` ser definido numa publicação revisada.
 
 Consulte também `../DoItBad-Documentation/PLANO-DE-EXECUCAO.md` e `docs/SPRINT-0-1.md`.
 
 ## Deploy mais curto (Vercel)
 
-1. No Supabase SQL Editor, execute `supabase/migrations/202609280002_waitlist.sql`.
+1. No Supabase SQL Editor, execute `supabase/migrations/202609280002_waitlist.sql` e depois `supabase/migrations/202610070001_waitlist_lifecycle.sql`.
 2. Importe esta pasta na Vercel e use `pnpm build` como Build Command e `dist` como Output Directory.
 3. Cadastre as variáveis abaixo tanto em Preview quanto em Production e faça um novo deploy.
 4. Em produção, aponte `doitbad.tech` e `www.doitbad.tech` para o projeto seguindo os registros mostrados pela própria Vercel.
@@ -53,7 +53,10 @@ Variáveis necessárias:
 - `RESEND_API_KEY`: privada; ativa o e-mail de confirmação.
 - `RESEND_FROM_EMAIL`: por exemplo `DoItBad <novidades@doitbad.tech>`; o domínio precisa estar verificado.
 - `RESEND_REPLY_TO`: endereço que receberá uma resposta direta do visitante, por exemplo `contato@doitbad.tech`.
+- `WAITLIST_RATE_LIMIT_SALT`: valor privado e aleatório usado para anonimizar a chave do rate limit.
 - `PUBLIC_SITE_URL`: origem pública usada no botão do e-mail de confirmação; por padrão, `https://doitbad.tech`.
 - `PUBLIC_ALLOW_INDEXING`: `false` em Preview e `true` em Production, depois da revisão final.
+- `PUBLIC_SANITY_PROJECT_ID` e `PUBLIC_SANITY_DATASET`: habilitam a leitura do conteúdo publicado; sem eles, o build usa os artigos versionados.
+- `SANITY_PREVIEW` e `SANITY_API_READ_TOKEN`: somente em previews editoriais protegidos; o token nunca deve usar prefixo `PUBLIC_`.
 
 Preview é cada URL temporária criada pela Vercel para testar uma alteração antes de publicá-la. Production é a versão ligada ao domínio oficial. O mesmo projeto Supabase pode atender a landing e o beta no MVP, com tabelas e políticas separadas; desenvolvimento/testes devem usar outro projeto para não misturar cadastros reais.

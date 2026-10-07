@@ -5,14 +5,32 @@ import Footer from '../../../components/Footer.astro';
 import { getMessages } from '../../../i18n/messages';
 import { getPageCopy } from '../../../i18n/pages';
 import { isLocale, publishedLocales } from '../../../i18n/config';
-import { getArticles } from '../../../content/articles';
+import { getEditorialCatalog } from '../../../content/editorial';
+import type { Locale } from '../../../i18n/config';
 
-export function getStaticPaths() {
+export async function getStaticPaths() {
+  const catalog = await getEditorialCatalog();
   return publishedLocales.flatMap((locale) =>
-    getArticles(locale).map((article) => ({
-      params: { locale, slug: article.slug },
-      props: { article },
-    })),
+    catalog[locale].map((article) => {
+      const localizedPaths = Object.fromEntries(
+        publishedLocales.flatMap((target) => {
+          const translation = catalog[target].find(
+            (candidate) => candidate.translationKey === article.translationKey,
+          );
+          return translation ? [[target, `/${target}/artigos/${translation.slug}/`]] : [];
+        }),
+      ) as Partial<Record<Locale, string>>;
+      return {
+        params: { locale, slug: article.slug },
+        props: {
+          article,
+          localizedPaths,
+          relatedArticles: catalog[locale]
+            .filter((candidate) => candidate.translationKey !== article.translationKey)
+            .slice(0, 2),
+        },
+      };
+    }),
   );
 }
 
@@ -21,8 +39,13 @@ if (!isLocale(rawLocale)) return Astro.redirect('/pt-br/artigos/');
 const locale = rawLocale;
 const copy = getMessages(locale);
 const pages = getPageCopy(locale);
-const { article } = Astro.props;
+const { article, localizedPaths, relatedArticles } = Astro.props;
 const articleUrl = new URL(Astro.url.pathname, Astro.site).href;
+const dateLocale = locale === 'pt-br' ? 'pt-BR' : locale;
+const formatDate = (value: string) =>
+  new Intl.DateTimeFormat(dateLocale, { day: 'numeric', month: 'long', year: 'numeric' }).format(
+    new Date(`${value}T12:00:00Z`),
+  );
 const structuredData = {
   '@context': 'https://schema.org',
   '@type': 'Article',
@@ -34,6 +57,7 @@ const structuredData = {
   dateModified: article.reviewedAt,
   inLanguage: locale,
   mainEntityOfPage: articleUrl,
+  image: new URL(article.cover.src, Astro.site).href,
 };
 ---
 
@@ -43,8 +67,10 @@ const structuredData = {
   description={article.summary}
   type="article"
   structuredData={structuredData}
+  localizedPaths={localizedPaths}
+  image={article.cover.src}
 >
-  <Header locale={locale} copy={copy} />
+  <Header locale={locale} copy={copy} localizedPaths={localizedPaths} />
   <main class="article-page" id="conteudo">
     <article class="article-reader shell">
       <a class="back-link" href={`/${locale}/artigos/`}>
@@ -59,11 +85,12 @@ const structuredData = {
           <h1>{article.title}</h1>
           <p class="article-lede">{article.summary}</p>
           <p class="article-meta">
-            {article.author} · <time datetime={article.publishedAt}>{article.publishedAt}</time>
+            {article.author} ·{' '}
+            <time datetime={article.publishedAt}>{formatDate(article.publishedAt)}</time>
           </p>
         </div>
         <figure class="article-cover">
-          <img src={article.cover.src} alt={article.cover.alt} />
+          <img src={article.cover.src} alt={article.cover.alt} width="1280" height="853" />
         </figure>
       </header>
       <div class="article-content">
@@ -84,6 +111,20 @@ const structuredData = {
           </a>
         </div>
       </div>
+      <aside class="related-articles" aria-labelledby="related-title">
+        <h2 id="related-title">{pages.editorial.related}</h2>
+        <div>
+          {relatedArticles.map((related) => (
+            <a href={`/${locale}/artigos/${related.slug}/`}>
+              <span>
+                {related.category} · {related.readingTime}
+              </span>
+              <strong>{related.title}</strong>
+              <i aria-hidden="true">↗</i>
+            </a>
+          ))}
+        </div>
+      </aside>
     </article>
   </main>
   <Footer locale={locale} copy={copy} />

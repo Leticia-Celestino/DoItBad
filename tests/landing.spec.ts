@@ -91,7 +91,9 @@ test('submits the updates form and shows a success state', async ({ page }) => {
   await form.getByPlaceholder('Seu melhor e-mail').fill('ada@example.com');
   await form.getByRole('button', { name: 'Quero acompanhar' }).click();
 
-  await expect(form.locator('[data-form-status]')).toHaveText('Pronto! Seu cadastro foi recebido.');
+  await expect(form.locator('[data-form-status]')).toHaveText(
+    'Quase pronto! Confira seu e-mail para confirmar a inscrição.',
+  );
 });
 
 test('keeps the landing inside a narrow mobile viewport', async ({ page }) => {

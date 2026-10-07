@@ -1,31 +1,27 @@
-# Sprint 2 — demo interativa e preparação da captação
+# Sprint 2 — landing utilizável e captação
 
-## Entrega desta sessão
+## Implementação concluída localmente
 
-A demonstração da home deixou de ser apenas visual. Ela apresenta três intenções predefinidas e permite que a pessoa escolha uma, veja o próximo gesto e peça uma redução adicional quando o primeiro passo ainda parecer grande.
+- Demo pública com cenários predefinidos, sem conta e sem envio de texto pessoal.
+- Formulário localizado com validação, estados de envio, sucesso e erro.
+- Turnstile vinculado à ação e ao hostname esperado.
+- Persistência privada no Supabase; `anon` e `authenticated` não leem a lista.
+- Cadastro idempotente e reserva transacional que evita reenvios simultâneos.
+- Rate limiting atômico no Supabase: cinco tentativas por hash de IP a cada 15 minutos.
+- Double opt-in com tokens aleatórios armazenados somente como SHA-256.
+- Falha do Resend retorna erro e libera uma nova tentativa; não há sucesso enganoso.
+- Confirmação e descadastro localizados em `/[locale]/preferencias/`.
+- Cabeçalhos `List-Unsubscribe` e `List-Unsubscribe-Post` para clientes compatíveis.
 
-O fluxo é deliberadamente público: não exige conta, não envia texto para uma API e deixa claro que é uma demonstração. Isso permite testar entendimento e sensação de controle antes de conectar dados reais.
+## Implantação concluída em 07/10/2026
 
-Também foi incluída a seção “Quem está por trás”, com cartões preparados para foto, função, mini-bio e links externos. Os nomes, imagens e URLs atuais são placeholders de conteúdo e devem ser substituídos somente após aprovação do elenco.
+1. Projeto Supabase `fdfhqmmlbxgpzfsatavm` restaurado e em estado `ACTIVE_HEALTHY`.
+2. Migrações base e `202610070001_waitlist_lifecycle.sql` aplicadas; histórico reparado após a
+   reinicialização automática do banco durante a restauração.
+3. `WAITLIST_RATE_LIMIT_SALT` separado configurado em produção e preview.
+4. Supabase, Turnstile, Resend e links públicos configurados na Vercel.
+5. Diagnóstico protegido confirmou rate limit, confirmação e descadastro via RPC com HTTP 200; o
+   envio Resend de teste retornou HTTP 200.
 
-## Arquivos principais
-
-- `src/components/StepDemo.tsx` — estado local dos cenários e da redução do passo.
-- `src/pages/[locale]/index.astro` — ilha React carregada com `client:load`.
-- `src/styles/global.css` — layout, estados selecionados e responsividade já existentes.
-- `src/components/TeamSection.astro` — seção componentizada do elenco e estrutura para fotos/links.
-- `tests/landing.spec.ts` — fluxo desktop/mobile da demo e regressões de tema.
-
-## Verificação
-
-- `pnpm format` passou.
-- `pnpm build` passou.
-- `pnpm test:e2e` passou: 6/6 (desktop e Pixel 7).
-
-## Ainda não implementado
-
-O formulário continua desabilitado de propósito. A captação real precisa de Supabase, Resend, Turnstile, política de privacidade, domínio/remetente autorizados e estados de confirmação/descadastro. Não ativar o botão antes dessas decisões e configurações.
-
-## Próximo passo
-
-Criar a persistência de `waitlist_subscribers` em ambiente de teste e o endpoint de cadastro com validação, deduplicação, rate limiting e confirmação por e-mail. Depois testar falhas de banco/e-mail sem exibir sucesso enganoso.
+A Sprint 2 está concluída em produção. O segredo temporário usado no teste foi removido após a
+validação.

@@ -1,38 +1,57 @@
-# Publicação de artigos
+# Operação editorial
 
-## Como funciona hoje
+## Fonte de conteúdo
 
-Os artigos exibidos pela landing são gerados estaticamente a partir de
-`src/content/articles.ts`. Cada artigo precisa ter a mesma `slug` nos quatro idiomas para que a
-troca de idioma preserve a página equivalente.
+O build consulta o dataset público `production` do projeto Sanity `xqfqfioy`. As variáveis
+`PUBLIC_SANITY_PROJECT_ID` e `PUBLIC_SANITY_DATASET` podem substituir esses padrões por ambiente.
+Se a consulta não retornar artigos ou estiver indisponível, `src/content/articles.ts` preserva uma
+versão publicável do site. Rascunhos não são consultados em produção.
 
-Para publicar um artigo agora:
+## Identidade e traduções
 
-1. Salve a capa otimizada em `public/editorial/`, preferencialmente em WebP, com proporção 3:2 e
-   pelo menos 1280 px de largura.
-2. Adicione o artigo em cada lista de idioma dentro de `articlesByLocale`.
-3. Preencha `slug`, `title`, `summary`, `category`, `readingTime`, `cover`, `paragraphs` e `action`.
-4. Use a mesma `slug` nas quatro traduções e um texto alternativo localizado em `cover.alt`.
-5. Execute `pnpm verify` e `pnpm test:e2e` antes de publicar a branch `main`.
+Cada tradução possui seu próprio `slug`. O campo `translationKey` identifica versões equivalentes
+e alimenta o seletor de idioma e `hreflang`. Nunca altere a chave ao traduzir um artigo. Slugs
+publicados só devem mudar junto com um redirecionamento permanente em `vercel.json`.
 
-O site é estático: depois do merge na `main`, a Vercel gera a listagem, a página individual, os
-metadados e o sitemap novamente.
+## Fluxo para publicar
 
-## Caminho recomendado: Sanity Studio
+1. Criar ou selecionar o autor.
+2. Criar um documento por idioma com a mesma `translationKey`.
+3. Preencher título, slug, resumo, categoria, capa/alt, corpo, ação prática e datas.
+4. Revisar referências, direitos da imagem e linguagem.
+5. Abrir o preview e conferir as quatro rotas, metadados e links equivalentes.
+6. Publicar somente os idiomas aprovados.
+7. O webhook do Sanity solicita um novo deploy estático da Vercel.
 
-O formulário administrativo já está modelado em `apps/studio/schemaTypes/articleType.ts`, com
-idioma, chave de tradução, título, slug, resumo, categoria, capa, autor, conteúdo, ação prática,
-referências e datas.
+## Configuração inicial
 
-O Studio ainda não alimenta as páginas públicas. Antes de usá-lo como fluxo editorial é preciso:
+- Studio: `SANITY_STUDIO_PROJECT_ID` e `SANITY_STUDIO_DATASET`.
+- Landing: `PUBLIC_SANITY_PROJECT_ID` e `PUBLIC_SANITY_DATASET`.
+- Preview editorial: `SANITY_PREVIEW=true` e `SANITY_API_READ_TOKEN` somente no servidor de build.
+- Dataset público contém somente material editorial publicado; não armazenar segredos nele.
+- Restringir usuários do Studio e origens CORS aos ambientes necessários.
+- Produção mantém `SANITY_PREVIEW=false`; o token de leitura de rascunhos nunca é variável pública.
 
-1. Criar ou escolher o projeto e o dataset no Sanity.
-2. Configurar `SANITY_STUDIO_PROJECT_ID` e `SANITY_STUDIO_DATASET`.
-3. Publicar o Studio com acesso restrito às pessoas editoras.
-4. Adicionar ao Astro um cliente de leitura e consultas para artigos e autores.
-5. Configurar webhook de publicação do Sanity para disparar um novo deploy da Vercel.
-6. Manter o conteúdo local como fallback durante a migração e só removê-lo depois de validar as
-   quatro traduções, previews e URLs existentes.
+## Estado da conta em 07/10/2026
 
-Com essa integração concluída, novos artigos poderão ser criados, revisados e publicados pelo
-navegador, sem editar código.
+- Projeto ativo: `DoItBad` (`xqfqfioy`).
+- Dataset: `production`, público.
+- Publicação: Letícia, papel `Administrator`.
+- Studio hospedado: `https://doitbad-editorial.sanity.studio/`.
+- Conteúdo editorial: um autor publicado e 12 artigos em rascunho, três para cada idioma.
+- As famílias `return-after-weeks`, `preparation-delays-start` e `keep-the-thread` possuem versões
+  em `pt-br`, `en`, `es` e `de`.
+- CORS: `http://localhost:3333` e `http://127.0.0.1:3333`, necessários para o Studio local.
+- Novos editores só serão convidados quando seus e-mails e papéis forem aprovados.
+
+## Importação inicial
+
+O script `scripts/build-sanity-editorial-import.ts` converte o conteúdo local em NDJSON para o
+Sanity. Ele usa identificadores determinísticos e gera os artigos como rascunhos, evitando uma
+publicação acidental. A importação de 07/10/2026 foi validada com 1 autor, 12 rascunhos, nenhuma
+publicação e três artigos por idioma. Antes de uma nova importação, crie um backup do dataset.
+
+## Verificação
+
+Execute `pnpm verify` e `pnpm test:e2e`. No preview publicado, confira canonical, `hreflang`, capa
+social, sitemap, layout mobile e ausência de rascunhos antes de permitir indexação.

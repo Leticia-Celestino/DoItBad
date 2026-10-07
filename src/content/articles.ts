@@ -1,6 +1,7 @@
 import type { Locale } from '../i18n/config';
 
 export type Article = {
+  translationKey: string;
   slug: string;
   title: string;
   summary: string;
@@ -27,6 +28,7 @@ export const articlesByLocale: Record<Locale, Article[]> = {
   'pt-br': [
     {
       ...meta,
+      translationKey: 'return-after-weeks',
       slug: slugs[0],
       title: 'Como voltar a um projeto depois de semanas',
       summary: 'Retomar não começa reconstruindo tudo. Começa encontrando um fio visível.',
@@ -45,6 +47,7 @@ export const articlesByLocale: Record<Locale, Article[]> = {
     },
     {
       ...meta,
+      translationKey: 'preparation-delays-start',
       slug: slugs[1],
       title: 'Quando preparar demais adia o começo',
       summary: 'Planejar pode acolher uma tarefa. Em excesso, pode escondê-la.',
@@ -63,6 +66,7 @@ export const articlesByLocale: Record<Locale, Article[]> = {
     },
     {
       ...meta,
+      translationKey: 'keep-the-thread',
       slug: slugs[2],
       title: 'Como guardar o fio da meada antes de pausar',
       summary: 'Uma nota curta pode transformar uma pausa em continuidade.',
@@ -83,7 +87,8 @@ export const articlesByLocale: Record<Locale, Article[]> = {
   en: [
     {
       ...meta,
-      slug: slugs[0],
+      translationKey: 'return-after-weeks',
+      slug: 'return-to-a-project-after-weeks',
       title: 'How to return to a project after weeks',
       summary: 'Returning begins by finding one visible thread, rather than rebuilding everything.',
       category: 'Returning',
@@ -101,7 +106,8 @@ export const articlesByLocale: Record<Locale, Article[]> = {
     },
     {
       ...meta,
-      slug: slugs[1],
+      translationKey: 'preparation-delays-start',
+      slug: 'when-preparation-delays-the-start',
       title: 'When too much preparation delays the start',
       summary: 'Planning can support a task. In excess, it can hide it.',
       category: 'Starting',
@@ -119,7 +125,8 @@ export const articlesByLocale: Record<Locale, Article[]> = {
     },
     {
       ...meta,
-      slug: slugs[2],
+      translationKey: 'keep-the-thread',
+      slug: 'keep-the-thread-before-a-pause',
       title: 'How to keep the thread before a pause',
       summary: 'A short note can turn a pause into continuity.',
       category: 'Everyday life',
@@ -139,7 +146,8 @@ export const articlesByLocale: Record<Locale, Article[]> = {
   es: [
     {
       ...meta,
-      slug: slugs[0],
+      translationKey: 'return-after-weeks',
+      slug: 'volver-a-un-proyecto-despues-de-semanas',
       title: 'Cómo volver a un proyecto después de semanas',
       summary: 'Retomar empieza encontrando un hilo visible, no reconstruyendo todo.',
       category: 'Retomar',
@@ -157,7 +165,8 @@ export const articlesByLocale: Record<Locale, Article[]> = {
     },
     {
       ...meta,
-      slug: slugs[1],
+      translationKey: 'preparation-delays-start',
+      slug: 'cuando-preparar-demasiado-retrasa-el-comienzo',
       title: 'Cuando preparar demasiado retrasa el comienzo',
       summary: 'Planificar puede sostener una tarea. En exceso, puede esconderla.',
       category: 'Empezar',
@@ -175,7 +184,8 @@ export const articlesByLocale: Record<Locale, Article[]> = {
     },
     {
       ...meta,
-      slug: slugs[2],
+      translationKey: 'keep-the-thread',
+      slug: 'guardar-el-hilo-antes-de-una-pausa',
       title: 'Cómo guardar el hilo antes de una pausa',
       summary: 'Una nota breve puede transformar una pausa en continuidad.',
       category: 'Cotidiano',
@@ -195,7 +205,8 @@ export const articlesByLocale: Record<Locale, Article[]> = {
   de: [
     {
       ...meta,
-      slug: slugs[0],
+      translationKey: 'return-after-weeks',
+      slug: 'nach-wochen-zu-einem-projekt-zurueckkehren',
       title: 'Nach Wochen zu einem Projekt zurückkehren',
       summary:
         'Zurückkehren beginnt mit einem sichtbaren Faden, nicht mit einem vollständigen Neubau.',
@@ -214,7 +225,8 @@ export const articlesByLocale: Record<Locale, Article[]> = {
     },
     {
       ...meta,
-      slug: slugs[1],
+      translationKey: 'preparation-delays-start',
+      slug: 'wenn-vorbereitung-den-anfang-verzoegert',
       title: 'Wenn zu viel Vorbereitung den Anfang verzögert',
       summary: 'Planung kann eine Aufgabe tragen. Zu viel davon kann sie verstecken.',
       category: 'Anfangen',
@@ -232,7 +244,8 @@ export const articlesByLocale: Record<Locale, Article[]> = {
     },
     {
       ...meta,
-      slug: slugs[2],
+      translationKey: 'keep-the-thread',
+      slug: 'vor-einer-pause-den-faden-bewahren',
       title: 'Vor einer Pause den Faden bewahren',
       summary: 'Eine kurze Notiz kann aus einer Pause Kontinuität machen.',
       category: 'Alltag',

@@ -26,7 +26,7 @@ test('publishes complete localized homes with equivalent metadata', async ({ pag
 });
 
 test('preserves the equivalent article when changing language', async ({ page }) => {
-  const slug = 'voltar-a-um-projeto-depois-de-semanas';
+  const slug = 'return-to-a-project-after-weeks';
   await page.goto(`/en/artigos/${slug}/`);
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(
     'How to return to a project after weeks',
@@ -36,7 +36,7 @@ test('preserves the equivalent article when changing language', async ({ page })
   ).toContain('Article');
   await expect(page.locator('.locale-picker a[href^="/de/"]')).toHaveAttribute(
     'href',
-    `/de/artigos/${slug}/`,
+    '/de/artigos/nach-wochen-zu-einem-projekt-zurueckkehren/',
   );
   await expect(page.locator('.article-cover img')).toBeVisible();
 });
@@ -50,7 +50,7 @@ test('presents the editorial index with optimized photographic covers', async ({
   await expect(page.locator('.article-index-art img')).toHaveCount(3);
   await expect(page.locator('.article-index-art img').first()).toHaveAttribute(
     'src',
-    /\/editorial\/.+\.webp$/,
+    /(\/editorial\/.+\.webp$|cdn\.sanity\.io\/.+auto=format)/,
   );
 });
 
@@ -97,7 +97,15 @@ test('keeps every localized public page inside a narrow mobile viewport', async 
     const routes = [
       `/${locale}/`,
       `/${locale}/artigos/`,
-      `/${locale}/artigos/voltar-a-um-projeto-depois-de-semanas/`,
+      `/${locale}/artigos/${
+        locale === 'pt-br'
+          ? 'voltar-a-um-projeto-depois-de-semanas'
+          : locale === 'en'
+            ? 'return-to-a-project-after-weeks'
+            : locale === 'es'
+              ? 'volver-a-un-proyecto-despues-de-semanas'
+              : 'nach-wochen-zu-einem-projekt-zurueckkehren'
+      }/`,
       `/${locale}/privacidade/`,
       `/${locale}/nao-existe/`,
     ];

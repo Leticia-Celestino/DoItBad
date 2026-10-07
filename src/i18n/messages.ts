@@ -87,8 +87,8 @@ export const messages = {
       button: 'Quero acompanhar',
       disclaimer:
         'Enviaremos apenas novidades do DoItBad. Você poderá sair da lista quando quiser.',
-      success: 'Pronto! Seu cadastro foi recebido.',
-      duplicate: 'Você já está na lista — que bom ter você por aqui.',
+      success: 'Quase pronto! Confira seu e-mail para confirmar a inscrição.',
+      duplicate: 'Já recebemos esse e-mail. Confira sua caixa de entrada para confirmar.',
       error: 'Não foi possível enviar agora. Tente novamente em instantes.',
     },
     footer: {
@@ -182,8 +182,8 @@ export const messages = {
       email: 'Your email',
       button: 'Follow along',
       disclaimer: 'We will only send DoItBad updates. You can leave the list at any time.',
-      success: 'Done! We received your sign-up.',
-      duplicate: 'You are already on the list — good to have you here.',
+      success: 'Almost done! Check your email to confirm your subscription.',
+      duplicate: 'We already received this email. Check your inbox to confirm.',
       error: 'We could not send it right now. Please try again shortly.',
     },
     footer: {
@@ -277,8 +277,8 @@ export const messages = {
       email: 'Tu correo',
       button: 'Quiero seguir',
       disclaimer: 'Solo enviaremos novedades de DoItBad. Podrás salir de la lista cuando quieras.',
-      success: '¡Listo! Recibimos tu registro.',
-      duplicate: 'Ya estás en la lista — qué bueno tenerte aquí.',
+      success: '¡Casi listo! Revisa tu correo para confirmar la suscripción.',
+      duplicate: 'Ya recibimos este correo. Revisa tu bandeja de entrada para confirmar.',
       error: 'No pudimos enviarlo ahora. Inténtalo de nuevo en unos instantes.',
     },
     footer: {
@@ -373,8 +373,8 @@ export const messages = {
       email: 'Deine E-Mail',
       button: 'Projekt verfolgen',
       disclaimer: 'Wir senden nur DoItBad-Neuigkeiten. Du kannst dich jederzeit abmelden.',
-      success: 'Geschafft! Deine Anmeldung ist angekommen.',
-      duplicate: 'Du bist bereits auf der Liste — schön, dass du da bist.',
+      success: 'Fast geschafft! Bestätige die Anmeldung über deine E-Mail.',
+      duplicate: 'Diese E-Mail ist schon eingetragen. Bitte bestätige sie in deinem Postfach.',
       error: 'Das Senden war gerade nicht möglich. Bitte versuche es gleich noch einmal.',
     },
     footer: {
