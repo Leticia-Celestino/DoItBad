@@ -125,7 +125,7 @@ const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY;
         <h2 id="step-title">{copy.step.title}</h2>
         <p class="quiet">{pages.demo.reassurance}</p>
       </div>
-      <StepDemo copy={pages.demo} client:load />
+      <StepDemo copy={pages.demo} client:idle />
     </section>
 
     <section class="return-section" aria-labelledby="return-title">
