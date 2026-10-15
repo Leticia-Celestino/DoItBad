@@ -19,6 +19,7 @@ export default tseslint.config(
     languageOptions: {
       globals: {
         process: 'readonly',
+        __DEV__: 'readonly',
         console: 'readonly',
         document: 'readonly',
         window: 'readonly',
@@ -30,6 +31,7 @@ export default tseslint.config(
         matchMedia: 'readonly',
         URL: 'readonly',
         requestAnimationFrame: 'readonly',
+        fetch: 'readonly',
       },
     },
   },

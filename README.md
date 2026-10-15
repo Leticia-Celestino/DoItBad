@@ -19,8 +19,15 @@ pnpm test:e2e
 O preview fica em `http://127.0.0.1:4321/pt-br/`.
 
 O beta web está em `apps/web`. Use `pnpm --filter @doitbad/web dev` para executá-lo em
-`http://127.0.0.1:4324/atividade`. Nesta etapa, a persistência é local e identificada como ambiente de
-desenvolvimento; autenticação e banco aguardam o projeto Supabase de teste.
+`http://127.0.0.1:4324/atividade`. Autenticação e persistência usam Supabase quando as
+variáveis públicas estão configuradas; o modo local de desenvolvimento é identificado na interface.
+O aplicativo Android/iOS está em `apps/mobile`; consulte [as instruções nativas](apps/mobile/README.md).
+Tarefas, foco e registros de humor exigem a nova migração `202610080001_workspace.sql`.
+As recomendações de próximo passo usam FastAPI/Python e Llama no Cloudflare Workers AI. A API
+publicada está em `https://doitbad-ai.doitbad-app.workers.dev`; o código e as instruções de deploy
+ficam em [`apps/ai-api`](apps/ai-api/README.md). O recurso exige também a migração
+`202610140001_ai_recommendations.sql`.
+O estado de implementação e as validações restantes estão em [NEXT-MISSION](docs/NEXT-MISSION.md).
 
 O Studio editorial está preparado em `apps/studio`. Copie o `.env.example`, informe o projeto Sanity e use
 `pnpm --filter @doitbad/studio dev`. Consulte `docs/SPRINT-3.md` e `docs/LAUNCH-PLAN.md` antes de publicar.

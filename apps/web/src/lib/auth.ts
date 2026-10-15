@@ -22,20 +22,32 @@ export async function signIn(email: string, password: string) {
   if (error) throw error;
 }
 
-export async function signUp(email: string, password: string) {
+export async function signUp(email: string, password: string, name = '') {
   if (!supabase) throw new Error('Autenticação não está configurada neste ambiente.');
-  const redirectTo = (import.meta.env.VITE_SITE_URL as string | undefined) ?? window.location.origin;
+  const redirectTo =
+    (import.meta.env.VITE_SITE_URL as string | undefined) ?? window.location.origin;
   const { error } = await supabase.auth.signUp({
     email,
     password,
-    options: { emailRedirectTo: `${redirectTo.replace(/\/$/, '')}/entrar` },
+    options: {
+      emailRedirectTo: `${redirectTo.replace(/\/$/, '')}/entrar`,
+      data: { name: name.trim() },
+    },
   });
   if (error) throw error;
 }
 
 export async function requestPasswordReset(email: string) {
   if (!supabase) throw new Error('Autenticação não está configurada neste ambiente.');
-  const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/entrar` });
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${window.location.origin}/redefinir-senha`,
+  });
+  if (error) throw error;
+}
+
+export async function updatePassword(password: string) {
+  if (!supabase) throw new Error('Autenticação indisponível.');
+  const { error } = await supabase.auth.updateUser({ password });
   if (error) throw error;
 }
 

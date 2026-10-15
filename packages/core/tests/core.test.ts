@@ -1,0 +1,153 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { createRepository, elapsedSeconds, summarize, validate, type Focus } from '../src/index.ts';
+const focus: Focus = {
+  taskId: null,
+  title: 'Ler',
+  step: 'Uma página',
+  blockers: [],
+  target: 120,
+  elapsed: 10,
+  runningSince: 1000,
+  status: 'active',
+  note: '',
+  mood: null,
+};
+test('timer reconstructs elapsed time and clamps completion', () => {
+  assert.equal(elapsedSeconds(focus, 31000), 40);
+  assert.equal(elapsedSeconds(focus, 999999), 120);
+  assert.equal(elapsedSeconds({ ...focus, runningSince: null }, 999999), 10);
+});
+test('repository rejects stale edits without erasing another record', async () => {
+  let data: string | null = null;
+  let id = 0;
+  const storage = {
+    getItem: async () => data,
+    setItem: async (_key: string, value: string) => {
+      data = value;
+    },
+  };
+  const first = createRepository(null, storage, () => String(++id));
+  const second = createRepository(null, storage, () => String(++id));
+  const record = await first.save('focus', focus);
+  await second.save('mood', { value: 3, note: '' });
+  const completed = await first.save(
+    'focus',
+    { ...focus, status: 'complete', runningSince: null },
+    record,
+  );
+  await assert.rejects(() => second.save('focus', { ...focus, note: 'stale' }, record), /mudou/);
+  const items = await first.list();
+  assert.equal(items.length, 2);
+  assert.equal(summarize(items).steps, 1);
+  assert.equal(completed.revision, 2);
+});
+test('failed storage propagates and invalid dates are rejected', async () => {
+  const repo = createRepository(
+    null,
+    {
+      getItem: async () => null,
+      setItem: async () => {
+        throw new Error('Storage full');
+      },
+    },
+    () => 'id',
+  );
+  await assert.rejects(() => repo.save('mood', { value: 4, note: '' }), /Storage full/);
+  assert.throws(
+    () =>
+      validate('task', {
+        title: 'Tarefa',
+        project: '',
+        date: '2026-02-30',
+        steps: [],
+        done: false,
+      }),
+    /data válida/,
+  );
+});
+
+test('microaction completion survives reorder, removal and repeated titles', async () => {
+  const { editSteps, toggleStep, orderedTasks, isTaskBlocked } = await import('../src/index.ts');
+  const task = {
+    title: 'Preparar',
+    project: '',
+    date: '',
+    done: false,
+    steps: ['Abrir', 'Escrever', 'Abrir'],
+    completedSteps: [1, 2],
+  };
+  assert.deepEqual(
+    editSteps(task, ['Escrever', 'Abrir', 'Abrir', 'Revisar']).completedSteps,
+    [0, 2],
+  );
+  assert.deepEqual(editSteps(task, ['Escrever']).completedSteps, [0]);
+  assert.deepEqual(toggleStep(task, 1).completedSteps, [2]);
+  assert.deepEqual(toggleStep(task, 0).completedSteps, [1, 2, 0]);
+  assert.equal(toggleStep(task, 10), task);
+  const records = [
+    {
+      id: 'done',
+      kind: 'task' as const,
+      payload: { ...task, done: true, priority: 'alta' as const },
+      revision: 1,
+      created_at: '2026-01-01',
+    },
+    { id: 'normal', kind: 'task' as const, payload: task, revision: 1, created_at: '2026-01-01' },
+    {
+      id: 'high',
+      kind: 'task' as const,
+      payload: { ...task, priority: 'alta' as const },
+      revision: 1,
+      created_at: '2026-01-02',
+    },
+  ];
+  assert.deepEqual(
+    orderedTasks(records).map((t) => t.id),
+    ['high', 'normal', 'done'],
+  );
+  const dependent = {
+    ...records[1],
+    id: 'dependent',
+    payload: { ...task, priority: 'alta' as const, dependsOn: ['normal'] },
+  };
+  assert.equal(isTaskBlocked(dependent, [...records, dependent]), true);
+  assert.deepEqual(
+    orderedTasks([...records, dependent]).map((t) => t.id),
+    ['high', 'normal', 'dependent', 'done'],
+  );
+  assert.throws(() => validate('task', { ...task, completedSteps: [3] }), /microações/);
+  let data: string | null = null;
+  const repo = createRepository(
+    null,
+    {
+      getItem: async () => data,
+      setItem: async (_key, value) => {
+        data = value;
+      },
+    },
+    () => 'task',
+  );
+  const saved = await repo.save('task', task);
+  await repo.save('task', toggleStep(task, 0), saved);
+  assert.deepEqual((await repo.list())[0].payload, { ...task, completedSteps: [1, 2, 0] });
+  await repo.remove((await repo.list())[0]);
+  assert.deepEqual(await repo.list(), []);
+});
+
+test('task recurrence and dependencies are validated', () => {
+  const task = {
+    title: 'Preparar',
+    project: '',
+    date: '',
+    done: false,
+    steps: [],
+    recurrence: 'weekly' as const,
+    dependsOn: ['first'],
+  };
+  assert.doesNotThrow(() => validate('task', task));
+  assert.throws(() => validate('task', { ...task, recurrence: 'yearly' as never }), /recorrência/);
+  assert.throws(() => validate('task', { ...task, dependsOn: ['first', 'first'] }), /dependências/);
+  assert.doesNotThrow(() => validate('project', { title: 'Trabalho', color: '#5C6B4A' }));
+  assert.throws(() => validate('project', { title: 'Trabalho', color: 'verde' }), /cor/);
+});

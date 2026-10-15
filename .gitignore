@@ -9,6 +9,15 @@ playwright-report/
 test-results/
 *.tsbuildinfo
 .DS_Store
+.expo/
+apps/mobile/android/
+apps/mobile/ios/
+.venv/
+.venv-workers/
+python_modules/
+.pytest_cache/
+__pycache__/
+*.pyc
 .vercel
 supabase/.temp
 .env*

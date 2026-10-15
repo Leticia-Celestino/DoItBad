@@ -1,0 +1,46 @@
+{
+  "expo": {
+    "name": "DoItBad",
+    "slug": "doitbad",
+    "scheme": "doitbad",
+    "version": "0.1.0",
+    "icon": "./assets/brand/icon-editorial.png",
+    "orientation": "default",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "tech.doitbad.app"
+    },
+    "android": {
+      "package": "tech.doitbad.app",
+      "icon": "./assets/brand/icon-editorial.png",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/brand/icon-editorial.png",
+        "backgroundColor": "#F4EDE1"
+      }
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#F4EDE1",
+          "image": "./assets/brand/icon-editorial.png",
+          "imageWidth": 140,
+          "resizeMode": "contain"
+        }
+      ],
+      [
+        "expo-navigation-bar",
+        {
+          "enforceContrast": false,
+          "style": "dark"
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": false
+    }
+  }
+}

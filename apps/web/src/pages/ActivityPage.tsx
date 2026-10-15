@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import type { SyntheticEvent } from 'react';
 import { listIntentions, saveIntention } from '../lib/intentions';
 import type { Intention } from '../lib/intentions';
+import { isSupabaseConfigured } from '../lib/supabase';
+import { Link } from 'react-router-dom';
 
 type LoadState = 'loading' | 'ready' | 'error';
 type SaveState = 'idle' | 'saving' | 'saved' | 'error';
@@ -66,7 +68,10 @@ export default function ActivityPage() {
           </button>
         </div>
         <p className="status" role="status" aria-live="polite">
-          {saveState === 'saved' && 'Intenção guardada neste navegador.'}
+          {saveState === 'saved' &&
+            (isSupabaseConfigured
+              ? 'Intenção guardada na sua conta.'
+              : 'Intenção guardada neste navegador.')}
           {saveState === 'error' && 'Não foi possível guardar. Tente outra vez.'}
         </p>
       </form>
@@ -76,7 +81,7 @@ export default function ActivityPage() {
         {loadState === 'loading' && <p className="empty-state">Carregando…</p>}
         {loadState === 'error' && (
           <div className="empty-state" role="alert">
-            <p>Não foi possível ler os dados locais.</p>
+            <p>Não foi possível carregar suas intenções.</p>
             <button className="text-button" onClick={() => void load()}>
               Tentar novamente
             </button>
@@ -88,7 +93,23 @@ export default function ActivityPage() {
         {loadState === 'ready' && intentions.length > 0 && (
           <ul className="intention-list">
             {intentions.map((intention) => (
-              <li key={intention.id}>{intention.title}</li>
+              <li key={intention.id}>
+                <strong>{intention.title}</strong>
+                <small>
+                  Criada em{' '}
+                  {new Date(intention.createdAt).toLocaleDateString('pt-BR', {
+                    day: '2-digit',
+                    month: '2-digit',
+                  })}
+                </small>
+                <Link
+                  className="intention-action"
+                  aria-label={`Começar: ${intention.title}`}
+                  to={`/tarefa?title=${encodeURIComponent(intention.title)}`}
+                >
+                  Dar um passo →
+                </Link>
+              </li>
             ))}
           </ul>
         )}

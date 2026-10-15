@@ -1,0 +1,18 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "doitbad-ai",
+  "main": "app/worker.py",
+  "compatibility_date": "2026-10-14",
+  "compatibility_flags": ["python_workers", "python_dedicated_snapshot"],
+  "workers_dev": true,
+  "preview_urls": false,
+  "ai": {
+    "binding": "AI"
+  },
+  "vars": {
+    "LLM_MODEL": "@cf/meta/llama-3.1-8b-instruct-fp8-fast"
+  },
+  "observability": {
+    "enabled": true
+  }
+}

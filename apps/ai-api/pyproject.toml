@@ -1,0 +1,26 @@
+[project]
+name = "doitbad-ai-api"
+version = "0.1.0"
+description = "Authenticated AI recommendations for DoItBad"
+requires-python = ">=3.13,<3.15"
+dependencies = [
+  "fastapi==0.119.1",
+  "httpx==0.28.1",
+  "pydantic-settings==2.11.0",
+]
+
+[project.optional-dependencies]
+server = ["uvicorn[standard]==0.38.0"]
+
+[dependency-groups]
+dev = [
+  "pytest==8.4.2",
+  "pytest-asyncio==1.2.0",
+  "workers-py>=1.8.0",
+  "workers-runtime-sdk>=0.1.0",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+pythonpath = ["."]

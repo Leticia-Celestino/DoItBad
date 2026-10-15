@@ -1,0 +1,15 @@
+project_id = "doitbad"
+
+[auth]
+site_url = "https://doitbad-beta.vercel.app"
+additional_redirect_urls = [
+  "https://doitbad-beta.vercel.app/entrar",
+  "https://doitbad-beta.vercel.app/redefinir-senha",
+  "http://localhost:4324/entrar",
+  "http://localhost:4324/redefinir-senha",
+  "http://127.0.0.1:4324/entrar",
+  "http://127.0.0.1:4324/redefinir-senha",
+  "http://127.0.0.1:4325/entrar",
+  "http://127.0.0.1:4325/redefinir-senha",
+  "doitbad://entrar",
+]

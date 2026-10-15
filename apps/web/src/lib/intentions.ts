@@ -16,7 +16,10 @@ function fromRemote(item: RemoteIntention): Intention {
 
 export async function listIntentions(): Promise<Intention[]> {
   if (supabase) {
-    const { data, error } = await supabase.from('intentions').select('id,title,created_at,updated_at').order('updated_at', { ascending: false });
+    const { data, error } = await supabase
+      .from('intentions')
+      .select('id,title,created_at,updated_at')
+      .order('updated_at', { ascending: false });
     if (error) throw error;
     return (data as RemoteIntention[]).map(fromRemote);
   }
@@ -29,7 +32,11 @@ export async function listIntentions(): Promise<Intention[]> {
 
 export async function saveIntention(title: string): Promise<Intention> {
   if (supabase) {
-    const { data, error } = await supabase.from('intentions').insert({ title: title.trim() }).select('id,title,created_at,updated_at').single();
+    const { data, error } = await supabase
+      .from('intentions')
+      .insert({ title: title.trim() })
+      .select('id,title,created_at,updated_at')
+      .single();
     if (error) throw error;
     return fromRemote(data as RemoteIntention);
   }
