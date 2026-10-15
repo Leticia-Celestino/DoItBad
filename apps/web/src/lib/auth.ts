@@ -16,6 +16,14 @@ export function subscribeToAuth(callback: (session: Session | null) => void) {
   return () => data.subscription.unsubscribe();
 }
 
+function publicOrigin() {
+  // Keep confirmation links on the deployment the user is currently using.
+  if (typeof window !== 'undefined' && window.location.origin) {
+    return window.location.origin;
+  }
+  return (import.meta.env.VITE_SITE_URL as string | undefined) ?? 'http://localhost:4324';
+}
+
 export async function signIn(email: string, password: string) {
   if (!supabase) throw new Error('Autenticação não está configurada neste ambiente.');
   const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -24,8 +32,7 @@ export async function signIn(email: string, password: string) {
 
 export async function signUp(email: string, password: string, name = '') {
   if (!supabase) throw new Error('Autenticação não está configurada neste ambiente.');
-  const redirectTo =
-    (import.meta.env.VITE_SITE_URL as string | undefined) ?? window.location.origin;
+  const redirectTo = publicOrigin();
   const { error } = await supabase.auth.signUp({
     email,
     password,
@@ -40,7 +47,7 @@ export async function signUp(email: string, password: string, name = '') {
 export async function requestPasswordReset(email: string) {
   if (!supabase) throw new Error('Autenticação não está configurada neste ambiente.');
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${window.location.origin}/redefinir-senha`,
+    redirectTo: `${publicOrigin()}/redefinir-senha`,
   });
   if (error) throw error;
 }

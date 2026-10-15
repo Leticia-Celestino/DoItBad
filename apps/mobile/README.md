@@ -98,9 +98,10 @@ build. Para pessoas externas, TestFlight costuma ser o fluxo mais simples.
 
 ### Website
 
-O beta publicado está em `https://web-staging-2502.up.railway.app/`. Basta compartilhar
-essa URL: não há instalação. Antes de cada rodada, teste a URL em uma janela anônima e
-confirme login, recuperação de senha e o fluxo principal com uma conta exclusiva de teste.
+O endereço do beta web deve ser o domínio configurado no deploy atual (por exemplo,
+`https://doitbad-beta.vercel.app/`). Não use URLs antigas de Railway. Antes de cada
+rodada, teste a URL em uma janela anônima e confirme login, recuperação de senha e o
+fluxo principal com uma conta exclusiva de teste.
 
 Nunca envie a chave `service_role` do Supabase para builds mobile ou para o navegador.
 
