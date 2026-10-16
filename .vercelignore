@@ -1,0 +1,37 @@
+# The beta deployment builds only apps/web plus its shared packages.
+# Keep local/native artifacts and unrelated applications out of the upload.
+node_modules/
+/dist/
+/.astro/
+/.git/
+/.github/
+/.agents/
+/.codex/
+.vercel/
+.env
+.env.*
+!.env.example
+
+/apps/mobile/
+/apps/studio/
+/apps/ai-api/
+/api/
+/docs/
+/public/
+/rive-intro/
+/scripts/
+/src/
+/supabase/
+/tests/
+/test-results/
+/playwright-report/
+/vercel.json
+
+*.pptx
+*.docx
+*.zip
+*.tsbuildinfo
+__pycache__/
+.pytest_cache/
+.venv/
+.venv-workers/
