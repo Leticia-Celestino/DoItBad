@@ -180,6 +180,9 @@ export function TasksPage() {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('open');
   const [editing, setEditing] = useState<Item<'task'> | undefined>();
+  const [editorOpen, setEditorOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(dayKey());
+  const [showAllDates, setShowAllDates] = useState(false);
   const tasks = orderedTasks(items);
   const projectItems = items.filter((item): item is Item<'project'> => item.kind === 'project');
   const projects = [
@@ -189,6 +192,58 @@ export function TasksPage() {
     ]),
   ];
   const suggested = tasks.find((task) => !task.payload.done && !isTaskBlocked(task, items));
+  const periods: DayPeriod[] = ['morning', 'afternoon', 'night', 'anytime'];
+  const weekStart = new Date(`${selectedDate}T12:00:00`);
+  weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+  const weekDays = Array.from({ length: 7 }, (_, index) => {
+    const value = new Date(weekStart);
+    value.setDate(value.getDate() + index);
+    return { key: dayKey(value), date: value };
+  });
+  const visibleTasks = tasks.filter(
+    (task) =>
+      (showAllDates || task.payload.date === selectedDate) &&
+      task.payload.title.toLocaleLowerCase().includes(search.toLocaleLowerCase()) &&
+      (filter === 'all' || task.payload.done === (filter === 'done')),
+  );
+  function resetEditor() {
+    setEditing(undefined);
+    setTitle('');
+    setProject('');
+    setSteps('');
+    setPriority('media');
+    setRecurrence('none');
+    setTimeOfDay('anytime');
+    setDependsOn('');
+    setDate(selectedDate);
+  }
+  function openNewTask(period: DayPeriod = 'anytime') {
+    resetEditor();
+    setTimeOfDay(period);
+    setEditorOpen(true);
+    window.setTimeout(() => document.getElementById('task-title')?.focus(), 0);
+  }
+  function openTaskEditor(task: Item<'task'>) {
+    setEditing(task);
+    setTitle(task.payload.title);
+    setProject(task.payload.project);
+    setPriority(task.payload.priority ?? 'media');
+    setRecurrence(task.payload.recurrence ?? 'none');
+    setTimeOfDay(task.payload.timeOfDay ?? 'anytime');
+    setDependsOn(task.payload.dependsOn?.[0] ?? '');
+    setDate(task.payload.date || selectedDate);
+    setSteps(task.payload.steps.join('\n'));
+    setEditorOpen(true);
+    window.setTimeout(() => document.getElementById('task-title')?.focus(), 0);
+  }
+  useEffect(() => {
+    if (!editorOpen) return;
+    const close = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setEditorOpen(false);
+    };
+    document.addEventListener('keydown', close);
+    return () => document.removeEventListener('keydown', close);
+  }, [editorOpen]);
   async function submit(e: FormEvent) {
     e.preventDefault();
     const projectTitle = project.trim();
@@ -232,264 +287,387 @@ export function TasksPage() {
         editing,
       )
     ) {
-      setTitle('');
-      setSteps('');
-      setEditing(undefined);
-      setPriority('media');
-      setRecurrence('none');
-      setTimeOfDay('anytime');
-      setDependsOn('');
+      setSelectedDate(date || selectedDate);
+      setShowAllDates(false);
+      setEditorOpen(false);
+      resetEditor();
     }
   }
   return (
-    <>
-      <Heading tag="Um pouco de clareza" title="Cada coisa no seu tempo.">
-        Organize o que importa e encontre um começo possível.
-      </Heading>
-      <div className="split-layout">
-        <section>
-          <article className="card next-step-card">
-            <span className="round-icon" aria-hidden="true">
-              ↗
+    <section className="tasks-timeline-page">
+      <header className="tasks-page-header">
+        <div>
+          <p className="eyebrow">Seu plano visual</p>
+          <h1>O que cabe neste dia?</h1>
+          <p>Veja o dia inteiro sem precisar organizar tudo de uma vez.</p>
+        </div>
+        <button className="button" onClick={() => openNewTask()}>
+          + Nova tarefa
+        </button>
+      </header>
+
+      <nav className="week-strip card" aria-label="Escolher dia">
+        <button
+          className="week-arrow"
+          aria-label="Semana anterior"
+          onClick={() => {
+            const previous = new Date(`${selectedDate}T12:00:00`);
+            previous.setDate(previous.getDate() - 7);
+            setSelectedDate(dayKey(previous));
+          }}
+        >
+          ←
+        </button>
+        {weekDays.map(({ key, date: weekDate }) => (
+          <button
+            key={key}
+            className="week-day"
+            aria-pressed={selectedDate === key}
+            aria-current={key === dayKey() ? 'date' : undefined}
+            onClick={() => {
+              setSelectedDate(key);
+              setShowAllDates(false);
+            }}
+          >
+            <span>
+              {weekDate.toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', '')}
             </span>
-            <div className="grow">
-              <strong>Não sei por onde começar</strong>
-              <p>
-                {suggested
-                  ? (suggested.payload.steps.find(
-                      (_, index) => !suggested.payload.completedSteps?.includes(index),
-                    ) ?? suggested.payload.title)
-                  : 'Adicione uma tarefa e encontraremos um começo possível.'}
-              </p>
-            </div>
-            <Link
-              className="button secondary"
-              to={suggested ? `/tarefa?task=${suggested.id}` : '/tarefa'}
-            >
-              {suggested ? 'Começar' : 'Criar tarefa'}
-            </Link>
-          </article>
-          <div className="filters">
-            <label className="grow">
-              Buscar tarefas
+            <strong>{weekDate.getDate()}</strong>
+          </button>
+        ))}
+        <button
+          className="week-arrow"
+          aria-label="Próxima semana"
+          onClick={() => {
+            const next = new Date(`${selectedDate}T12:00:00`);
+            next.setDate(next.getDate() + 7);
+            setSelectedDate(dayKey(next));
+          }}
+        >
+          →
+        </button>
+      </nav>
+
+      <div className="task-view-bar">
+        <div>
+          <h2>
+            {showAllDates
+              ? 'Todas as tarefas'
+              : new Date(`${selectedDate}T12:00:00`).toLocaleDateString('pt-BR', {
+                  weekday: 'long',
+                  day: 'numeric',
+                  month: 'long',
+                })}
+          </h2>
+          <small>{visibleTasks.length} coisas neste recorte</small>
+        </div>
+        <div className="segmented-control task-scope" aria-label="Escopo das tarefas">
+          <button aria-pressed={!showAllDates} onClick={() => setShowAllDates(false)}>
+            Este dia
+          </button>
+          <button aria-pressed={showAllDates} onClick={() => setShowAllDates(true)}>
+            Todas
+          </button>
+        </div>
+      </div>
+
+      {suggested && !showAllDates && selectedDate === dayKey() && (
+        <aside className="gentle-suggestion">
+          <span className="round-icon" aria-hidden="true">
+            ↗
+          </span>
+          <div className="grow">
+            <small>Se estiver difícil escolher</small>
+            <strong>
+              {suggested.payload.steps.find(
+                (_, index) => !suggested.payload.completedSteps?.includes(index),
+              ) ?? suggested.payload.title}
+            </strong>
+          </div>
+          <Link className="text-button" to={`/tarefa?task=${suggested.id}`}>
+            Começar por aqui
+          </Link>
+        </aside>
+      )}
+
+      <details className="task-tools">
+        <summary>Buscar e filtrar</summary>
+        <div className="filters card">
+          <label className="grow">
+            Buscar
+            <input
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Nome da tarefa"
+            />
+          </label>
+          <label>
+            Mostrar
+            <select value={filter} onChange={(event) => setFilter(event.target.value)}>
+              <option value="open">Em aberto</option>
+              <option value="done">Concluídas</option>
+              <option value="all">Todas</option>
+            </select>
+          </label>
+        </div>
+      </details>
+
+      <div className="daily-task-timeline">
+        {periods.map((period) => {
+          const periodTasks = visibleTasks.filter(
+            (task) => (task.payload.timeOfDay ?? 'anytime') === period,
+          );
+          return (
+            <section className={`task-period task-period-${period}`} key={period}>
+              <header>
+                <span className="period-mark" aria-hidden="true" />
+                <div className="grow">
+                  <h2>{dayPeriodLabels[period]}</h2>
+                  <small>
+                    {period === 'morning'
+                      ? 'Um começo calmo para o dia.'
+                      : period === 'afternoon'
+                        ? 'O que pode continuar depois.'
+                        : period === 'night'
+                          ? 'Só o que ainda fizer sentido.'
+                          : 'Sem hora marcada, sem pressão.'}
+                  </small>
+                </div>
+                <span className="period-count">{periodTasks.length}</span>
+                <button
+                  className="period-add"
+                  aria-label={`Adicionar em ${dayPeriodLabels[period]}`}
+                  onClick={() => openNewTask(period)}
+                >
+                  +
+                </button>
+              </header>
+              <div className="period-list">
+                {periodTasks.length ? (
+                  periodTasks.map((task) => {
+                    const blocked = isTaskBlocked(task, items);
+                    const projectItem = projectItems.find(
+                      (item) => item.id === task.payload.projectId,
+                    );
+                    return (
+                      <article
+                        className={`timeline-task ${blocked ? 'blocked' : ''}`}
+                        key={task.id}
+                      >
+                        <input
+                          type="checkbox"
+                          aria-label={`Concluir ${task.payload.title}`}
+                          checked={task.payload.done}
+                          disabled={busy || (blocked && !task.payload.done)}
+                          onChange={() =>
+                            void save('task', { ...task.payload, done: !task.payload.done }, task)
+                          }
+                        />
+                        <div className="grow">
+                          <strong className={task.payload.done ? 'done' : ''}>
+                            {task.payload.title}
+                          </strong>
+                          <div className="task-quiet-meta">
+                            {task.payload.project && (
+                              <span style={{ color: projectItem?.payload.color }}>
+                                {task.payload.project}
+                              </span>
+                            )}
+                            {showAllDates && task.payload.date && (
+                              <span>
+                                {new Date(`${task.payload.date}T12:00:00`).toLocaleDateString(
+                                  'pt-BR',
+                                  { day: 'numeric', month: 'short' },
+                                )}
+                              </span>
+                            )}
+                            {task.payload.steps.length > 0 && (
+                              <span>
+                                {task.payload.completedSteps?.length ?? 0}/
+                                {task.payload.steps.length} passos
+                              </span>
+                            )}
+                            {blocked && <span>Depois de outra tarefa</span>}
+                          </div>
+                          {task.payload.steps.length > 0 && (
+                            <details className="task-steps-details">
+                              <summary>Ver pequenos passos</summary>
+                              <MicroSteps task={task} />
+                            </details>
+                          )}
+                        </div>
+                        {!blocked && !task.payload.done && (
+                          <Link className="task-focus-link" to={`/tarefa?task=${task.id}`}>
+                            Focar
+                          </Link>
+                        )}
+                        <details className="task-row-menu">
+                          <summary aria-label={`Mais opções para ${task.payload.title}`}>
+                            •••
+                          </summary>
+                          <div>
+                            <button onClick={() => openTaskEditor(task)}>Editar</button>
+                            <button
+                              className="danger"
+                              disabled={busy}
+                              onClick={() => {
+                                if (window.confirm(`Remover “${task.payload.title}”?`))
+                                  void remove(task);
+                              }}
+                            >
+                              Remover
+                            </button>
+                          </div>
+                        </details>
+                      </article>
+                    );
+                  })
+                ) : (
+                  <button className="empty-period" onClick={() => openNewTask(period)}>
+                    <span aria-hidden="true">＋</span>
+                    <span>Nada planejado aqui. Deixe vazio ou adicione algo.</span>
+                  </button>
+                )}
+              </div>
+            </section>
+          );
+        })}
+      </div>
+
+      {editorOpen && (
+        <div className="task-editor-layer">
+          <button
+            className="task-editor-backdrop"
+            aria-label="Fechar editor"
+            onClick={() => setEditorOpen(false)}
+          />
+          <form className="task-editor" onSubmit={submit} role="dialog" aria-modal="true">
+            <header>
+              <div>
+                <p className="eyebrow">{editing ? 'Ajustar com calma' : 'Um novo começo'}</p>
+                <h2>{editing ? 'Editar tarefa' : 'Adicionar tarefa'}</h2>
+              </div>
+              <button
+                type="button"
+                className="icon-button"
+                aria-label="Fechar editor"
+                onClick={() => setEditorOpen(false)}
+              >
+                ×
+              </button>
+            </header>
+            <label>
+              O que você quer fazer?
               <input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="O que você procura?"
+                required
+                id="task-title"
+                maxLength={240}
+                value={title}
+                onChange={(event) => setTitle(event.target.value)}
+                placeholder="Uma frase já basta"
               />
             </label>
-            <label>
-              Mostrar
-              <select value={filter} onChange={(e) => setFilter(e.target.value)}>
-                <option value="open">Em aberto</option>
-                <option value="done">Concluídas</option>
-                <option value="all">Todas</option>
-              </select>
-            </label>
-          </div>
-          <div className="stack">
-            {tasks
-              .filter(
-                (t) =>
-                  t.payload.title.toLowerCase().includes(search.toLowerCase()) &&
-                  (filter === 'all' || t.payload.done === (filter === 'done')),
-              )
-              .map((t) => (
-                <article
-                  className={`card task-row ${isTaskBlocked(t, items) ? 'blocked' : ''}`}
-                  key={t.id}
+            <div className="editor-primary-grid">
+              <label>
+                Quando?
+                <input type="date" value={date} onChange={(event) => setDate(event.target.value)} />
+              </label>
+              <label>
+                Período do dia
+                <select
+                  value={timeOfDay}
+                  onChange={(event) => setTimeOfDay(event.target.value as DayPeriod)}
                 >
+                  {Object.entries(dayPeriodLabels).map(([value, label]) => (
+                    <option key={value} value={value}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+            <label>
+              Pequenos passos <span className="optional-label">opcional</span>
+              <textarea
+                value={steps}
+                onChange={(event) => setSteps(event.target.value)}
+                maxLength={2000}
+                placeholder="Abrir o documento&#10;Escrever uma frase"
+              />
+            </label>
+            <details className="editor-more">
+              <summary>Mais opções</summary>
+              <div className="stack">
+                <label>
+                  Projeto
                   <input
-                    type="checkbox"
-                    aria-label={`Concluir ${t.payload.title}`}
-                    checked={t.payload.done}
-                    disabled={busy || (isTaskBlocked(t, items) && !t.payload.done)}
-                    onChange={() => void save('task', { ...t.payload, done: !t.payload.done }, t)}
+                    value={project}
+                    maxLength={80}
+                    onChange={(event) => setProject(event.target.value)}
+                    placeholder="Pessoal, estudos, trabalho…"
+                    list="task-projects"
                   />
-                  <div className="grow">
-                    <h3>{t.payload.title}</h3>
-                    <div className="task-tags">
-                      <span>Prioridade {priorityLabels[t.payload.priority ?? 'media']}</span>
-                      {t.payload.project && (
-                        <span
-                          style={{
-                            color:
-                              projectItems.find((project) => project.id === t.payload.projectId)
-                                ?.payload.color ?? undefined,
-                          }}
-                        >
-                          {t.payload.project}
-                        </span>
-                      )}
-                      {(t.payload.recurrence ?? 'none') !== 'none' && (
-                        <span>{recurrenceLabels[t.payload.recurrence ?? 'none']}</span>
-                      )}
-                      <span>{dayPeriodLabels[t.payload.timeOfDay ?? 'anytime']}</span>
-                      {isTaskBlocked(t, items) && <span>Bloqueada por outra tarefa</span>}
-                    </div>
-                    <p>
-                      {t.payload.date
-                        ? new Date(`${t.payload.date}T12:00:00`).toLocaleDateString('pt-BR')
-                        : 'Sem data'}
-                    </p>
-                    {t.payload.steps.length > 0 && (
-                      <details>
-                        <summary>Ver pequenos passos</summary>
-                        <MicroSteps task={t} />
-                      </details>
-                    )}
-                  </div>
-                  {isTaskBlocked(t, items) ? (
-                    <span className="text-button" aria-label="Tarefa bloqueada">
-                      Bloqueada
-                    </span>
-                  ) : (
-                    <Link className="text-button" to={`/tarefa?task=${t.id}`}>
-                      Focar
-                    </Link>
-                  )}
-                  <button
-                    className="text-button"
-                    onClick={() => {
-                      setEditing(t);
-                      setTitle(t.payload.title);
-                      setProject(t.payload.project);
-                      setPriority(t.payload.priority ?? 'media');
-                      setRecurrence(t.payload.recurrence ?? 'none');
-                      setTimeOfDay(t.payload.timeOfDay ?? 'anytime');
-                      setDependsOn(t.payload.dependsOn?.[0] ?? '');
-                      setDate(t.payload.date);
-                      setSteps(t.payload.steps.join('\n'));
-                      document.getElementById('task-title')?.focus();
-                    }}
-                  >
-                    Editar
-                  </button>
-                  <button
-                    className="text-button danger"
-                    disabled={busy}
-                    onClick={() => {
-                      if (window.confirm(`Remover “${t.payload.title}”?`)) void remove(t);
-                    }}
-                  >
-                    Remover
-                  </button>
-                </article>
-              ))}
-          </div>
-          {!tasks.length && (
-            <Empty>Você ainda não adicionou tarefas. Comece com algo que caiba no seu dia.</Empty>
-          )}
-        </section>
-        <form className="card stack" onSubmit={submit}>
-          <h2>{editing ? 'Ajustar sua tarefa' : 'Uma nova tarefa'}</h2>
-          <label>
-            O que você quer fazer?
-            <input
-              required
-              id="task-title"
-              maxLength={240}
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
-          </label>
-          <label>
-            Projeto (opcional)
-            <input
-              value={project}
-              maxLength={80}
-              onChange={(e) => setProject(e.target.value)}
-              placeholder="Pessoal, estudos, trabalho…"
-              list="task-projects"
-            />
-            <datalist id="task-projects">
-              {projects.map((name) => (
-                <option key={name} value={name} />
-              ))}
-            </datalist>
-          </label>
-          <label>
-            Só faça depois de
-            <select value={dependsOn} onChange={(e) => setDependsOn(e.target.value)}>
-              <option value="">Nada — pode começar já</option>
-              {tasks
-                .filter((task) => task.id !== editing?.id && !task.payload.done)
-                .map((task) => (
-                  <option key={task.id} value={task.id}>
-                    {task.payload.title}
-                  </option>
-                ))}
-            </select>
-          </label>
-          <label>
-            Repetir
-            <select
-              value={recurrence}
-              onChange={(e) => setRecurrence(e.target.value as Recurrence)}
-            >
-              {Object.entries(recurrenceLabels).map(([value, label]) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            Período do dia
-            <select value={timeOfDay} onChange={(e) => setTimeOfDay(e.target.value as DayPeriod)}>
-              {Object.entries(dayPeriodLabels).map(([value, label]) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            Prioridade
-            <select value={priority} onChange={(e) => setPriority(e.target.value as Priority)}>
-              {Object.entries(priorityLabels).map(([value, label]) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            Quando?
-            <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
-          </label>
-          <label>
-            Pequenos passos (um por linha)
-            <textarea
-              value={steps}
-              onChange={(e) => setSteps(e.target.value)}
-              maxLength={2000}
-              placeholder="Abrir o documento&#10;Escrever uma frase"
-            />
-          </label>
-          <button className="button" disabled={busy || !title.trim()}>
-            {editing ? 'Salvar alterações' : 'Adicionar tarefa'}
-          </button>
-          {editing && (
-            <button
-              type="button"
-              className="text-button"
-              onClick={() => {
-                setEditing(undefined);
-                setTitle('');
-                setProject('');
-                setSteps('');
-                setPriority('media');
-                setRecurrence('none');
-                setDependsOn('');
-              }}
-            >
-              Cancelar edição
-            </button>
-          )}
-        </form>
-      </div>
-    </>
+                  <datalist id="task-projects">
+                    {projects.map((name) => (
+                      <option key={name} value={name} />
+                    ))}
+                  </datalist>
+                </label>
+                <div className="editor-primary-grid">
+                  <label>
+                    Prioridade
+                    <select
+                      value={priority}
+                      onChange={(event) => setPriority(event.target.value as Priority)}
+                    >
+                      {Object.entries(priorityLabels).map(([value, label]) => (
+                        <option key={value} value={value}>
+                          {label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label>
+                    Repetir
+                    <select
+                      value={recurrence}
+                      onChange={(event) => setRecurrence(event.target.value as Recurrence)}
+                    >
+                      {Object.entries(recurrenceLabels).map(([value, label]) => (
+                        <option key={value} value={value}>
+                          {label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                </div>
+                <label>
+                  Começar depois de
+                  <select value={dependsOn} onChange={(event) => setDependsOn(event.target.value)}>
+                    <option value="">Nada — pode começar já</option>
+                    {tasks
+                      .filter((task) => task.id !== editing?.id && !task.payload.done)
+                      .map((task) => (
+                        <option key={task.id} value={task.id}>
+                          {task.payload.title}
+                        </option>
+                      ))}
+                  </select>
+                </label>
+              </div>
+            </details>
+            <footer>
+              <button type="button" className="text-button" onClick={() => setEditorOpen(false)}>
+                Agora não
+              </button>
+              <button className="button" disabled={busy || !title.trim()}>
+                {editing ? 'Salvar alterações' : 'Adicionar ao dia'}
+              </button>
+            </footer>
+          </form>
+        </div>
+      )}
+    </section>
   );
 }
 export function StartPage() {
