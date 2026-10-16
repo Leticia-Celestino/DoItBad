@@ -959,7 +959,108 @@ function MicroSteps({ task }: { task: Item<'task'> }) {
   );
 }
 export function History() {
-  return <Dashboard />;
+  const { items, night } = useStore();
+  const [period, setPeriod] = useState<'Semana' | 'Mês' | 'Ano'>('Semana');
+  const cutoff = Date.now() - { Semana: 7, Mês: 30, Ano: 365 }[period] * 86400000;
+  const stats = summarize(items.filter((item) => new Date(item.created_at).getTime() >= cutoff));
+  const allSessions = summarize(items).sessions;
+  const days = new Set(allSessions.map((item) => dayKey(new Date(item.created_at))));
+  let streak = 0;
+  const cursor = new Date();
+  while (days.has(dayKey(cursor))) {
+    streak += 1;
+    cursor.setDate(cursor.getDate() - 1);
+  }
+  const started = new Set(stats.sessions.map((item) => item.payload.taskId || item.payload.title))
+    .size;
+  const goal = Math.min(100, Math.round((stats.minutes / 20) * 100));
+  return (
+    <Page>
+      <Copy style={{ fontSize: 12 }}>Cada ação conta. Mesmo as pequenas.</Copy>
+      <Title style={{ fontSize: 34, lineHeight: 39 }}>{stats.minutes} minutos</Title>
+      <Text
+        style={[s.subtitle, { marginTop: -10, color: night ? colors.nightMuted : colors.muted }]}
+      >
+        de execução
+      </Text>
+
+      <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 18 }}>
+        <Ring progress={goal / 100} label={`${goal}%`} caption="" diameter={96} />
+        <View style={{ flex: 1, gap: 4 }}>
+          <Text style={[s.subtitle, night && { color: colors.nightInk }]}>Meta do período</Text>
+          <Copy>Uma referência gentil de 20 minutos, não uma cobrança.</Copy>
+        </View>
+      </Card>
+
+      <View style={s.row} accessibilityRole="radiogroup">
+        {(['Semana', 'Mês', 'Ano'] as const).map((value) => (
+          <Pressable
+            key={value}
+            accessibilityRole="radio"
+            accessibilityState={{ selected: period === value }}
+            onPress={() => setPeriod(value)}
+            style={[s.pill, { flexGrow: 1 }, choiceState(night, period === value)]}
+          >
+            <Text
+              style={[s.text, { textAlign: 'center', color: night ? colors.nightInk : colors.ink }]}
+            >
+              {value}
+            </Text>
+          </Pressable>
+        ))}
+      </View>
+
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
+        {[
+          ['Passos dados', stats.steps],
+          ['Minutos focados', stats.minutes],
+          ['Tarefas iniciadas', started],
+          ['Sequência atual', `${streak} dias`],
+        ].map(([label, value]) => (
+          <Card key={label} style={{ width: '48%', flexGrow: 1, padding: 16, gap: 6 }}>
+            <Copy style={{ fontSize: 11 }}>{label}</Copy>
+            <Text
+              style={[s.subtitle, { fontSize: 23, color: night ? colors.nightInk : colors.ink }]}
+            >
+              {value}
+            </Text>
+          </Card>
+        ))}
+      </View>
+
+      <View style={s.row}>
+        <Button variant="outline" onPress={() => go('/desafios')}>
+          Desafios
+        </Button>
+        <Button variant="outline" onPress={() => go('/zen')}>
+          Modo zen
+        </Button>
+        <Button variant="outline" onPress={() => go('/retomada')}>
+          Retomar
+        </Button>
+      </View>
+
+      <Text style={[s.subtitle, night && { color: colors.nightInk }]}>Seus passos recentes</Text>
+      {!stats.sessions.length ? (
+        <Card>
+          <Copy>Seu primeiro passo vai aparecer aqui.</Copy>
+        </Card>
+      ) : (
+        stats.sessions
+          .slice(0, 8)
+          .map((item) => (
+            <ListRow
+              key={item.id}
+              icon="check"
+              title={item.payload.title}
+              meta={`${formatTime(item.payload.elapsed)} · ${new Date(item.created_at).toLocaleDateString('pt-BR')}`}
+              onPress={() => go(`/conclusao?id=${item.id}`)}
+            />
+          ))
+      )}
+      <Button onPress={() => go('/tarefa')}>Novo desafio de 2 minutos</Button>
+    </Page>
+  );
 }
 export function More() {
   const [error, setError] = useState('');
