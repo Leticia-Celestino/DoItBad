@@ -27,7 +27,14 @@ import {
   presenceDays,
 } from '@doitbad/core';
 import { useWorkspace } from '../lib/workspace';
-import { getSession } from '../lib/auth';
+import { getSession, updateProfileName } from '../lib/auth';
+import {
+  getPreferences,
+  preferencesEvent,
+  savePreferences,
+  type Preferences,
+  type ThemePreference,
+} from '../lib/preferences';
 import { acceptRecommendation, recommendNextStep } from '../lib/ai';
 import Garden from '../components/Garden';
 import Ambience from '../components/Ambience';
@@ -55,10 +62,17 @@ function Empty({ children }: { children: ReactNode }) {
 export function Dashboard() {
   const { items } = useWorkspace();
   const [name, setName] = useState('você');
+  const [preferences, setPreferences] = useState(getPreferences);
   useEffect(() => {
     void getSession().then((session) =>
       setName(firstName(String(session?.user.user_metadata?.name ?? ''), session?.user.email)),
     );
+  }, []);
+  useEffect(() => {
+    const update = (event: Event) =>
+      setPreferences((event as CustomEvent<Preferences>).detail ?? getPreferences());
+    window.addEventListener(preferencesEvent, update);
+    return () => window.removeEventListener(preferencesEvent, update);
   }, []);
   const stats = summarize(items);
   const active = items.find(
@@ -74,7 +88,7 @@ export function Dashboard() {
           day: 'numeric',
           month: 'long',
         })}
-        title={`${greetingForHour()}, ${name}.`}
+        title={`${preferences.contextualGreeting ? greetingForHour() : 'Olá'}, ${name}.`}
       >
         Seu ritmo. Seu próximo passo. Não precisa fazer tudo hoje.
       </Heading>
@@ -685,7 +699,7 @@ export function StartPage() {
     task?.payload.steps.find((_, i) => !task.payload.completedSteps?.includes(i)) ?? '',
   );
   const [blockers, setBlockers] = useState<string[]>([]);
-  const [duration, setDuration] = useState(2);
+  const [duration, setDuration] = useState(() => getPreferences().focusMinutes);
   const [recommendationBusy, setRecommendationBusy] = useState(false);
   const [recommendationId, setRecommendationId] = useState<string | null>(null);
   const [createdTask, setCreatedTask] = useState<Item<'task'> | null>(null);
@@ -1626,7 +1640,7 @@ export function StatsPage() {
 export function ZenPage() {
   const { save, busy } = useWorkspace();
   const nav = useNavigate();
-  const [minutes, setMinutes] = useState(5);
+  const [minutes, setMinutes] = useState(() => getPreferences().focusMinutes);
   return (
     <section className="zen-panel">
       <Ambience />
@@ -1665,6 +1679,204 @@ export function ZenPage() {
       >
         Começar meu momento
       </button>
+    </section>
+  );
+}
+
+export function SettingsPage() {
+  const [preferences, setPreferences] = useState(getPreferences);
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [profileMessage, setProfileMessage] = useState('');
+  useEffect(() => {
+    void getSession().then((session) => {
+      setName(String(session?.user.user_metadata?.name ?? ''));
+      setEmail(session?.user.email ?? '');
+    });
+  }, []);
+  function updatePreferences(next: Partial<Preferences>) {
+    const value = { ...preferences, ...next };
+    setPreferences(value);
+    savePreferences(value);
+  }
+  return (
+    <section className="settings-page">
+      <Heading tag="Seu espaço, do seu jeito" title="Configurações">
+        Ajustes simples para o DoItBad acompanhar seu ritmo sem criar mais cobrança.
+      </Heading>
+      <div className="settings-layout">
+        <nav className="settings-index" aria-label="Seções de configurações">
+          <a href="#perfil">Perfil</a>
+          <a href="#aparencia">Aparência</a>
+          <a href="#foco">Foco e som</a>
+          <a href="#privacidade">Dados e privacidade</a>
+        </nav>
+        <div className="settings-sections">
+          <section className="card settings-card" id="perfil">
+            <header>
+              <div>
+                <p className="eyebrow">Perfil</p>
+                <h2>Como podemos chamar você?</h2>
+              </div>
+              <span className="settings-icon" aria-hidden="true">
+                ☺
+              </span>
+            </header>
+            <form
+              className="stack"
+              onSubmit={async (event) => {
+                event.preventDefault();
+                setSavingProfile(true);
+                setProfileMessage('');
+                try {
+                  await updateProfileName(name);
+                  setProfileMessage('Nome atualizado. Que bom ter você por aqui.');
+                } catch {
+                  setProfileMessage('Não foi possível atualizar agora. Tente novamente.');
+                } finally {
+                  setSavingProfile(false);
+                }
+              }}
+            >
+              <label>
+                Seu nome
+                <input
+                  value={name}
+                  maxLength={80}
+                  onChange={(event) => setName(event.target.value)}
+                />
+              </label>
+              <label>
+                E-mail da conta
+                <input value={email} disabled readOnly />
+              </label>
+              <div className="settings-action-row">
+                <button className="button" disabled={savingProfile || !name.trim()}>
+                  {savingProfile ? 'Salvando…' : 'Salvar nome'}
+                </button>
+                {profileMessage && <p role="status">{profileMessage}</p>}
+              </div>
+            </form>
+          </section>
+
+          <section className="card settings-card" id="aparencia">
+            <header>
+              <div>
+                <p className="eyebrow">Aparência</p>
+                <h2>Uma luz confortável para você.</h2>
+              </div>
+              <span className="settings-icon" aria-hidden="true">
+                ☾
+              </span>
+            </header>
+            <fieldset className="preference-options">
+              <legend>Tema</legend>
+              {(
+                [
+                  ['light', 'Claro', 'Creme e superfícies quentes'],
+                  ['dark', 'Noturno', 'Verde profundo e contraste suave'],
+                  ['system', 'Do dispositivo', 'Acompanha o sistema automaticamente'],
+                ] as [ThemePreference, string, string][]
+              ).map(([value, label, description]) => (
+                <label className="preference-choice" key={value}>
+                  <input
+                    type="radio"
+                    name="theme"
+                    value={value}
+                    checked={preferences.theme === value}
+                    onChange={() => updatePreferences({ theme: value })}
+                  />
+                  <span>
+                    <strong>{label}</strong>
+                    <small>{description}</small>
+                  </span>
+                </label>
+              ))}
+            </fieldset>
+            <label className="setting-toggle">
+              <span>
+                <strong>Saudação pelo horário</strong>
+                <small>Usar “Bom dia”, “Boa tarde” ou “Boa noite”.</small>
+              </span>
+              <input
+                type="checkbox"
+                checked={preferences.contextualGreeting}
+                onChange={(event) =>
+                  updatePreferences({ contextualGreeting: event.target.checked })
+                }
+              />
+            </label>
+          </section>
+
+          <section className="card settings-card" id="foco">
+            <header>
+              <div>
+                <p className="eyebrow">Foco e som</p>
+                <h2>Começar com o tamanho certo.</h2>
+              </div>
+              <span className="settings-icon" aria-hidden="true">
+                ◷
+              </span>
+            </header>
+            <fieldset className="compact-options">
+              <legend>Duração sugerida para novos focos</legend>
+              {[2, 5, 10, 15, 25].map((minutes) => (
+                <button
+                  type="button"
+                  key={minutes}
+                  aria-pressed={preferences.focusMinutes === minutes}
+                  onClick={() => updatePreferences({ focusMinutes: minutes })}
+                >
+                  {minutes} min
+                </button>
+              ))}
+            </fieldset>
+            <label className="volume-setting">
+              <span>
+                <strong>Volume dos sons suaves</strong>
+                <small>O som só começa quando você pedir.</small>
+              </span>
+              <span className="volume-control">
+                <input
+                  type="range"
+                  min="0"
+                  max="0.6"
+                  step="0.05"
+                  value={preferences.soundVolume}
+                  onChange={(event) =>
+                    updatePreferences({ soundVolume: Number(event.target.value) })
+                  }
+                />
+                <output>{Math.round(preferences.soundVolume * 100)}%</output>
+              </span>
+            </label>
+          </section>
+
+          <section className="card settings-card" id="privacidade">
+            <header>
+              <div>
+                <p className="eyebrow">Dados e privacidade</p>
+                <h2>Seu espaço continua sendo seu.</h2>
+              </div>
+              <span className="settings-icon" aria-hidden="true">
+                ◇
+              </span>
+            </header>
+            <p>
+              Suas tarefas, sessões e registros ficam ligados à sua conta para sincronizar web e
+              aplicativo.
+            </p>
+            <div className="privacy-note">
+              <strong>Excluir dados</strong>
+              <p>
+                Para evitar uma exclusão acidental, o fluxo definitivo de remoção da conta será
+                confirmado em uma etapa protegida.
+              </p>
+            </div>
+          </section>
+        </div>
+      </div>
     </section>
   );
 }

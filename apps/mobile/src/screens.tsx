@@ -962,6 +962,7 @@ export function More() {
           ['estatisticas', 'Estatísticas emocionais', 'chart', 'Conheça seus padrões'],
           ['retomada', 'Retomar', 'heart', 'Seu fio da meada está aqui'],
           ['zen', 'Modo zen', 'moon', 'Um espaço tranquilo para você'],
+          ['configuracoes', 'Configurações', 'person', 'Perfil, aparência, foco e privacidade'],
         ] as const
       ).map(([path, title, icon, meta]) => (
         <ListRow key={path} title={title} icon={icon} meta={meta} onPress={() => go(`/${path}`)} />
@@ -996,6 +997,12 @@ function Start() {
   );
   const [blockers, setBlockers] = useState<string[]>([]);
   const [minutes, setMinutes] = useState(2);
+  useEffect(() => {
+    void AsyncStorage.getItem('doitbad:focus-minutes').then((value) => {
+      const saved = Number(value);
+      if ([2, 5, 10, 15, 25].includes(saved)) setMinutes(saved);
+    });
+  }, []);
   useEffect(() => {
     const listener = BackHandler.addEventListener('hardwareBackPress', () => {
       if (stage > 0) {
@@ -1609,7 +1616,137 @@ export function Detail({ screen, embedded = false }: { screen: string; embedded?
   if (screen === 'foco') return <Timer />;
   if (screen === 'conclusao') return <Done />;
   if (screen === 'intencoes') return <Intentions />;
+  if (screen === 'configuracoes') return <Settings />;
   return <Explore screen={screen} embedded={embedded} />;
+}
+
+function Settings() {
+  const { session, night, toggleNight } = useStore();
+  const [name, setName] = useState(String(session?.user.user_metadata?.name ?? ''));
+  const [focusMinutes, setFocusMinutes] = useState(2);
+  const [soundVolume, setSoundVolume] = useState(25);
+  const [message, setMessage] = useState('');
+  const [saving, setSaving] = useState(false);
+  useEffect(() => {
+    void Promise.all([
+      AsyncStorage.getItem('doitbad:focus-minutes'),
+      AsyncStorage.getItem('doitbad:sound-volume'),
+    ]).then(([focus, volume]) => {
+      if ([2, 5, 10, 15, 25].includes(Number(focus))) setFocusMinutes(Number(focus));
+      if ([0, 15, 25, 40].includes(Number(volume))) setSoundVolume(Number(volume));
+    });
+  }, []);
+  return (
+    <Page back navigation>
+      <Copy style={{ fontSize: 12 }}>Seu espaço, do seu jeito</Copy>
+      <Title>Configurações</Title>
+      <Copy>Ajustes simples para o DoItBad acompanhar seu ritmo.</Copy>
+
+      <Card>
+        <Pill>Perfil</Pill>
+        <Title style={{ fontSize: 23, lineHeight: 29 }}>Como podemos chamar você?</Title>
+        <Field label="Seu nome" value={name} maxLength={80} onChangeText={setName} />
+        <Field label="E-mail da conta" value={session?.user.email ?? ''} editable={false} />
+        <Button
+          disabled={saving || !name.trim()}
+          onPress={async () => {
+            setSaving(true);
+            setMessage('');
+            try {
+              const result = await supabase?.auth.updateUser({ data: { name: name.trim() } });
+              if (result?.error) throw result.error;
+              setMessage('Nome atualizado. Que bom ter você por aqui.');
+            } catch {
+              setMessage('Não foi possível atualizar agora.');
+            } finally {
+              setSaving(false);
+            }
+          }}
+        >
+          {saving ? 'Salvando…' : 'Salvar nome'}
+        </Button>
+        {!!message && <Copy>{message}</Copy>}
+      </Card>
+
+      <Card>
+        <Pill>Aparência</Pill>
+        <Title style={{ fontSize: 23, lineHeight: 29 }}>Uma luz confortável para você.</Title>
+        <Copy>A paleta creme ou a noite verde profunda seguem a mesma identidade do DoItBad.</Copy>
+        <View style={s.row}>
+          {['Claro', 'Noturno'].map((label, index) => {
+            const selected = night === Boolean(index);
+            return (
+              <Pressable
+                key={label}
+                accessibilityRole="radio"
+                accessibilityState={{ selected }}
+                style={[s.pill, choiceState(night, selected)]}
+                onPress={() => selected || toggleNight()}
+              >
+                <Text style={[s.text, { color: night ? colors.nightInk : colors.ink }]}>
+                  {label}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+      </Card>
+
+      <Card>
+        <Pill>Foco e som</Pill>
+        <Title style={{ fontSize: 23, lineHeight: 29 }}>Começar com o tamanho certo.</Title>
+        <Copy>Duração sugerida para um novo foco</Copy>
+        <View style={s.row}>
+          {[2, 5, 10, 15, 25].map((value) => (
+            <Pressable
+              key={value}
+              accessibilityRole="radio"
+              accessibilityState={{ selected: focusMinutes === value }}
+              style={[s.pill, choiceState(night, focusMinutes === value)]}
+              onPress={() => {
+                setFocusMinutes(value);
+                void AsyncStorage.setItem('doitbad:focus-minutes', String(value));
+              }}
+            >
+              <Text style={[s.text, { color: night ? colors.nightInk : colors.ink }]}>
+                {value} min
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+        <Copy>Volume dos sons suaves</Copy>
+        <View style={s.row}>
+          {[0, 15, 25, 40].map((value) => (
+            <Pressable
+              key={value}
+              accessibilityRole="radio"
+              accessibilityState={{ selected: soundVolume === value }}
+              style={[s.pill, choiceState(night, soundVolume === value)]}
+              onPress={() => {
+                setSoundVolume(value);
+                void AsyncStorage.setItem('doitbad:sound-volume', String(value));
+              }}
+            >
+              <Text style={[s.text, { color: night ? colors.nightInk : colors.ink }]}>
+                {value === 0 ? 'Sem som' : `${value}%`}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+      </Card>
+
+      <Card>
+        <Pill>Dados e privacidade</Pill>
+        <Title style={{ fontSize: 23, lineHeight: 29 }}>Seu espaço continua sendo seu.</Title>
+        <Copy>
+          Suas tarefas, sessões e registros ficam ligados à conta para sincronizar web e aplicativo.
+        </Copy>
+        <Copy>
+          A exclusão definitiva terá uma confirmação protegida para evitar perdas acidentais.
+        </Copy>
+      </Card>
+    </Page>
+  );
 }
 function Explore({ screen, embedded = false }: { screen: string; embedded?: boolean }) {
   const { items, events, save, busy, night } = useStore();

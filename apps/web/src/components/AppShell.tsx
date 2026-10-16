@@ -3,6 +3,13 @@ import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { signOut } from '../lib/auth';
 import { isSupabaseConfigured } from '../lib/supabase';
 import { useWorkspace } from '../lib/workspace';
+import {
+  getPreferences,
+  prefersNight,
+  preferencesEvent,
+  savePreferences,
+  type Preferences,
+} from '../lib/preferences';
 
 const links = [
   ['/atividade', '⌂', 'Meu espaço'],
@@ -16,13 +23,15 @@ const links = [
   ['/estatisticas', '↗', 'Como me sinto'],
   ['/retomada', '☾', 'Retomar'],
   ['/zen', '❋', 'Modo zen'],
+  ['/configuracoes', '⚙', 'Configurações'],
 ];
 
 export default function AppShell() {
   const [open, setOpen] = useState(false);
   const [error, setError] = useState('');
   const [keyboardOpen, setKeyboardOpen] = useState(false);
-  const [night, setNight] = useState(() => localStorage.getItem('doitbad:night') === '1');
+  const [preferences, setPreferences] = useState(getPreferences);
+  const [night, setNight] = useState(() => prefersNight(getPreferences().theme));
   const { loading, ready, error: dataError, reload, busy } = useWorkspace();
   const location = useLocation();
   useEffect(() => {
@@ -53,8 +62,20 @@ export default function AppShell() {
     document.getElementById('conteudo')?.focus();
   }, [location.pathname]);
   useEffect(() => {
-    localStorage.setItem('doitbad:night', night ? '1' : '0');
-  }, [night]);
+    const update = (event?: Event) => {
+      const next = event instanceof CustomEvent ? (event.detail as Preferences) : getPreferences();
+      setPreferences(next);
+      setNight(prefersNight(next.theme));
+    };
+    const media = matchMedia('(prefers-color-scheme: dark)');
+    const systemUpdate = () => preferences.theme === 'system' && setNight(media.matches);
+    window.addEventListener(preferencesEvent, update);
+    media.addEventListener('change', systemUpdate);
+    return () => {
+      window.removeEventListener(preferencesEvent, update);
+      media.removeEventListener('change', systemUpdate);
+    };
+  }, [preferences.theme]);
   return (
     <div className={`app-frame ${night ? 'night-theme' : ''}`}>
       <a className="skip-link" href="#conteudo">
@@ -115,7 +136,7 @@ export default function AppShell() {
               className="icon-button theme-toggle"
               aria-label={night ? 'Ativar modo claro' : 'Ativar modo noturno'}
               aria-pressed={night}
-              onClick={() => setNight((value) => !value)}
+              onClick={() => savePreferences({ ...preferences, theme: night ? 'light' : 'dark' })}
             >
               <span aria-hidden="true">{night ? '☀' : '☾'}</span>
             </button>

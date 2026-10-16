@@ -16,6 +16,7 @@ import {
   RecoveryPage,
   StatsPage,
   ZenPage,
+  SettingsPage,
   WelcomePage,
   SplashPage,
 } from './pages/ProductPages';
@@ -102,6 +103,7 @@ export default function App() {
         <Route path="/retomada" element={<RecoveryPage />} />
         <Route path="/estatisticas" element={<StatsPage />} />
         <Route path="/zen" element={<ZenPage />} />
+        <Route path="/configuracoes" element={<SettingsPage />} />
         <Route path="/historico" element={<HistoryPage />} />
         <Route path="/pequenos-comecos" element={<SmallBeginningsPage />} />
       </Route>

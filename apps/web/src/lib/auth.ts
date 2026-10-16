@@ -58,6 +58,12 @@ export async function updatePassword(password: string) {
   if (error) throw error;
 }
 
+export async function updateProfileName(name: string) {
+  if (!supabase) return;
+  const { error } = await supabase.auth.updateUser({ data: { name: name.trim() } });
+  if (error) throw error;
+}
+
 export async function signOut() {
   if (!supabase) return;
   const { error } = await supabase.auth.signOut();

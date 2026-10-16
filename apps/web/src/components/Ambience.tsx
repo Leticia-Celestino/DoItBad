@@ -1,12 +1,23 @@
 import { useEffect, useRef, useState } from 'react';
 import sound from '../../../../packages/assets/zen.wav?url';
+import { getPreferences, preferencesEvent, type Preferences } from '../lib/preferences';
 export default function Ambience() {
   const audio = useRef<HTMLAudioElement>(null);
   const [enabled, setEnabled] = useState(false);
   const [error, setError] = useState('');
+  const [volume, setVolume] = useState(() => getPreferences().soundVolume);
   useEffect(() => {
     const element = audio.current;
     return () => element?.pause();
+  }, []);
+  useEffect(() => {
+    const update = (event: Event) => {
+      const next = (event as CustomEvent<Preferences>).detail ?? getPreferences();
+      setVolume(next.soundVolume);
+      if (audio.current) audio.current.volume = next.soundVolume;
+    };
+    window.addEventListener(preferencesEvent, update);
+    return () => window.removeEventListener(preferencesEvent, update);
   }, []);
   return (
     <div className="ambience">
@@ -22,7 +33,7 @@ export default function Ambience() {
             setEnabled(false);
           } else {
             try {
-              audio.current.volume = 0.35;
+              audio.current.volume = volume;
               await audio.current.play();
               setEnabled(true);
               setError('');
