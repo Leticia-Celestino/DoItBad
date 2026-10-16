@@ -18,6 +18,8 @@ import {
   editSteps,
 } from '@doitbad/core';
 import { useWorkspace } from '../lib/workspace';
+import { getSession } from '../lib/auth';
+import { acceptRecommendation, recommendNextStep } from '../lib/ai';
 import Garden from '../components/Garden';
 import Ambience from '../components/Ambience';
 
@@ -447,12 +449,28 @@ export function StartPage() {
   );
   const [blockers, setBlockers] = useState<string[]>([]);
   const [duration, setDuration] = useState(2);
+  const [recommendationBusy, setRecommendationBusy] = useState(false);
+  const [recommendationId, setRecommendationId] = useState<string | null>(null);
+  const [createdTask, setCreatedTask] = useState<Item<'task'> | null>(null);
   const active = items.find(
     (i): i is Item<'focus'> => i.kind === 'focus' && i.payload.status === 'active',
   );
   async function start() {
+    const focusTask = task ?? createdTask;
+    const savedTask =
+      createdTask && step.trim()
+        ? await save(
+            'task',
+            {
+              ...createdTask.payload,
+              steps: [step.trim()],
+              completedSteps: [],
+            },
+            createdTask,
+          )
+        : focusTask;
     const result = await save('focus', {
-      taskId: task?.id ?? null,
+      taskId: savedTask?.id ?? null,
       title,
       step,
       blockers,
@@ -463,7 +481,46 @@ export function StartPage() {
       note: '',
       mood: null,
     });
-    if (result) nav(`/foco/${result.id}`);
+    if (result) {
+      const session = await getSession().catch(() => null);
+      if (session && recommendationId) void acceptRecommendation(session.access_token, recommendationId);
+      nav(`/foco/${result.id}`);
+    }
+  }
+  async function findStep() {
+    setRecommendationBusy(true);
+    try {
+      let candidate = task ?? createdTask;
+      if (!candidate && title.trim()) {
+        candidate = await save('task', {
+          title: title.trim(),
+          project: '',
+          date: dayKey(),
+          done: false,
+          steps: [],
+          priority: 'media',
+          completedSteps: [],
+          dependsOn: [],
+          recurrence: 'none',
+        });
+        if (candidate) setCreatedTask(candidate);
+      }
+      const session = await getSession();
+      if (session && candidate) {
+        const recommendation = await recommendNextStep(session.access_token);
+        setStep(recommendation.microaction);
+        setRecommendationId(recommendation.id);
+        setStage(2);
+        return;
+      }
+      if (!step) setStep('Dedicar dois minutos a um primeiro rascunho');
+      setStage(2);
+    } catch {
+      if (!step) setStep('Abrir o material e escolher por onde começar');
+      setStage(2);
+    } finally {
+      setRecommendationBusy(false);
+    }
   }
   const labels = [
     'Não sei por onde começar',
@@ -532,12 +589,10 @@ export function StartPage() {
             </div>
             <button
               className="button"
-              onClick={() => {
-                if (!step) setStep('Dedicar dois minutos a um primeiro rascunho');
-                setStage(2);
-              }}
+              disabled={recommendationBusy}
+              onClick={() => void findStep()}
             >
-              Encontrar meu passo →
+              {recommendationBusy ? 'Encontrando um passo específico…' : 'Encontrar meu passo →'}
             </button>
           </>
         ) : (
