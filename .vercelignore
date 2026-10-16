@@ -1,5 +1,5 @@
-# The beta deployment builds only apps/web plus its shared packages.
-# Keep local/native artifacts and unrelated applications out of the upload.
+# Shared ignore rules must preserve the root Astro landing as well as apps/web.
+# Each Vercel project's root/build settings decide which application is built.
 node_modules/
 /dist/
 /.astro/
@@ -17,15 +17,12 @@ node_modules/
 /apps/ai-api/
 /api/
 /docs/
-/public/
 /rive-intro/
 /scripts/
-/src/
 /supabase/
 /tests/
 /test-results/
 /playwright-report/
-/vercel.json
 
 *.pptx
 *.docx
