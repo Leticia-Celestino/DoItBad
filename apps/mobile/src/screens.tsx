@@ -334,15 +334,25 @@ export function Dashboard() {
 
 export function Tasks() {
   const { items, save, remove, busy, session, night } = useStore();
+  const params = useLocalSearchParams<{ date?: string; period?: string; new?: string }>();
+  const requestedDate =
+    typeof params.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(params.date)
+      ? params.date
+      : dayKey();
+  const requestedPeriod =
+    typeof params.period === 'string' &&
+    (Object.keys(dayPeriodLabels) as DayPeriod[]).includes(params.period as DayPeriod)
+      ? (params.period as DayPeriod)
+      : 'anytime';
   const [title, setTitle] = useState('');
   const [project, setProject] = useState('');
   const [priority, setPriority] = useState<Priority>('media');
   const [recurrence, setRecurrence] = useState<Recurrence>('none');
-  const [timeOfDay, setTimeOfDay] = useState<DayPeriod>('anytime');
+  const [timeOfDay, setTimeOfDay] = useState<DayPeriod>(requestedPeriod);
   const [dependsOn, setDependsOn] = useState('');
   const [steps, setSteps] = useState('');
-  const [date, setDate] = useState(dayKey());
-  const [adding, setAdding] = useState(false);
+  const [date, setDate] = useState(requestedDate);
+  const [adding, setAdding] = useState(params.new === '1');
   const [filter, setFilter] = useState<'Todas' | 'Pendentes' | 'Concluídas'>('Todas');
   const [query, setQuery] = useState('');
   const [projectFilter, setProjectFilter] = useState('Todos');
@@ -353,6 +363,12 @@ export function Tasks() {
   const [recommendationNotice, setRecommendationNotice] = useState('');
   const tasks = orderedTasks(items);
   const projectItems = items.filter((item): item is Item<'project'> => item.kind === 'project');
+  useEffect(() => {
+    if (params.new !== '1') return;
+    setDate(requestedDate);
+    setTimeOfDay(requestedPeriod);
+    setAdding(true);
+  }, [params.new, requestedDate, requestedPeriod]);
   return (
     <Page>
       <Copy style={{ fontSize: 12 }}>Por ordem de prioridade</Copy>
@@ -1919,10 +1935,24 @@ function Explore({ screen, embedded = false }: { screen: string; embedded?: bool
           const periodTasks = selectedTasks.filter(
             (task) => (task.payload.timeOfDay ?? 'anytime') === period,
           );
-          if (!periodTasks.length) return null;
           return (
             <View key={period} style={{ gap: 10, marginTop: 8 }}>
-              <Text style={s.eyebrow}>{dayPeriodLabels[period]}</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                <Text style={[s.eyebrow, { flex: 1 }]}>{dayPeriodLabels[period]}</Text>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={`Adicionar em ${dayPeriodLabels[period]}`}
+                  onPress={() => go(`/tarefas?date=${date}&period=${period}&new=1`)}
+                  style={{
+                    minWidth: 44,
+                    minHeight: 44,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Icon name="plus" size={18} />
+                </Pressable>
+              </View>
               {periodTasks.map((t) => (
                 <Card key={t.id} style={{ paddingHorizontal: 16, paddingVertical: 13 }}>
                   <Pressable
@@ -2009,10 +2039,14 @@ function Explore({ screen, embedded = false }: { screen: string; embedded?: bool
                   </Pressable>
                 </Card>
               ))}
+              {!periodTasks.length && (
+                <Card style={{ paddingHorizontal: 16, paddingVertical: 13 }}>
+                  <Copy>Espaço livre para o que couber.</Copy>
+                </Card>
+              )}
             </View>
           );
         })}
-        {!selectedTasks.length && <Copy>Um dia com espaço. Você decide o que cabe aqui.</Copy>}
         <Button variant="text" onPress={() => go('/tarefas')}>
           Voltar para a lista
         </Button>

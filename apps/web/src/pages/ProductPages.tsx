@@ -183,19 +183,29 @@ export function Dashboard() {
 }
 export function TasksPage() {
   const { items, save, remove, busy } = useWorkspace();
+  const query = new URLSearchParams(window.location.search);
+  const requestedDate = query.get('date');
+  const initialDate =
+    requestedDate && /^\d{4}-\d{2}-\d{2}$/.test(requestedDate) ? requestedDate : dayKey();
+  const requestedPeriod = query.get('period');
+  const initialPeriod: DayPeriod = ['morning', 'afternoon', 'night', 'anytime'].includes(
+    requestedPeriod ?? '',
+  )
+    ? (requestedPeriod as DayPeriod)
+    : 'anytime';
   const [title, setTitle] = useState('');
   const [project, setProject] = useState('');
   const [priority, setPriority] = useState<Priority>('media');
   const [recurrence, setRecurrence] = useState<Recurrence>('none');
-  const [timeOfDay, setTimeOfDay] = useState<DayPeriod>('anytime');
+  const [timeOfDay, setTimeOfDay] = useState<DayPeriod>(initialPeriod);
   const [dependsOn, setDependsOn] = useState('');
-  const [date, setDate] = useState(dayKey());
+  const [date, setDate] = useState(initialDate);
   const [steps, setSteps] = useState('');
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('open');
   const [editing, setEditing] = useState<Item<'task'> | undefined>();
-  const [editorOpen, setEditorOpen] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(dayKey());
+  const [editorOpen, setEditorOpen] = useState(query.get('new') === '1');
+  const [selectedDate, setSelectedDate] = useState(initialDate);
   const [showAllDates, setShowAllDates] = useState(false);
   const tasks = orderedTasks(items);
   const projectItems = items.filter((item): item is Item<'project'> => item.kind === 'project');
@@ -252,6 +262,7 @@ export function TasksPage() {
   }
   useEffect(() => {
     if (!editorOpen) return;
+    window.setTimeout(() => document.getElementById('task-title')?.focus(), 0);
     const close = (event: KeyboardEvent) => {
       if (event.key === 'Escape') setEditorOpen(false);
     };
@@ -1358,10 +1369,17 @@ export function CalendarPage() {
             const periodTasks = selectedTasks.filter(
               (t) => (t.payload.timeOfDay ?? 'anytime') === period,
             );
-            if (!periodTasks.length) return null;
             return (
               <section className="agenda-period" key={period}>
-                <p className="eyebrow">{dayPeriodLabels[period]}</p>
+                <header>
+                  <p className="eyebrow">{dayPeriodLabels[period]}</p>
+                  <Link
+                    aria-label={`Adicionar em ${dayPeriodLabels[period]}`}
+                    to={`/tarefas?date=${selected}&period=${period}&new=1`}
+                  >
+                    +
+                  </Link>
+                </header>
                 {periodTasks.map((t) => (
                   <div className="micro-step" key={t.id}>
                     <input
@@ -1380,10 +1398,12 @@ export function CalendarPage() {
                     )}
                   </div>
                 ))}
+                {!periodTasks.length && (
+                  <p className="agenda-empty">Espaço livre para o que couber.</p>
+                )}
               </section>
             );
           })}
-          {!selectedTasks.length && <p>Um dia com espaço. Você decide o que cabe aqui.</p>}
           <Link className="button secondary" to="/tarefas">
             Organizar tarefas
           </Link>

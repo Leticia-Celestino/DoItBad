@@ -2029,8 +2029,31 @@ textarea {
   padding-top: 14px;
   border-top: 1px solid var(--line);
 }
+.agenda-period > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.agenda-period > header a {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  color: var(--sage);
+  text-decoration: none;
+}
 .agenda-period .eyebrow {
   margin: 0 0 4px;
+}
+.agenda-empty {
+  margin: 2px 0 0;
+  padding: 11px 13px;
+  border-radius: 12px;
+  background: var(--canvas-soft);
+  font-size: 0.78rem;
 }
 .micro-step:has(:checked) span {
   text-decoration: line-through;
