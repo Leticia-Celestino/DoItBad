@@ -63,36 +63,50 @@ small {
   max-width: none;
   min-height: 100dvh;
   background: var(--canvas);
+  color: var(--ink);
   box-shadow: none;
 }
 .app-frame.night-theme {
-  --canvas: #222630;
-  --surface: #2c3140;
-  --ink: #f4ede1;
-  --muted: #c9c0ac;
-  --line: #464c5d;
-  --sage: #a9b991;
-  --terracotta: #e1a080;
+  /* Keep the product dark theme aligned with the landing page palette. */
+  --canvas: #171c19;
+  --surface: #222a24;
+  --surface-raised: #293229;
+  --ink: #f4ecdc;
+  --ink-soft: #d5cdbc;
+  --muted: #b7ae9d;
+  --line: #3b463c;
+  --sage: #a8b79b;
+  --sage-soft: #364337;
+  --terracotta: #df9878;
+  --butter: #e4c77f;
+  --peach: #d99272;
+  --night-deep: #0b100e;
+  --night-ink: #f8f0df;
+  --focus: #f0b28f;
   color-scheme: dark;
 }
 .night-theme .sidebar,
 .night-theme .app-header {
-  background: #282d39;
+  background: var(--surface);
 }
 .night-theme .sidebar nav a.active,
 .night-theme .next-step-card,
-.night-theme .choice:has(:checked) {
-  background: #394235;
+.night-theme .choice:has(:checked),
+.night-theme .task-tags span,
+.night-theme .mobile-nav a.active {
+  background: var(--sage-soft);
 }
 .night-theme .sidebar nav a:hover,
-.night-theme .calendar-grid button {
-  background: #353b49;
+.night-theme .calendar-grid button,
+.night-theme .round-icon,
+.night-theme .history-metrics > div > span:first-child {
+  background: var(--surface-raised);
 }
 .night-theme .hero-panel,
 .night-theme .quiet-card,
 .night-theme .map-stop,
 .night-theme .empty-state {
-  background-color: #333947;
+  background-color: var(--surface-raised);
 }
 .theme-toggle {
   flex-shrink: 0;
@@ -1050,6 +1064,48 @@ progress {
 .navigation-scrim {
   display: none;
 }
+
+/* Dark mode uses the same earthy, high-contrast palette as the landing page. */
+.night-theme .pill {
+  background: color-mix(in srgb, var(--surface-raised) 92%, transparent);
+  color: var(--sage);
+}
+.night-theme .challenge {
+  background: linear-gradient(140deg, var(--sage-soft), var(--surface));
+}
+.night-theme .timer-ring {
+  background: conic-gradient(var(--sage) var(--progress), var(--line) 0);
+}
+.night-theme .night-panel {
+  background: var(--surface);
+  color: var(--night-ink);
+}
+.night-theme .night-panel > p,
+.night-theme .night-panel .eyebrow,
+.night-theme .night-panel > div > p {
+  color: var(--ink-soft);
+}
+.night-theme .mood-chart span {
+  background: var(--terracotta);
+}
+.night-theme .history-goal {
+  border-color: var(--peach);
+}
+.night-theme .error-banner {
+  background: #3a2924;
+  color: #f4c6ad;
+  border-color: #9a5b43;
+}
+.night-theme .navigation-scrim {
+  background: rgb(11 16 14 / 72%);
+}
+.night-theme .sidebar {
+  box-shadow: 20px 0 70px rgb(11 16 14 / 48%);
+}
+.night-theme .mobile-nav {
+  box-shadow: 0 16px 40px -20px rgb(11 16 14 / 80%);
+}
+
 .app-header {
   border-bottom: 0;
   flex-wrap: wrap;
