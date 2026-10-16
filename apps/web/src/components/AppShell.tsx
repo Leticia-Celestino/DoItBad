@@ -11,6 +11,7 @@ const links = [
   ['/mapa', '⌁', 'Meu caminho'],
   ['/intencoes', '◇', 'Intenções'],
   ['/historico', '◷', 'Histórico'],
+  ['/pequenos-comecos', '▦', 'Pequenos começos'],
   ['/desafios', '✧', 'Desafios gentis'],
   ['/estatisticas', '↗', 'Como me sinto'],
   ['/retomada', '☾', 'Retomar'],

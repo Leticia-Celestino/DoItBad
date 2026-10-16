@@ -4,7 +4,14 @@ import { createClient, type Session } from '@supabase/supabase-js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
 import * as Crypto from 'expo-crypto';
-import { createRepository, type Item, type Kind, type Payloads } from '@doitbad/core';
+import {
+  createRepository,
+  loadActivityEvents,
+  type ActivityEvent,
+  type Item,
+  type Kind,
+  type Payloads,
+} from '@doitbad/core';
 
 const url = process.env.EXPO_PUBLIC_SUPABASE_URL;
 const key = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
@@ -29,6 +36,7 @@ type Store = {
   ready: boolean;
   dataReady: boolean;
   items: Item[];
+  events: ActivityEvent[];
   error: string;
   busy: boolean;
   night: boolean;
@@ -47,6 +55,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(!supabase);
   const [dataReady, setDataReady] = useState(false);
   const [items, setItems] = useState<Item[]>([]);
+  const [events, setEvents] = useState<ActivityEvent[]>([]);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [night, setNight] = useState(false);
@@ -71,6 +80,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       const next = await repo.list();
       if (current === generation.current && started === revision.current) {
         setItems(next);
+        setEvents(await loadActivityEvents(supabase, next));
         setDataReady(true);
         setError('');
       }
@@ -97,6 +107,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         generation.current++;
         owner.current = value?.user.id ?? null;
         setItems([]);
+        setEvents([]);
         setDataReady(false);
       }
       setSession(value);
@@ -128,7 +139,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     try {
       const item = await repo.save(kind, payload, previous);
       if (current !== generation.current) return null;
-      setItems((values) => [item, ...values.filter((i) => i.id !== item.id)]);
+      const next = [item, ...items.filter((i) => i.id !== item.id)];
+      setItems(next);
+      setEvents(await loadActivityEvents(supabase, next));
       return item;
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Falha ao salvar.');
@@ -165,6 +178,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         ready,
         dataReady,
         items,
+        events,
         error,
         busy,
         night,

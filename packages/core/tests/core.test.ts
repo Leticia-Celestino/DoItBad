@@ -116,6 +116,15 @@ test('microaction completion survives reorder, removal and repeated titles', asy
     orderedTasks([...records, dependent]).map((t) => t.id),
     ['high', 'normal', 'dependent', 'done'],
   );
+  const chained = {
+    ...dependent,
+    id: 'chained',
+    payload: { ...task, priority: 'alta' as const, dependsOn: ['dependent'] },
+  };
+  assert.deepEqual(
+    orderedTasks([chained, dependent, ...records]).map((t) => t.id),
+    ['high', 'normal', 'dependent', 'chained', 'done'],
+  );
   assert.throws(() => validate('task', { ...task, completedSteps: [3] }), /microações/);
   let data: string | null = null;
   const repo = createRepository(
@@ -152,4 +161,73 @@ test('task recurrence and dependencies are validated', () => {
   assert.throws(() => validate('task', { ...task, dependsOn: ['first', 'first'] }), /dependências/);
   assert.doesNotThrow(() => validate('project', { title: 'Trabalho', color: '#5C6B4A' }));
   assert.throws(() => validate('project', { title: 'Trabalho', color: 'verde' }), /cor/);
+});
+
+test('tasks are grouped into gentle planning horizons', async () => {
+  const { groupTasksByHorizon } = await import('../src/index.ts');
+  const record = (id: string, date: string, done = false) => ({
+    id,
+    kind: 'task' as const,
+    payload: { title: id, project: '', date, done, steps: [] },
+    revision: 1,
+    created_at: '2026-10-01T12:00:00Z',
+  });
+  const groups = groupTasksByHorizon(
+    [
+      record('overdue', '2026-10-15'),
+      record('today', '2026-10-16'),
+      record('after', '2026-10-20'),
+      record('later', '2026-11-01'),
+      record('done', '2026-10-16', true),
+    ],
+    '2026-10-16',
+  );
+  assert.deepEqual(
+    groups.today.map((task) => task.id),
+    ['overdue', 'today'],
+  );
+  assert.deepEqual(
+    groups.after.map((task) => task.id),
+    ['after'],
+  );
+  assert.deepEqual(
+    groups.later.map((task) => task.id),
+    ['later'],
+  );
+});
+
+test('presence levels celebrate kinds of progress without counting volume', async () => {
+  const { activityLevel } = await import('../src/index.ts');
+  const event = (type: 'focus_started' | 'step_completed' | 'focus_completed', taskId = 'one') => ({
+    id: `${type}-${taskId}`,
+    type,
+    workspaceItemId: taskId,
+    taskId,
+    projectId: null,
+    occurredAt: '2026-10-16T12:00:00Z',
+    metadata: {},
+  });
+  assert.equal(activityLevel([]), 0);
+  assert.equal(activityLevel([event('focus_started')]), 1);
+  assert.equal(activityLevel([event('step_completed')]), 2);
+  assert.equal(activityLevel([event('focus_completed')]), 3);
+  assert.equal(activityLevel([event('focus_started'), event('step_completed', 'two')]), 4);
+});
+
+test('greetings and first names stay human without requiring profile data', async () => {
+  const { firstName, greetingForHour } = await import('../src/index.ts');
+  assert.equal(greetingForHour(8), 'Bom dia');
+  assert.equal(greetingForHour(14), 'Boa tarde');
+  assert.equal(greetingForHour(22), 'Boa noite');
+  assert.equal(firstName(' Letícia Celestino ', 'ignored@example.com'), 'Letícia');
+  assert.equal(firstName('', 'pessoa@example.com'), 'pessoa');
+  assert.equal(firstName(), 'você');
+});
+
+test('presence calendar starts on Sunday and ends today', async () => {
+  const { presenceDays } = await import('../src/index.ts');
+  const days = presenceDays([], new Date('2026-10-16T12:00:00'));
+  assert.equal(days[0].date.getDay(), 0);
+  assert.equal(days.at(-1)?.key, '2026-10-16');
+  assert.ok(days.length >= 365 && days.length <= 371);
 });

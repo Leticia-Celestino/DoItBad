@@ -18,6 +18,13 @@ import {
   orderedTasks,
   toggleStep,
   editSteps,
+  type ActivityEvent,
+  groupTasksByHorizon,
+  taskHorizonLabels,
+  type TaskHorizon,
+  firstName,
+  greetingForHour,
+  presenceDays,
 } from '@doitbad/core';
 import { useWorkspace } from '../lib/workspace';
 import { getSession } from '../lib/auth';
@@ -47,11 +54,18 @@ function Empty({ children }: { children: ReactNode }) {
 }
 export function Dashboard() {
   const { items } = useWorkspace();
+  const [name, setName] = useState('você');
+  useEffect(() => {
+    void getSession().then((session) =>
+      setName(firstName(String(session?.user.user_metadata?.name ?? ''), session?.user.email)),
+    );
+  }, []);
   const stats = summarize(items);
   const active = items.find(
     (i): i is Item<'focus'> => i.kind === 'focus' && i.payload.status === 'active',
   );
   const tasks = items.filter((i): i is Item<'task'> => i.kind === 'task' && !i.payload.done);
+  const horizons = groupTasksByHorizon(items);
   return (
     <>
       <Heading
@@ -60,9 +74,9 @@ export function Dashboard() {
           day: 'numeric',
           month: 'long',
         })}
-        title="Seu ritmo. Seu próximo passo."
+        title={`${greetingForHour()}, ${name}.`}
       >
-        Não precisa fazer tudo hoje. Há espaço para começar pequeno.
+        Seu ritmo. Seu próximo passo. Não precisa fazer tudo hoje.
       </Heading>
       <div className="dashboard-grid">
         <section className="hero-panel">
@@ -103,18 +117,36 @@ export function Dashboard() {
         </div>
       </div>
       <div className="section-title">
-        <h2>O que está no seu caminho</h2>
+        <div>
+          <span className="eyebrow">Seu dia continua daqui</span>
+          <h2>Agora, depois, quando couber.</h2>
+        </div>
         <Link to="/tarefas">Todas as tarefas →</Link>
       </div>
       {tasks.length ? (
-        <div className="card-grid">
-          {tasks.slice(0, 3).map((t) => (
-            <article className="card" key={t.id}>
-              <span className="eyebrow">{t.payload.project || 'Seu cotidiano'}</span>
-              <h3>{t.payload.title}</h3>
-              <p>{t.payload.steps.length} pequenos passos</p>
-              <Link to={`/tarefa?task=${t.id}`}>Começar →</Link>
-            </article>
+        <div className="day-horizons">
+          {(Object.keys(horizons) as TaskHorizon[]).map((horizon) => (
+            <section className={`card horizon horizon-${horizon}`} key={horizon}>
+              <div className="horizon-heading">
+                <span className="horizon-dot" aria-hidden="true" />
+                <h3>{taskHorizonLabels[horizon]}</h3>
+                <small>{horizons[horizon].length}</small>
+              </div>
+              {horizons[horizon].length ? (
+                horizons[horizon].slice(0, 3).map((task) => (
+                  <Link className="horizon-task" to={`/tarefa?task=${task.id}`} key={task.id}>
+                    <span>{task.payload.title}</span>
+                    <small>
+                      {isTaskBlocked(task, items)
+                        ? 'Esperando um passo anterior'
+                        : dayPeriodLabels[task.payload.timeOfDay ?? 'anytime']}
+                    </small>
+                  </Link>
+                ))
+              ) : (
+                <p>Há espaço aqui.</p>
+              )}
+            </section>
           ))}
         </div>
       ) : (
@@ -122,6 +154,16 @@ export function Dashboard() {
           Seu espaço está pronto. <Link to="/tarefas">Adicione sua primeira tarefa.</Link>
         </Empty>
       )}
+      <Link className="presence-invite card" to="/pequenos-comecos">
+        <span className="round-icon" aria-hidden="true">
+          ✦
+        </span>
+        <span className="grow">
+          <strong>Pequenos começos</strong>
+          <small>Veja os dias em que você esteve presente, sem sequências obrigatórias.</small>
+        </span>
+        <span aria-hidden="true">→</span>
+      </Link>
     </>
   );
 }
@@ -923,6 +965,101 @@ export function HistoryPage() {
       <Link className="button history-new" to="/tarefa">
         Novo desafio de 2 minutos
       </Link>
+    </section>
+  );
+}
+const activityLabels: Record<ActivityEvent['type'], string> = {
+  task_created: 'Tarefa acolhida',
+  task_completed: 'Tarefa concluída',
+  step_completed: 'Microação concluída',
+  focus_started: 'Foco iniciado',
+  focus_resumed: 'Foco retomado',
+  focus_completed: 'Sessão de foco concluída',
+  mood_logged: 'Como você estava foi registrado',
+};
+export function SmallBeginningsPage() {
+  const { events } = useWorkspace();
+  const [selected, setSelected] = useState(dayKey());
+  const days = presenceDays(events);
+  const selectedDay = days.find((day) => day.key === selected);
+  const selectedEvents = selectedDay?.events ?? [];
+  return (
+    <section className="presence-page">
+      <Heading tag="Pequenos começos" title="Você esteve aqui.">
+        Um mapa de presença, não uma cobrança. Pausas também fazem parte do caminho.
+      </Heading>
+      <div className="card presence-card">
+        <div className="presence-summary">
+          <div>
+            <strong>
+              {new Set(events.map((event) => dayKey(new Date(event.occurredAt)))).size}
+            </strong>
+            <span>dias em que você voltou</span>
+          </div>
+          <div className="presence-legend" aria-label="Intensidade de presença">
+            <span>Um começo</span>
+            {[1, 2, 3, 4].map((level) => (
+              <i key={level} className={`presence-cell level-${level}`} />
+            ))}
+            <span>Mais de uma frente</span>
+          </div>
+        </div>
+        <div className="presence-scroll">
+          <div className="presence-grid" aria-label="Presença nos últimos doze meses">
+            {days.map((day) => (
+              <button
+                key={day.key}
+                className={`presence-cell level-${day.level}`}
+                aria-label={`${day.date.toLocaleDateString('pt-BR')}: ${day.events.length ? `${day.events.length} registros` : 'dia de pausa'}`}
+                aria-pressed={selected === day.key}
+                title={`${day.date.toLocaleDateString('pt-BR')} · ${day.events.length ? `${day.events.length} registros` : 'Dia de pausa'}`}
+                onClick={() => setSelected(day.key)}
+              />
+            ))}
+          </div>
+        </div>
+        <p className="presence-footnote">Dias sem registro aparecem como espaço, não como falha.</p>
+      </div>
+      <div className="section-title presence-day-title">
+        <div>
+          <p className="eyebrow">O que ficou deste dia</p>
+          <h2>
+            {new Date(`${selected}T12:00:00`).toLocaleDateString('pt-BR', {
+              weekday: 'long',
+              day: 'numeric',
+              month: 'long',
+            })}
+          </h2>
+        </div>
+      </div>
+      {selectedEvents.length ? (
+        <div className="stack presence-events">
+          {selectedEvents.map((event) => (
+            <article className="card" key={event.id}>
+              <span className="round-icon" aria-hidden="true">
+                {event.type === 'mood_logged' ? '♡' : event.type.includes('focus') ? '◷' : '✓'}
+              </span>
+              <div className="grow">
+                <span className="eyebrow">{activityLabels[event.type]}</span>
+                <h3>
+                  {String(event.metadata.title ?? event.metadata.step ?? 'Um gesto de presença')}
+                </h3>
+                {Boolean(event.metadata.step && event.metadata.title) && (
+                  <p>{String(event.metadata.step)}</p>
+                )}
+                <small>
+                  {new Date(event.occurredAt).toLocaleTimeString('pt-BR', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
+                </small>
+              </div>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <Empty>Dia de pausa. Ele também pertence ao seu caminho.</Empty>
+      )}
     </section>
   );
 }

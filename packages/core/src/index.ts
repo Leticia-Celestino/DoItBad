@@ -58,7 +58,7 @@ export function isTaskBlocked(task: Item<'task'>, items: Item[]): boolean {
 }
 export function orderedTasks(items: Item[]): Item<'task'>[] {
   const rank = { alta: 0, media: 1, baixa: 2 };
-  return items
+  const base = items
     .filter((i): i is Item<'task'> => i.kind === 'task')
     .sort(
       (a, b) =>
@@ -67,6 +67,55 @@ export function orderedTasks(items: Item[]): Item<'task'>[] {
         rank[a.payload.priority ?? 'media'] - rank[b.payload.priority ?? 'media'] ||
         a.created_at.localeCompare(b.created_at),
     );
+  const tasks = new Map(base.map((task) => [task.id, task]));
+  const ordered: Item<'task'>[] = [];
+  const visiting = new Set<string>();
+  const visited = new Set<string>();
+  function visit(task: Item<'task'>) {
+    if (visited.has(task.id) || visiting.has(task.id)) return;
+    visiting.add(task.id);
+    for (const dependencyId of task.payload.dependsOn ?? []) {
+      const dependency = tasks.get(dependencyId);
+      if (dependency && !dependency.payload.done) visit(dependency);
+    }
+    visiting.delete(task.id);
+    visited.add(task.id);
+    ordered.push(task);
+  }
+  base.forEach(visit);
+  return ordered;
+}
+export function taskSequencePosition(task: Item<'task'>, items: Item[]) {
+  const related = orderedTasks(items).filter(
+    (candidate) =>
+      candidate.payload.projectId === task.payload.projectId &&
+      Boolean(candidate.payload.projectId) &&
+      !candidate.payload.done,
+  );
+  const position = related.findIndex((candidate) => candidate.id === task.id);
+  return position < 0 || related.length < 2
+    ? null
+    : { position: position + 1, total: related.length };
+}
+export type TaskHorizon = 'today' | 'after' | 'later';
+export const taskHorizonLabels: Record<TaskHorizon, string> = {
+  today: 'Hoje',
+  after: 'Depois',
+  later: 'Mais tarde',
+};
+export function groupTasksByHorizon(items: Item[], today = dayKey()) {
+  const end = new Date(`${today}T12:00:00`);
+  end.setDate(end.getDate() + 7);
+  const afterEnd = dayKey(end);
+  const groups: Record<TaskHorizon, Item<'task'>[]> = { today: [], after: [], later: [] };
+  orderedTasks(items)
+    .filter((task) => !task.payload.done)
+    .forEach((task) => {
+      if (task.payload.date && task.payload.date <= today) groups.today.push(task);
+      else if (task.payload.date && task.payload.date <= afterEnd) groups.after.push(task);
+      else groups.later.push(task);
+    });
+  return groups;
 }
 export function toggleStep(task: Task, index: number): Task {
   if (!Number.isInteger(index) || index < 0 || index >= task.steps.length) return task;
@@ -107,6 +156,23 @@ export type Focus = {
   mood: number | null;
 };
 export type Mood = { value: number; note: string };
+export type ActivityEventType =
+  | 'task_created'
+  | 'task_completed'
+  | 'step_completed'
+  | 'focus_started'
+  | 'focus_resumed'
+  | 'focus_completed'
+  | 'mood_logged';
+export type ActivityEvent = {
+  id: string;
+  type: ActivityEventType;
+  workspaceItemId: string | null;
+  taskId: string | null;
+  projectId: string | null;
+  occurredAt: string;
+  metadata: Record<string, unknown>;
+};
 export type Payloads = { task: Task; focus: Focus; mood: Mood; project: Project };
 export type Kind = keyof Payloads;
 export type Item<K extends Kind = Kind> = K extends Kind
@@ -118,6 +184,17 @@ export type Storage = {
 };
 export function dayKey(date = new Date()): string {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+}
+export function greetingForHour(
+  hour = new Date().getHours(),
+): 'Bom dia' | 'Boa tarde' | 'Boa noite' {
+  if (hour < 12) return 'Bom dia';
+  if (hour < 18) return 'Boa tarde';
+  return 'Boa noite';
+}
+export function firstName(name?: string | null, email?: string | null): string {
+  const value = name?.trim() || email?.split('@')[0].trim() || 'você';
+  return value.split(/\s+/)[0];
 }
 export function elapsedSeconds(focus: Focus, now = Date.now()): number {
   return Math.min(
@@ -146,6 +223,103 @@ export function summarize(items: Item[]) {
     minutes: Math.floor(sessions.reduce((n, i) => n + i.payload.elapsed, 0) / 60),
     days: new Set(sessions.map((i) => dayKey(new Date(i.created_at)))).size,
   };
+}
+export function deriveActivityEvents(items: Item[]): ActivityEvent[] {
+  return items.flatMap((item): ActivityEvent[] => {
+    const common = {
+      workspaceItemId: item.id,
+      occurredAt: item.created_at,
+      projectId: null,
+    };
+    if (item.kind === 'task')
+      return [
+        {
+          ...common,
+          id: `legacy-task-${item.id}`,
+          type: item.payload.done ? 'task_completed' : 'task_created',
+          taskId: item.id,
+          projectId: item.payload.projectId ?? null,
+          metadata: { title: item.payload.title, historical: true },
+        },
+      ];
+    if (item.kind === 'focus')
+      return [
+        {
+          ...common,
+          id: `legacy-focus-${item.id}`,
+          type: item.payload.status === 'complete' ? 'focus_completed' : 'focus_started',
+          taskId: item.payload.taskId,
+          metadata: {
+            title: item.payload.title,
+            step: item.payload.step,
+            seconds: item.payload.elapsed,
+            historical: true,
+          },
+        },
+      ];
+    if (item.kind === 'mood')
+      return [
+        {
+          ...common,
+          id: `legacy-mood-${item.id}`,
+          type: 'mood_logged',
+          taskId: null,
+          metadata: { value: item.payload.value, note: item.payload.note, historical: true },
+        },
+      ];
+    return [];
+  });
+}
+export async function loadActivityEvents(
+  client: SupabaseClient | null,
+  items: Item[],
+): Promise<ActivityEvent[]> {
+  if (!client) return deriveActivityEvents(items);
+  const { data, error } = await client
+    .from('activity_events')
+    .select('id,event_type,workspace_item_id,task_id,project_id,occurred_at,metadata')
+    .order('occurred_at', { ascending: false })
+    .limit(2000);
+  if (error) return deriveActivityEvents(items);
+  return (data ?? []).map((event) => ({
+    id: event.id,
+    type: event.event_type as ActivityEventType,
+    workspaceItemId: event.workspace_item_id,
+    taskId: event.task_id,
+    projectId: event.project_id,
+    occurredAt: event.occurred_at,
+    metadata: event.metadata ?? {},
+  }));
+}
+export function activityLevel(events: ActivityEvent[]): 0 | 1 | 2 | 3 | 4 {
+  if (!events.length) return 0;
+  const fronts = new Set(
+    events.map((event) => event.taskId ?? event.projectId ?? event.workspaceItemId ?? event.id),
+  );
+  if (fronts.size > 1) return 4;
+  if (events.some((event) => event.type === 'focus_completed')) return 3;
+  if (events.some((event) => ['step_completed', 'task_completed'].includes(event.type))) return 2;
+  return 1;
+}
+export function presenceDays(events: ActivityEvent[], today = new Date()) {
+  const end = new Date(today);
+  end.setHours(12, 0, 0, 0);
+  const start = new Date(end);
+  start.setDate(start.getDate() - 364);
+  start.setDate(start.getDate() - start.getDay());
+  const byDay = new Map<string, ActivityEvent[]>();
+  events.forEach((event) => {
+    const key = dayKey(new Date(event.occurredAt));
+    byDay.set(key, [...(byDay.get(key) ?? []), event]);
+  });
+  const result = [];
+  for (const cursor = new Date(start); cursor <= end; cursor.setDate(cursor.getDate() + 1)) {
+    const date = new Date(cursor);
+    const key = dayKey(date);
+    const dayEvents = byDay.get(key) ?? [];
+    result.push({ key, date, events: dayEvents, level: activityLevel(dayEvents) });
+  }
+  return result;
 }
 export function validate<K extends Kind>(kind: K, payload: Payloads[K]) {
   if (kind === 'task') {

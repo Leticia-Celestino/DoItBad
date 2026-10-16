@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Pressable, Text, View, BackHandler, Alert } from 'react-native';
+import { Pressable, Text, View, BackHandler, Alert, ScrollView } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import {
   colors,
@@ -19,6 +19,13 @@ import {
   orderedTasks,
   toggleStep,
   editSteps,
+  type ActivityEvent,
+  groupTasksByHorizon,
+  taskHorizonLabels,
+  type TaskHorizon,
+  firstName,
+  greetingForHour,
+  presenceDays,
 } from '@doitbad/core';
 import { supabase, useStore } from './store';
 import {
@@ -63,6 +70,7 @@ export function Dashboard() {
   const active = items.find(
     (i): i is Item<'focus'> => i.kind === 'focus' && i.payload.status === 'active',
   );
+  const horizons = groupTasksByHorizon(items);
   return (
     <Page contentStyle={{ paddingTop: 32, paddingHorizontal: 24 }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -101,6 +109,13 @@ export function Dashboard() {
         </View>
       </View>
       {!!signOutError && <Copy style={{ color: colors.terracotta }}>{signOutError}</Copy>}
+      <View style={{ gap: 2 }}>
+        <Text style={s.eyebrow}>{greetingForHour()}</Text>
+        <Text style={[s.subtitle, night && { color: colors.nightInk }]}>
+          {firstName(String(session?.user.user_metadata?.name ?? ''), session?.user.email)}, seu
+          próximo passo pode ser pequeno.
+        </Text>
+      </View>
       <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap' }}>
         <View style={{ flex: 1, minWidth: 150, gap: 4 }}>
           <Title style={{ fontSize: 30, lineHeight: 36, color: colors.terracotta }}>
@@ -108,8 +123,7 @@ export function Dashboard() {
           </Title>
           <Text style={[s.subtitle, night && { color: colors.nightInk }]}>de execução</Text>
           <Copy style={{ fontSize: 13, lineHeight: 20 }}>
-            Olá, {String(session?.user.user_metadata?.name || 'você').split(' ')[0]} — cada começo
-            faz parte do seu caminho.
+            Cada começo faz parte do seu caminho, no seu ritmo.
           </Copy>
         </View>
         <View style={{ gap: 4 }}>
@@ -212,6 +226,94 @@ export function Dashboard() {
           </Pressable>
         ))}
       </View>
+      <View style={{ gap: 4, marginTop: 10 }}>
+        <Text style={s.eyebrow}>Seu dia continua daqui</Text>
+        <Text style={[s.subtitle, night && { color: colors.nightInk }]}>
+          Agora, depois, quando couber.
+        </Text>
+      </View>
+      {(Object.keys(horizons) as TaskHorizon[]).map((horizon) => (
+        <Card key={horizon} style={{ gap: 0, padding: 16 }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 9,
+              paddingBottom: 11,
+              borderBottomWidth: 1,
+              borderColor: night ? colors.nightLine : colors.line,
+            }}
+          >
+            <View
+              style={{
+                width: 9,
+                height: 9,
+                borderRadius: 5,
+                backgroundColor:
+                  horizon === 'today'
+                    ? colors.terracotta
+                    : horizon === 'after'
+                      ? colors.butter
+                      : colors.sage,
+              }}
+            />
+            <Text
+              style={[
+                s.text,
+                {
+                  flex: 1,
+                  fontFamily: 'Inter_600SemiBold',
+                  color: night ? colors.nightInk : colors.ink,
+                },
+              ]}
+            >
+              {taskHorizonLabels[horizon]}
+            </Text>
+            <Copy style={{ fontSize: 11 }}>{horizons[horizon].length}</Copy>
+          </View>
+          {horizons[horizon].length ? (
+            horizons[horizon].slice(0, 3).map((task) => (
+              <Pressable
+                key={task.id}
+                accessibilityRole="button"
+                onPress={() => go(`/tarefa?task=${task.id}`)}
+                style={{
+                  minHeight: 54,
+                  justifyContent: 'center',
+                  paddingVertical: 10,
+                  borderBottomWidth: 1,
+                  borderColor: night ? colors.nightLine : colors.line,
+                }}
+              >
+                <Text
+                  style={[
+                    s.text,
+                    {
+                      color: night ? colors.nightInk : colors.ink,
+                      fontFamily: 'Inter_600SemiBold',
+                    },
+                  ]}
+                >
+                  {task.payload.title}
+                </Text>
+                <Copy style={{ fontSize: 11 }}>
+                  {isTaskBlocked(task, items)
+                    ? 'Esperando um passo anterior'
+                    : dayPeriodLabels[task.payload.timeOfDay ?? 'anytime']}
+                </Copy>
+              </Pressable>
+            ))
+          ) : (
+            <Copy style={{ fontSize: 12, paddingTop: 12 }}>Há espaço aqui.</Copy>
+          )}
+        </Card>
+      ))}
+      <ListRow
+        icon="calendar"
+        title="Pequenos começos"
+        meta="Veja os dias em que você esteve presente"
+        onPress={() => go('/pequenos-comecos')}
+      />
       <Text style={[s.text, { color: colors.ink, marginTop: 8 }]}>Sua semana</Text>
       {!stats.sessions.length && <Copy>Seu primeiro passo vai aparecer aqui.</Copy>}
       {stats.sessions.slice(0, 5).map((item) => (
@@ -852,6 +954,7 @@ export function More() {
       {(
         [
           ['historico', 'Seu histórico', 'clock', 'Todas as suas pequenas vitórias'],
+          ['pequenos-comecos', 'Pequenos começos', 'calendar', 'Os dias em que você esteve aqui'],
           ['calendario', 'Calendário', 'calendar', 'Um dia de cada vez'],
           ['mapa', 'Mapa de execução', 'flag', 'Enxergue o próximo passo'],
           ['intencoes', 'Intenções', 'leaf', 'Ideias que podem esperar'],
@@ -1509,7 +1612,7 @@ export function Detail({ screen, embedded = false }: { screen: string; embedded?
   return <Explore screen={screen} embedded={embedded} />;
 }
 function Explore({ screen, embedded = false }: { screen: string; embedded?: boolean }) {
-  const { items, save, busy, night } = useStore();
+  const { items, events, save, busy, night } = useStore();
   const [note, setNote] = useState('');
   const [mood, setMood] = useState(3);
   const [minutes, setMinutes] = useState(25);
@@ -1522,6 +1625,143 @@ function Explore({ screen, embedded = false }: { screen: string; embedded?: bool
   const active = items.find(
     (i): i is Item<'focus'> => i.kind === 'focus' && i.payload.status === 'active',
   );
+  if (screen === 'pequenos-comecos') {
+    const days = presenceDays(events);
+    const selectedEvents = days.find((day) => day.key === date)?.events ?? [];
+    const activityLabels: Record<ActivityEvent['type'], string> = {
+      task_created: 'Tarefa acolhida',
+      task_completed: 'Tarefa concluída',
+      step_completed: 'Microação concluída',
+      focus_started: 'Foco iniciado',
+      focus_resumed: 'Foco retomado',
+      focus_completed: 'Sessão de foco concluída',
+      mood_logged: 'Como você estava foi registrado',
+    };
+    const levelColors = [
+      night ? colors.nightRaised : colors.canvasSoft,
+      night ? '#354337' : '#CBD3BD',
+      night ? '#465744' : '#A5B394',
+      night ? '#64765E' : '#7D906F',
+      night ? '#8D9E84' : colors.sage,
+    ];
+    return (
+      <Page navigation={!embedded}>
+        <Copy style={{ fontSize: 12 }}>Pequenos começos</Copy>
+        <Title style={{ fontSize: 30, lineHeight: 36 }}>Você esteve aqui.</Title>
+        <Copy>Um mapa de presença, não uma cobrança. Pausas também fazem parte do caminho.</Copy>
+        <Card style={{ gap: 16 }}>
+          <View>
+            <Text
+              style={[
+                s.subtitle,
+                { fontSize: 34, lineHeight: 40, color: night ? colors.nightInk : colors.ink },
+              ]}
+            >
+              {new Set(events.map((event) => dayKey(new Date(event.occurredAt)))).size}
+            </Text>
+            <Copy style={{ fontSize: 12 }}>dias em que você voltou</Copy>
+          </View>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <View
+              accessibilityLabel="Presença nos últimos doze meses"
+              style={{ flexDirection: 'row', gap: 4 }}
+            >
+              {Array.from({ length: Math.ceil(days.length / 7) }, (_, week) => (
+                <View key={week} style={{ gap: 4 }}>
+                  {days.slice(week * 7, week * 7 + 7).map((day) => (
+                    <Pressable
+                      key={day.key}
+                      accessibilityRole="button"
+                      accessibilityLabel={`${new Date(`${day.key}T12:00:00`).toLocaleDateString('pt-BR')}: ${day.events.length ? `${day.events.length} registros` : 'dia de pausa'}`}
+                      accessibilityState={{ selected: date === day.key }}
+                      onPress={() => setDate(day.key)}
+                      style={{
+                        width: 13,
+                        height: 13,
+                        borderRadius: 4,
+                        backgroundColor: levelColors[day.level],
+                        borderWidth: date === day.key ? 2 : 1,
+                        borderColor:
+                          date === day.key
+                            ? colors.terracotta
+                            : night
+                              ? colors.nightLine
+                              : colors.line,
+                      }}
+                    />
+                  ))}
+                </View>
+              ))}
+            </View>
+          </ScrollView>
+          <Copy style={{ fontSize: 11 }}>
+            Dias sem registro aparecem como espaço, não como falha.
+          </Copy>
+        </Card>
+        <View style={{ gap: 3 }}>
+          <Text style={s.eyebrow}>O que ficou deste dia</Text>
+          <Text style={[s.subtitle, night && { color: colors.nightInk }]}>
+            {new Date(`${date}T12:00:00`).toLocaleDateString('pt-BR', {
+              weekday: 'long',
+              day: 'numeric',
+              month: 'long',
+            })}
+          </Text>
+        </View>
+        {selectedEvents.length ? (
+          selectedEvents.map((event) => (
+            <Card key={event.id} style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+              <View
+                style={{
+                  width: 38,
+                  height: 38,
+                  borderRadius: 19,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: night ? colors.nightRaised : colors.sageSoft,
+                }}
+              >
+                <Icon
+                  name={
+                    event.type === 'mood_logged'
+                      ? 'heart'
+                      : event.type.includes('focus')
+                        ? 'clock'
+                        : 'check'
+                  }
+                  size={18}
+                />
+              </View>
+              <View style={{ flex: 1, gap: 2 }}>
+                <Text style={s.eyebrow}>{activityLabels[event.type]}</Text>
+                <Text
+                  style={[
+                    s.text,
+                    {
+                      fontFamily: 'Inter_600SemiBold',
+                      color: night ? colors.nightInk : colors.ink,
+                    },
+                  ]}
+                >
+                  {String(event.metadata.title ?? event.metadata.step ?? 'Um gesto de presença')}
+                </Text>
+                <Copy style={{ fontSize: 11 }}>
+                  {new Date(event.occurredAt).toLocaleTimeString('pt-BR', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
+                </Copy>
+              </View>
+            </Card>
+          ))
+        ) : (
+          <Card>
+            <Copy>Dia de pausa. Ele também pertence ao seu caminho.</Copy>
+          </Card>
+        )}
+      </Page>
+    );
+  }
   if (screen === 'calendario') {
     const selectedTasks = tasks.filter((task) => task.payload.date === date);
     const periods: DayPeriod[] = ['morning', 'afternoon', 'night', 'anytime'];

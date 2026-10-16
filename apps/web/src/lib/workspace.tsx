@@ -1,5 +1,12 @@
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
-import { createRepository, type Item, type Kind, type Payloads } from '@doitbad/core';
+import {
+  createRepository,
+  loadActivityEvents,
+  type ActivityEvent,
+  type Item,
+  type Kind,
+  type Payloads,
+} from '@doitbad/core';
 import { supabase } from './supabase';
 
 const repository = createRepository(
@@ -12,6 +19,7 @@ const repository = createRepository(
 );
 type Workspace = {
   items: Item[];
+  events: ActivityEvent[];
   loading: boolean;
   ready: boolean;
   busy: boolean;
@@ -27,6 +35,7 @@ type Workspace = {
 const Context = createContext<Workspace | null>(null);
 export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<Item[]>([]);
+  const [events, setEvents] = useState<ActivityEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [ready, setReady] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -41,6 +50,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       const next = await repository.list();
       if (started !== version.current) return;
       setItems(next);
+      setEvents(await loadActivityEvents(supabase, next));
       setError('');
       setReady(true);
     } catch (e) {
@@ -73,7 +83,9 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     setError('');
     try {
       const saved = await repository.save(kind, payload, previous);
-      setItems((current) => [saved, ...current.filter((i) => i.id !== saved.id)]);
+      const next = [saved, ...items.filter((i) => i.id !== saved.id)];
+      setItems(next);
+      setEvents(await loadActivityEvents(supabase, next));
       return saved;
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Falha ao salvar.');
@@ -102,7 +114,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     }
   }
   return (
-    <Context.Provider value={{ items, loading, ready, busy, error, reload, save, remove }}>
+    <Context.Provider value={{ items, events, loading, ready, busy, error, reload, save, remove }}>
       {children}
     </Context.Provider>
   );
