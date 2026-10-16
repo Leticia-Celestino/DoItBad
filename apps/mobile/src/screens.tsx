@@ -10,6 +10,8 @@ import {
   type Item,
   type Priority,
   type Recurrence,
+  type DayPeriod,
+  dayPeriodLabels,
   priorityLabels,
   recurrenceLabels,
   projectColors,
@@ -19,17 +21,25 @@ import {
   editSteps,
 } from '@doitbad/core';
 import { supabase, useStore } from './store';
-import { Button, Card, Copy, DateField, Field, Page, Title, ListRow, Pill, s } from './ui';
+import {
+  Button,
+  Card,
+  Copy,
+  DateField,
+  Field,
+  Page,
+  Title,
+  ListRow,
+  Pill,
+  choiceState,
+  s,
+} from './ui';
 import { SunOverHills, NightScene, Sprout } from './illustrations';
 import { Icon, Ring, MoodChart, PathMap } from './visuals';
 import { MonthGrid } from './calendar';
 import Ambience from './Ambience';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {
-  acceptRecommendation,
-  recommendNextStep,
-  type AIRecommendation,
-} from './ai';
+import { acceptRecommendation, recommendNextStep, type AIRecommendation } from './ai';
 
 const go = (path: string) => router.push(path as never);
 export function Dashboard() {
@@ -68,12 +78,16 @@ export function Dashboard() {
               height: 36,
               borderRadius: 18,
               borderWidth: 1,
-              borderColor: night ? '#464c5d' : colors.line,
+              borderColor: night ? colors.nightLine : colors.line,
               alignItems: 'center',
               justifyContent: 'center',
             }}
           >
-            <Icon name={night ? 'sun' : 'moon'} size={18} color={night ? '#e4c579' : colors.sage} />
+            <Icon
+              name={night ? 'sun' : 'moon'}
+              size={18}
+              color={night ? colors.butter : colors.sage}
+            />
           </Pressable>
           <Pressable
             accessibilityRole="button"
@@ -86,13 +100,13 @@ export function Dashboard() {
           </Pressable>
         </View>
       </View>
-      {!!signOutError && <Copy style={{ color: '#c87e5a' }}>{signOutError}</Copy>}
+      {!!signOutError && <Copy style={{ color: colors.terracotta }}>{signOutError}</Copy>}
       <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap' }}>
         <View style={{ flex: 1, minWidth: 150, gap: 4 }}>
           <Title style={{ fontSize: 30, lineHeight: 36, color: colors.terracotta }}>
             {stats.minutes} minutos
           </Title>
-          <Text style={[s.subtitle, night && { color: '#f4ede1' }]}>de execução</Text>
+          <Text style={[s.subtitle, night && { color: colors.nightInk }]}>de execução</Text>
           <Copy style={{ fontSize: 13, lineHeight: 20 }}>
             Olá, {String(session?.user.user_metadata?.name || 'você').split(' ')[0]} — cada começo
             faz parte do seu caminho.
@@ -172,7 +186,7 @@ export function Dashboard() {
               borderColor: colors.line,
             }}
           >
-            <View style={{ padding: 8, borderRadius: 12, backgroundColor: '#e8eadc' }}>
+            <View style={{ padding: 8, borderRadius: 12, backgroundColor: colors.sageSoft }}>
               <Icon name={icon} size={20} />
             </View>
             <Text style={[s.text, { flex: 1, color: colors.ink, fontSize: 14 }]}>{label}</Text>
@@ -217,11 +231,12 @@ export function Dashboard() {
 }
 
 export function Tasks() {
-  const { items, save, remove, busy, session } = useStore();
+  const { items, save, remove, busy, session, night } = useStore();
   const [title, setTitle] = useState('');
   const [project, setProject] = useState('');
   const [priority, setPriority] = useState<Priority>('media');
   const [recurrence, setRecurrence] = useState<Recurrence>('none');
+  const [timeOfDay, setTimeOfDay] = useState<DayPeriod>('anytime');
   const [dependsOn, setDependsOn] = useState('');
   const [steps, setSteps] = useState('');
   const [date, setDate] = useState(dayKey());
@@ -283,7 +298,7 @@ export function Tasks() {
         }}
       />
       {recommendation && (
-        <Card style={{ backgroundColor: '#efe6d6', gap: 10 }}>
+        <Card style={{ backgroundColor: colors.canvasSoft, gap: 10 }}>
           <Pill>Seu próximo pequeno passo</Pill>
           <Text style={[s.subtitle, { color: colors.ink }]}>{recommendation.microaction}</Text>
           <Copy>{recommendation.reason}</Copy>
@@ -292,14 +307,14 @@ export function Tasks() {
             {recommendation.source === 'llama' ? ' · sugerido com Llama' : ''}
           </Copy>
           {!!recommendationNotice && (
-            <Copy style={{ fontSize: 11, color: colors.terracotta }}>
-              {recommendationNotice}
-            </Copy>
+            <Copy style={{ fontSize: 11, color: colors.terracotta }}>{recommendationNotice}</Copy>
           )}
           <Button
             onPress={async () => {
               if (recommendation.id && session?.access_token) {
-                await acceptRecommendation(session.access_token, recommendation.id).catch(() => undefined);
+                await acceptRecommendation(session.access_token, recommendation.id).catch(
+                  () => undefined,
+                );
               }
               go(
                 `/tarefa?task=${recommendation.task_id}&suggestion=${encodeURIComponent(recommendation.microaction)}`,
@@ -328,9 +343,9 @@ export function Tasks() {
                 accessibilityRole="button"
                 accessibilityState={{ selected: filter === v }}
                 onPress={() => setFilter(v)}
-                style={[s.pill, filter === v && s.selected]}
+                style={[s.pill, choiceState(night, filter === v)]}
               >
-                <Text style={s.text}>{v}</Text>
+                <Text style={[s.text, { color: night ? colors.nightInk : colors.ink }]}>{v}</Text>
               </Pressable>
             ))}
           </View>
@@ -343,9 +358,11 @@ export function Tasks() {
                     accessibilityRole="button"
                     accessibilityState={{ selected: projectFilter === v }}
                     onPress={() => setProjectFilter(v)}
-                    style={[s.pill, projectFilter === v && s.selected]}
+                    style={[s.pill, choiceState(night, projectFilter === v)]}
                   >
-                    <Text style={s.text}>{v}</Text>
+                    <Text style={[s.text, { color: night ? colors.nightInk : colors.ink }]}>
+                      {v}
+                    </Text>
                   </Pressable>
                 ),
               )}
@@ -376,9 +393,11 @@ export function Tasks() {
                   accessibilityRole="radio"
                   accessibilityState={{ selected: !project }}
                   onPress={() => setProject('')}
-                  style={[s.pill, !project && s.selected]}
+                  style={[s.pill, choiceState(night, !project)]}
                 >
-                  <Text style={s.text}>Sem tag</Text>
+                  <Text style={[s.text, { color: night ? colors.nightInk : colors.ink }]}>
+                    Sem tag
+                  </Text>
                 </Pressable>
                 {projectItems.map((item) => {
                   const selected = project === item.payload.title;
@@ -394,7 +413,11 @@ export function Tasks() {
                           minHeight: 40,
                           paddingVertical: 8,
                           borderColor: item.payload.color,
-                          backgroundColor: selected ? `${item.payload.color}22` : colors.surface,
+                          backgroundColor: selected
+                            ? `${item.payload.color}22`
+                            : night
+                              ? colors.nightSurface
+                              : colors.surface,
                         },
                       ]}
                     >
@@ -407,7 +430,12 @@ export function Tasks() {
                             backgroundColor: item.payload.color,
                           }}
                         />
-                        <Text style={[s.text, { fontSize: 13, color: colors.ink }]}>
+                        <Text
+                          style={[
+                            s.text,
+                            { fontSize: 13, color: night ? colors.nightInk : colors.ink },
+                          ]}
+                        >
                           {item.payload.title}
                         </Text>
                       </View>
@@ -425,9 +453,11 @@ export function Tasks() {
                 accessibilityRole="radio"
                 accessibilityState={{ selected: priority === p }}
                 onPress={() => setPriority(p)}
-                style={[s.pill, priority === p && s.selected]}
+                style={[s.pill, choiceState(night, priority === p)]}
               >
-                <Text style={s.text}>{priorityLabels[p]}</Text>
+                <Text style={[s.text, { color: night ? colors.nightInk : colors.ink }]}>
+                  {priorityLabels[p]}
+                </Text>
               </Pressable>
             ))}
           </View>
@@ -439,9 +469,27 @@ export function Tasks() {
                 accessibilityRole="radio"
                 accessibilityState={{ selected: recurrence === value }}
                 onPress={() => setRecurrence(value)}
-                style={[s.pill, recurrence === value && s.selected]}
+                style={[s.pill, choiceState(night, recurrence === value)]}
               >
-                <Text style={s.text}>{recurrenceLabels[value]}</Text>
+                <Text style={[s.text, { color: night ? colors.nightInk : colors.ink }]}>
+                  {recurrenceLabels[value]}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+          <Copy>Período do dia</Copy>
+          <View style={s.row}>
+            {(Object.keys(dayPeriodLabels) as DayPeriod[]).map((value) => (
+              <Pressable
+                key={value}
+                accessibilityRole="radio"
+                accessibilityState={{ selected: timeOfDay === value }}
+                onPress={() => setTimeOfDay(value)}
+                style={[s.pill, choiceState(night, timeOfDay === value)]}
+              >
+                <Text style={[s.text, { color: night ? colors.nightInk : colors.ink }]}>
+                  {dayPeriodLabels[value]}
+                </Text>
               </Pressable>
             ))}
           </View>
@@ -451,9 +499,9 @@ export function Tasks() {
               accessibilityRole="radio"
               accessibilityState={{ selected: !dependsOn }}
               onPress={() => setDependsOn('')}
-              style={[s.pill, !dependsOn && s.selected]}
+              style={[s.pill, choiceState(night, !dependsOn)]}
             >
-              <Text style={s.text}>Nada</Text>
+              <Text style={[s.text, { color: night ? colors.nightInk : colors.ink }]}>Nada</Text>
             </Pressable>
             {tasks
               .filter((task) => task.id !== editing?.id && !task.payload.done)
@@ -463,9 +511,11 @@ export function Tasks() {
                   accessibilityRole="radio"
                   accessibilityState={{ selected: dependsOn === task.id }}
                   onPress={() => setDependsOn(task.id)}
-                  style={[s.pill, dependsOn === task.id && s.selected]}
+                  style={[s.pill, choiceState(night, dependsOn === task.id)]}
                 >
-                  <Text style={s.text}>{task.payload.title}</Text>
+                  <Text style={[s.text, { color: night ? colors.nightInk : colors.ink }]}>
+                    {task.payload.title}
+                  </Text>
                 </Pressable>
               ))}
           </View>
@@ -505,6 +555,7 @@ export function Tasks() {
                     title: title.trim(),
                     priority,
                     recurrence,
+                    timeOfDay,
                     dependsOn: dependsOn ? [dependsOn] : [],
                     project: projectTitle,
                     projectId,
@@ -528,6 +579,7 @@ export function Tasks() {
                 setProject('');
                 setPriority('media');
                 setRecurrence('none');
+                setTimeOfDay('anytime');
                 setDependsOn('');
               }
             }}
@@ -543,6 +595,7 @@ export function Tasks() {
                 setProject('');
                 setPriority('media');
                 setRecurrence('none');
+                setTimeOfDay('anytime');
                 setDependsOn('');
               }}
             >
@@ -630,6 +683,7 @@ export function Tasks() {
                     setProject(t.payload.project);
                     setPriority(t.payload.priority ?? 'media');
                     setRecurrence(t.payload.recurrence ?? 'none');
+                    setTimeOfDay(t.payload.timeOfDay ?? 'anytime');
                     setDependsOn(t.payload.dependsOn?.[0] ?? '');
                     setDate(t.payload.date || dayKey());
                     setSteps(t.payload.steps.join('\n'));
@@ -722,6 +776,9 @@ function TaskTags({
           ↻ {recurrenceLabels[task.payload.recurrence ?? 'none']}
         </Copy>
       )}
+      <Copy style={{ fontSize: 10, lineHeight: 20 }}>
+        {dayPeriodLabels[task.payload.timeOfDay ?? 'anytime']}
+      </Copy>
       {blocked && (
         <Copy style={{ fontSize: 10, lineHeight: 20, color: colors.terracotta }}>
           Após outra tarefa
@@ -824,13 +881,15 @@ function Start() {
     task?: string;
     suggestion?: string;
   }>();
-  const { items, save, busy } = useStore();
+  const { items, save, busy, night } = useStore();
   const task = items.find((i): i is Item<'task'> => i.kind === 'task' && i.id === taskId);
   const [stage, setStage] = useState(suggestion ? 2 : 0);
   const [customStep, setCustomStep] = useState(false);
   const [title, setTitle] = useState(task?.payload.title ?? '');
   const [step, setStep] = useState(
-    suggestion ?? task?.payload.steps.find((_, i) => !task.payload.completedSteps?.includes(i)) ?? '',
+    suggestion ??
+      task?.payload.steps.find((_, i) => !task.payload.completedSteps?.includes(i)) ??
+      '',
   );
   const [blockers, setBlockers] = useState<string[]>([]);
   const [minutes, setMinutes] = useState(2);
@@ -896,9 +955,13 @@ function Start() {
                 key={v}
                 accessibilityRole="button"
                 onPress={() => setTitle(v)}
-                style={[s.pill, title === v && s.selected]}
+                style={[s.pill, choiceState(night, title === v)]}
               >
-                <Text style={[s.text, { fontSize: 13 }]}>{v}</Text>
+                <Text
+                  style={[s.text, { fontSize: 13, color: night ? colors.nightInk : colors.ink }]}
+                >
+                  {v}
+                </Text>
               </Pressable>
             ))}
           </View>
@@ -928,7 +991,7 @@ function Start() {
                 style={[
                   s.card,
                   { padding: 16, flexDirection: 'row', alignItems: 'center' },
-                  blockers.includes(label) && s.selected,
+                  choiceState(night, blockers.includes(label)),
                 ]}
                 onPress={() =>
                   setBlockers((v) =>
@@ -948,7 +1011,9 @@ function Start() {
                 >
                   {blockers.includes(label) && <Icon name="check" color={colors.surface} />}
                 </View>
-                <Text style={[s.text, { flex: 1, color: colors.ink }]}>{label}</Text>
+                <Text style={[s.text, { flex: 1, color: night ? colors.nightInk : colors.ink }]}>
+                  {label}
+                </Text>
               </Pressable>
             ))}
           </View>
@@ -972,10 +1037,17 @@ function Start() {
           </View>
           <Card style={{ marginTop: 12, paddingVertical: 28 }}>
             <View style={{ alignItems: 'center', gap: 16 }}>
-              <View style={{ padding: 16, borderRadius: 16, backgroundColor: '#f4e8c8' }}>
+              <View style={{ padding: 16, borderRadius: 16, backgroundColor: colors.butterSoft }}>
                 <Icon name="document" size={32} color={colors.terracotta} />
               </View>
-              <Text style={[s.subtitle, { textAlign: 'center' }]}>{step}</Text>
+              <Text
+                style={[
+                  s.subtitle,
+                  { textAlign: 'center', color: night ? colors.nightInk : colors.ink },
+                ]}
+              >
+                {step}
+              </Text>
               <Copy style={{ textAlign: 'center', fontSize: 14 }}>
                 Não precisa ser perfeito. Só precisa começar.
               </Copy>
@@ -1005,23 +1077,31 @@ function Start() {
                     alignItems: 'center',
                     gap: 12,
                   },
-                  step === v && s.selected,
+                  choiceState(night, step === v),
                 ]}
               >
                 <View
                   style={{
                     padding: 8,
                     borderRadius: 12,
-                    backgroundColor: step === v ? colors.sage : '#e8eadc',
+                    backgroundColor:
+                      step === v ? colors.sage : night ? colors.nightRaised : colors.sageSoft,
                   }}
                 >
                   <Icon
                     name={(['document', 'book', 'pencil', 'clock'] as const)[n]}
                     size={16}
-                    color={step === v ? colors.canvas : colors.sage}
+                    color={step === v ? colors.canvas : night ? colors.nightMuted : colors.sage}
                   />
                 </View>
-                <Text style={[s.text, { fontSize: 14, color: colors.ink, flex: 1 }]}>{v}</Text>
+                <Text
+                  style={[
+                    s.text,
+                    { fontSize: 14, color: night ? colors.nightInk : colors.ink, flex: 1 },
+                  ]}
+                >
+                  {v}
+                </Text>
               </Pressable>
             ))}
           </View>
@@ -1076,6 +1156,7 @@ function Start() {
   );
 }
 function Duration({ value, onChange }: { value: number; onChange: (n: number) => void }) {
+  const { night } = useStore();
   return (
     <View style={s.row}>
       {[2, 5, 10, 15, 25].map((n) => (
@@ -1083,10 +1164,10 @@ function Duration({ value, onChange }: { value: number; onChange: (n: number) =>
           key={n}
           accessibilityRole="radio"
           accessibilityState={{ selected: value === n }}
-          style={[s.pill, value === n && s.selected]}
+          style={[s.pill, choiceState(night, value === n)]}
           onPress={() => onChange(n)}
         >
-          <Text style={s.text}>{n} min</Text>
+          <Text style={[s.text, { color: night ? colors.nightInk : colors.ink }]}>{n} min</Text>
         </Pressable>
       ))}
     </View>
@@ -1183,7 +1264,7 @@ function Timer() {
             <Icon name={f.runningSince ? 'pause' : 'play'} color={colors.canvas} />
           </Pressable>
           <Card style={{ flexDirection: 'row', alignItems: 'center', padding: 16, marginTop: 12 }}>
-            <View style={{ padding: 8, borderRadius: 12, backgroundColor: '#f4e8c8' }}>
+            <View style={{ padding: 8, borderRadius: 12, backgroundColor: colors.butterSoft }}>
               <Icon name="leaf" color={colors.terracotta} />
             </View>
             <Copy style={{ flex: 1, fontSize: 13, lineHeight: 19 }}>
@@ -1234,7 +1315,7 @@ function Done() {
             width: 64,
             height: 64,
             borderRadius: 32,
-            backgroundColor: '#e5e7d8',
+            backgroundColor: colors.sageSoft,
             alignItems: 'center',
             justifyContent: 'center',
           }}
@@ -1247,7 +1328,7 @@ function Done() {
         <Copy style={{ textAlign: 'center' }}>E isso já é mais do que ontem.</Copy>
       </View>
       <Card style={{ padding: 0, gap: 0, overflow: 'hidden', marginTop: 16 }}>
-        <View style={{ backgroundColor: '#efe6d6' }}>
+        <View style={{ backgroundColor: colors.canvasSoft }}>
           <SunOverHills height={190} />
         </View>
         <View style={{ padding: 24, alignItems: 'center', gap: 12 }}>
@@ -1265,7 +1346,7 @@ function Done() {
           <View
             style={{ height: 1, width: '100%', backgroundColor: colors.line, marginVertical: 12 }}
           />
-          <Icon name="flag" color="#e4c579" />
+          <Icon name="flag" color={colors.butter} />
           <Copy style={{ fontSize: 14, textAlign: 'center' }}>
             A meta nunca foi terminar.{'\n'}Era começar.
           </Copy>
@@ -1350,7 +1431,7 @@ function Intentions() {
       <Copy style={{ fontSize: 14 }}>Aqui ficam suas missões para quando você estiver pronto.</Copy>
       {values.map((v) => (
         <Card key={v.id} style={{ flexDirection: 'row', alignItems: 'center', padding: 16 }}>
-          <View style={{ padding: 9, borderRadius: 12, backgroundColor: '#f4e8c8' }}>
+          <View style={{ padding: 9, borderRadius: 12, backgroundColor: colors.butterSoft }}>
             <Icon name="pencil" color={colors.terracotta} />
           </View>
           <View style={{ flex: 1 }}>
@@ -1428,7 +1509,7 @@ export function Detail({ screen, embedded = false }: { screen: string; embedded?
   return <Explore screen={screen} embedded={embedded} />;
 }
 function Explore({ screen, embedded = false }: { screen: string; embedded?: boolean }) {
-  const { items, save, busy } = useStore();
+  const { items, save, busy, night } = useStore();
   const [note, setNote] = useState('');
   const [mood, setMood] = useState(3);
   const [minutes, setMinutes] = useState(25);
@@ -1441,7 +1522,9 @@ function Explore({ screen, embedded = false }: { screen: string; embedded?: bool
   const active = items.find(
     (i): i is Item<'focus'> => i.kind === 'focus' && i.payload.status === 'active',
   );
-  if (screen === 'calendario')
+  if (screen === 'calendario') {
+    const selectedTasks = tasks.filter((task) => task.payload.date === date);
+    const periods: DayPeriod[] = ['morning', 'afternoon', 'night', 'anytime'];
     return (
       <Page navigation={!embedded}>
         <Copy style={{ fontSize: 12 }}>Seu ritmo, dia após dia</Copy>
@@ -1455,97 +1538,110 @@ function Explore({ screen, embedded = false }: { screen: string; embedded?: bool
             month: 'long',
           })}
         </Text>
-        {tasks
-          .filter((t) => t.payload.date === date)
-          .map((t) => (
-            <Card key={t.id} style={{ paddingHorizontal: 16, paddingVertical: 13 }}>
-              <Pressable
-                accessibilityRole="checkbox"
-                accessibilityLabel={`Concluir ${t.payload.title}`}
-                accessibilityState={{ checked: t.payload.done }}
-                disabled={busy || (isTaskBlocked(t, items) && !t.payload.done)}
-                onPress={() => void save('task', { ...t.payload, done: !t.payload.done }, t)}
-                style={{ flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 44 }}
-              >
-                <View
-                  style={{
-                    width: 26,
-                    height: 26,
-                    borderRadius: 13,
-                    borderWidth: 2,
-                    borderColor: colors.sage,
-                    backgroundColor: t.payload.done ? colors.sage : 'transparent',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  {t.payload.done && <Icon name="check" size={15} color={colors.canvas} />}
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text
-                    style={[
-                      s.text,
-                      { color: colors.ink, fontSize: 14, fontFamily: 'Inter_600SemiBold' },
-                      t.payload.done && { textDecorationLine: 'line-through', opacity: 0.6 },
-                    ]}
+        {periods.map((period) => {
+          const periodTasks = selectedTasks.filter(
+            (task) => (task.payload.timeOfDay ?? 'anytime') === period,
+          );
+          if (!periodTasks.length) return null;
+          return (
+            <View key={period} style={{ gap: 10, marginTop: 8 }}>
+              <Text style={s.eyebrow}>{dayPeriodLabels[period]}</Text>
+              {periodTasks.map((t) => (
+                <Card key={t.id} style={{ paddingHorizontal: 16, paddingVertical: 13 }}>
+                  <Pressable
+                    accessibilityRole="checkbox"
+                    accessibilityLabel={`Concluir ${t.payload.title}`}
+                    accessibilityState={{ checked: t.payload.done }}
+                    disabled={busy || (isTaskBlocked(t, items) && !t.payload.done)}
+                    onPress={() => void save('task', { ...t.payload, done: !t.payload.done }, t)}
+                    style={{ flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 44 }}
                   >
-                    {t.payload.title}
-                  </Text>
-                  <View
-                    style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 7, alignItems: 'center' }}
-                  >
-                    {!!t.payload.project &&
-                      (() => {
-                        const project = projectItems.find(
-                          (item) =>
-                            item.id === t.payload.projectId ||
-                            item.payload.title === t.payload.project,
-                        );
-                        const color = project?.payload.color ?? colors.sage;
-                        return (
-                          <View
-                            style={{
-                              flexDirection: 'row',
-                              alignItems: 'center',
-                              gap: 5,
-                              borderRadius: 12,
-                              paddingHorizontal: 8,
-                              paddingVertical: 3,
-                              backgroundColor: `${color}20`,
-                            }}
-                          >
-                            <View
-                              style={{
-                                width: 6,
-                                height: 6,
-                                borderRadius: 3,
-                                backgroundColor: color,
-                              }}
-                            />
-                            <Copy style={{ fontSize: 10, lineHeight: 14, color }}>
-                              {t.payload.project}
-                            </Copy>
-                          </View>
-                        );
-                      })()}
-                    {(t.payload.recurrence ?? 'none') !== 'none' && (
-                      <Copy style={{ fontSize: 10, lineHeight: 20 }}>
-                        ↻ {recurrenceLabels[t.payload.recurrence ?? 'none']}
-                      </Copy>
-                    )}
-                  </View>
-                </View>
-              </Pressable>
-            </Card>
-          ))}
-        {!tasks.some((t) => t.payload.date === date) && (
-          <Copy>Um dia com espaço. Você decide o que cabe aqui.</Copy>
-        )}
+                    <View
+                      style={{
+                        width: 26,
+                        height: 26,
+                        borderRadius: 13,
+                        borderWidth: 2,
+                        borderColor: colors.sage,
+                        backgroundColor: t.payload.done ? colors.sage : 'transparent',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      {t.payload.done && <Icon name="check" size={15} color={colors.canvas} />}
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text
+                        style={[
+                          s.text,
+                          { color: colors.ink, fontSize: 14, fontFamily: 'Inter_600SemiBold' },
+                          t.payload.done && { textDecorationLine: 'line-through', opacity: 0.6 },
+                        ]}
+                      >
+                        {t.payload.title}
+                      </Text>
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          flexWrap: 'wrap',
+                          gap: 7,
+                          alignItems: 'center',
+                        }}
+                      >
+                        {!!t.payload.project &&
+                          (() => {
+                            const project = projectItems.find(
+                              (item) =>
+                                item.id === t.payload.projectId ||
+                                item.payload.title === t.payload.project,
+                            );
+                            const color = project?.payload.color ?? colors.sage;
+                            return (
+                              <View
+                                style={{
+                                  flexDirection: 'row',
+                                  alignItems: 'center',
+                                  gap: 5,
+                                  borderRadius: 12,
+                                  paddingHorizontal: 8,
+                                  paddingVertical: 3,
+                                  backgroundColor: `${color}20`,
+                                }}
+                              >
+                                <View
+                                  style={{
+                                    width: 6,
+                                    height: 6,
+                                    borderRadius: 3,
+                                    backgroundColor: color,
+                                  }}
+                                />
+                                <Copy style={{ fontSize: 10, lineHeight: 14, color }}>
+                                  {t.payload.project}
+                                </Copy>
+                              </View>
+                            );
+                          })()}
+                        {(t.payload.recurrence ?? 'none') !== 'none' && (
+                          <Copy style={{ fontSize: 10, lineHeight: 20 }}>
+                            ↻ {recurrenceLabels[t.payload.recurrence ?? 'none']}
+                          </Copy>
+                        )}
+                      </View>
+                    </View>
+                  </Pressable>
+                </Card>
+              ))}
+            </View>
+          );
+        })}
+        {!selectedTasks.length && <Copy>Um dia com espaço. Você decide o que cabe aqui.</Copy>}
         <Button variant="text" onPress={() => go('/tarefas')}>
           Voltar para a lista
         </Button>
       </Page>
     );
+  }
   if (screen === 'mapa')
     return (() => {
       const task = tasks.find((item) => !item.payload.done) ?? tasks[0];
@@ -1565,7 +1661,7 @@ function Explore({ screen, embedded = false }: { screen: string; embedded?: bool
           <Title style={{ fontSize: 30, lineHeight: 36 }}>
             Veja seus passos e avance no seu ritmo.
           </Title>
-          <Card style={{ backgroundColor: '#efe6d6' }}>
+          <Card style={{ backgroundColor: colors.canvasSoft }}>
             <PathMap done={completed.length} total={Math.max(steps.length, 1)} />
           </Card>
           <Text style={[s.text, { color: colors.ink }]}>⚑ Próximos passos</Text>
@@ -1596,7 +1692,7 @@ function Explore({ screen, embedded = false }: { screen: string; embedded?: bool
                       paddingHorizontal: 16,
                       paddingVertical: 13,
                       gap: 12,
-                      backgroundColor: checked ? '#e8eadc' : colors.surface,
+                      backgroundColor: checked ? colors.sageSoft : colors.surface,
                       borderColor: checked ? colors.sage : colors.line,
                     },
                   ]}
@@ -1639,7 +1735,7 @@ function Explore({ screen, embedded = false }: { screen: string; embedded?: bool
       <Page navigation={!embedded}>
         <Pill>Desafios gentis</Pill>
         <Title style={{ fontSize: 30, lineHeight: 36 }}>Desafio da semana</Title>
-        <Card style={{ backgroundColor: '#f2e3c8', padding: 24 }}>
+        <Card style={{ backgroundColor: colors.butterSoft, padding: 24 }}>
           <Text style={s.subtitle}>Começar 5 dias seguidos</Text>
           <Copy style={{ fontSize: 13 }}>Um pequeno passo por dia. Sem pressa.</Copy>
           <View
@@ -1685,7 +1781,9 @@ function Explore({ screen, embedded = false }: { screen: string; embedded?: bool
   if (screen === 'retomada')
     return (
       <Page dark contentStyle={{ paddingTop: 72 }}>
-        <Copy style={{ textAlign: 'center', fontSize: 13, letterSpacing: 2, color: '#c9c0ac' }}>
+        <Copy
+          style={{ textAlign: 'center', fontSize: 13, letterSpacing: 2, color: colors.nightMuted }}
+        >
           ANTES DE CONTINUAR…
         </Copy>
         <Title
@@ -1699,7 +1797,7 @@ function Explore({ screen, embedded = false }: { screen: string; embedded?: bool
         >
           Você tinha algo que queria fazer hoje?
         </Title>
-        <Copy style={{ textAlign: 'center', fontSize: 14, color: '#b9b19c' }}>
+        <Copy style={{ textAlign: 'center', fontSize: 14, color: colors.nightMuted }}>
           Sem cobrança. Só um convite gentil para dar o próximo passo.
         </Copy>
         <View style={{ flex: 1, minHeight: 80, justifyContent: 'flex-end' }}>
@@ -1742,7 +1840,7 @@ function Explore({ screen, embedded = false }: { screen: string; embedded?: bool
         ) : (
           <>
             <Button
-              style={{ backgroundColor: '#e4c579' }}
+              style={{ backgroundColor: colors.butter }}
               textStyle={{ color: colors.night }}
               onPress={() => go('/tarefas')}
             >
@@ -1750,10 +1848,21 @@ function Explore({ screen, embedded = false }: { screen: string; embedded?: bool
             </Button>
           </>
         )}
-        <Button variant="text" textStyle={{ color: '#c9c0ac' }} onPress={() => router.replace('/')}>
+        <Button
+          variant="text"
+          textStyle={{ color: colors.nightMuted }}
+          onPress={() => router.replace('/')}
+        >
           Continuar navegando
         </Button>
-        <Copy style={{ textAlign: 'center', fontSize: 12, fontStyle: 'italic', color: '#b9b19c' }}>
+        <Copy
+          style={{
+            textAlign: 'center',
+            fontSize: 12,
+            fontStyle: 'italic',
+            color: colors.nightMuted,
+          }}
+        >
           A escolha é sua. Sempre.
         </Copy>
       </Page>
@@ -1788,7 +1897,7 @@ function Explore({ screen, embedded = false }: { screen: string; embedded?: bool
           </Copy>
         </Card>
         <Card style={{ flexDirection: 'row', padding: 16, alignItems: 'flex-start' }}>
-          <View style={{ padding: 8, borderRadius: 12, backgroundColor: '#f4e8c8' }}>
+          <View style={{ padding: 8, borderRadius: 12, backgroundColor: colors.butterSoft }}>
             <Icon name="heart" color={colors.terracotta} />
           </View>
           <View style={{ flex: 1, gap: 4 }}>
@@ -1825,10 +1934,12 @@ function Explore({ screen, embedded = false }: { screen: string; embedded?: bool
                   key={label}
                   accessibilityRole="radio"
                   accessibilityState={{ selected: mood === n + 1 }}
-                  style={[s.pill, mood === n + 1 && s.selected]}
+                  style={[s.pill, choiceState(night, mood === n + 1)]}
                   onPress={() => setMood(n + 1)}
                 >
-                  <Text style={s.text}>{label}</Text>
+                  <Text style={[s.text, { color: night ? colors.nightInk : colors.ink }]}>
+                    {label}
+                  </Text>
                 </Pressable>
               ))}
             </View>
@@ -1894,7 +2005,7 @@ function Explore({ screen, embedded = false }: { screen: string; embedded?: bool
               <Text style={[s.title, { color: colors.canvas, fontSize: 28, lineHeight: 35 }]}>
                 Ambiente zen
               </Text>
-              <Text style={[s.text, { fontSize: 13, color: '#c9c0ac' }]}>
+              <Text style={[s.text, { fontSize: 13, color: colors.nightMuted }]}>
                 Um espaço tranquilo para você focar.
               </Text>
             </View>
@@ -1911,7 +2022,11 @@ function Explore({ screen, embedded = false }: { screen: string; embedded?: bool
                   accessibilityRole="radio"
                   accessibilityState={{ selected: minutes === n }}
                   onPress={() => setMinutes(n)}
-                  style={[s.pill, { flexGrow: 1, borderRadius: 12 }, minutes === n && s.selected]}
+                  style={[
+                    s.pill,
+                    { flexGrow: 1, borderRadius: 12 },
+                    choiceState(night, minutes === n),
+                  ]}
                 >
                   <Text style={[s.text, { textAlign: 'center', fontSize: 13 }]}>{n} min</Text>
                 </Pressable>

@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { colors, dayKey } from '@doitbad/core';
-import { s } from './ui';
+import { choiceState, s } from './ui';
 import { Icon } from './visuals';
+import { useStore } from './store';
 export function MonthGrid({
   value,
   onChange,
@@ -12,6 +13,7 @@ export function MonthGrid({
   onChange: (v: string) => void;
   dates: string[];
 }) {
+  const { night } = useStore();
   const [month, setMonth] = useState(() => new Date(value + 'T12:00:00'));
   const first = new Date(month.getFullYear(), month.getMonth(), 1, 12);
   const offset = first.getDay();
@@ -35,10 +37,10 @@ export function MonthGrid({
           flexDirection: 'row',
           alignSelf: 'flex-start',
           borderWidth: 1,
-          borderColor: colors.line,
+          borderColor: night ? colors.nightLine : colors.line,
           borderRadius: 28,
           padding: 4,
-          backgroundColor: colors.surface,
+          backgroundColor: night ? colors.nightSurface : colors.surface,
         }}
       >
         {(['month', 'day'] as const).map((v) => (
@@ -51,11 +53,24 @@ export function MonthGrid({
               paddingHorizontal: 18,
               paddingVertical: 8,
               borderRadius: 24,
-              backgroundColor: view === v ? colors.sage : 'transparent',
+              ...choiceState(night, view === v),
             }}
           >
             <Text
-              style={[s.text, { fontSize: 13, color: view === v ? colors.canvas : colors.muted }]}
+              style={[
+                s.text,
+                {
+                  fontSize: 13,
+                  color:
+                    view === v
+                      ? night
+                        ? colors.nightInk
+                        : colors.ink
+                      : night
+                        ? colors.nightMuted
+                        : colors.muted,
+                },
+              ]}
             >
               {v === 'month' ? 'Mês' : 'Dia'}
             </Text>
@@ -71,7 +86,17 @@ export function MonthGrid({
         >
           <Icon name="back" size={20} />
         </Pressable>
-        <Text style={[s.subtitle, { fontSize: 18, flex: 1, textAlign: 'center' }]}>
+        <Text
+          style={[
+            s.subtitle,
+            {
+              fontSize: 18,
+              flex: 1,
+              textAlign: 'center',
+              color: night ? colors.nightInk : colors.ink,
+            },
+          ]}
+        >
           {view === 'month'
             ? month.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
             : new Date(value + 'T12:00:00').toLocaleDateString('pt-BR', {
@@ -94,7 +119,15 @@ export function MonthGrid({
             {['D', 'S', 'T', 'Q', 'Q', 'S', 'S'].map((d, i) => (
               <Text
                 key={i}
-                style={[s.text, { width: '14.2857%', textAlign: 'center', fontSize: 12 }]}
+                style={[
+                  s.text,
+                  {
+                    width: '14.2857%',
+                    textAlign: 'center',
+                    fontSize: 12,
+                    color: night ? colors.nightMuted : colors.muted,
+                  },
+                ]}
               >
                 {d}
               </Text>
@@ -124,18 +157,26 @@ export function MonthGrid({
                     minHeight: 36,
                     paddingVertical: 4,
                     borderRadius: 12,
-                    backgroundColor: value === key ? colors.sage : 'transparent',
+                    backgroundColor:
+                      value === key
+                        ? night
+                          ? colors.nightRaised
+                          : colors.sageSoft
+                        : 'transparent',
                     alignItems: 'center',
                     justifyContent: 'center',
                     gap: 3,
                     borderWidth: key === dayKey() ? 1 : 0,
-                    borderColor: colors.sage,
+                    borderColor: night ? colors.nightMuted : colors.sage,
                   }}
                 >
                   <Text
                     style={[
                       s.text,
-                      { fontSize: 14, color: value === key ? colors.surface : colors.ink },
+                      {
+                        fontSize: 14,
+                        color: night ? colors.nightInk : colors.ink,
+                      },
                     ]}
                   >
                     {d}
@@ -147,7 +188,9 @@ export function MonthGrid({
                       borderRadius: 2,
                       backgroundColor: dates.includes(key)
                         ? value === key
-                          ? colors.surface
+                          ? night
+                            ? colors.nightInk
+                            : colors.ink
                           : colors.terracotta
                         : 'transparent',
                     }}

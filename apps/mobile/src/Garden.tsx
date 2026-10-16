@@ -8,15 +8,15 @@ export default function Garden() {
       <Path d="M202 240Q157 210 228 193" stroke="#FBF6EC" strokeWidth={12} strokeLinecap="round" />
       <Path
         d="M95 222V121M95 171Q51 170 62 140Q93 140 95 171ZM95 193Q134 183 128 157Q94 163 95 193Z"
-        stroke="#5C6B4A"
+        stroke="#526148"
         strokeWidth={4}
         strokeLinejoin="round"
       />
-      <Circle cx="257" cy="135" r="12" fill="#C87E5A" />
-      <Path d="M242 158Q257 149 271 160L280 194H235Z" fill="#5C6B4A" />
+      <Circle cx="257" cy="135" r="12" fill="#985033" />
+      <Path d="M242 158Q257 149 271 160L280 194H235Z" fill="#526148" />
       <Path
         d="M245 194L233 217M268 194L287 210"
-        stroke="#3D392F"
+        stroke="#343E31"
         strokeWidth={6}
         strokeLinecap="round"
       />

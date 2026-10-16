@@ -143,10 +143,12 @@ test('task recurrence and dependencies are validated', () => {
     done: false,
     steps: [],
     recurrence: 'weekly' as const,
+    timeOfDay: 'morning' as const,
     dependsOn: ['first'],
   };
   assert.doesNotThrow(() => validate('task', task));
   assert.throws(() => validate('task', { ...task, recurrence: 'yearly' as never }), /recorrência/);
+  assert.throws(() => validate('task', { ...task, timeOfDay: 'dawn' as never }), /período/);
   assert.throws(() => validate('task', { ...task, dependsOn: ['first', 'first'] }), /dependências/);
   assert.doesNotThrow(() => validate('project', { title: 'Trabalho', color: '#5C6B4A' }));
   assert.throws(() => validate('project', { title: 'Trabalho', color: 'verde' }), /cor/);

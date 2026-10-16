@@ -9,6 +9,8 @@ import {
   type Focus,
   type Priority,
   type Recurrence,
+  type DayPeriod,
+  dayPeriodLabels,
   priorityLabels,
   recurrenceLabels,
   projectColors,
@@ -129,6 +131,7 @@ export function TasksPage() {
   const [project, setProject] = useState('');
   const [priority, setPriority] = useState<Priority>('media');
   const [recurrence, setRecurrence] = useState<Recurrence>('none');
+  const [timeOfDay, setTimeOfDay] = useState<DayPeriod>('anytime');
   const [dependsOn, setDependsOn] = useState('');
   const [date, setDate] = useState(dayKey());
   const [steps, setSteps] = useState('');
@@ -170,6 +173,7 @@ export function TasksPage() {
           title: title.trim(),
           priority,
           recurrence,
+          timeOfDay,
           dependsOn: dependsOn ? [dependsOn] : [],
           project: projectTitle,
           projectId,
@@ -191,6 +195,7 @@ export function TasksPage() {
       setEditing(undefined);
       setPriority('media');
       setRecurrence('none');
+      setTimeOfDay('anytime');
       setDependsOn('');
     }
   }
@@ -277,6 +282,7 @@ export function TasksPage() {
                       {(t.payload.recurrence ?? 'none') !== 'none' && (
                         <span>{recurrenceLabels[t.payload.recurrence ?? 'none']}</span>
                       )}
+                      <span>{dayPeriodLabels[t.payload.timeOfDay ?? 'anytime']}</span>
                       {isTaskBlocked(t, items) && <span>Bloqueada por outra tarefa</span>}
                     </div>
                     <p>
@@ -308,6 +314,7 @@ export function TasksPage() {
                       setProject(t.payload.project);
                       setPriority(t.payload.priority ?? 'media');
                       setRecurrence(t.payload.recurrence ?? 'none');
+                      setTimeOfDay(t.payload.timeOfDay ?? 'anytime');
                       setDependsOn(t.payload.dependsOn?.[0] ?? '');
                       setDate(t.payload.date);
                       setSteps(t.payload.steps.join('\n'));
@@ -379,6 +386,16 @@ export function TasksPage() {
               onChange={(e) => setRecurrence(e.target.value as Recurrence)}
             >
               {Object.entries(recurrenceLabels).map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Período do dia
+            <select value={timeOfDay} onChange={(e) => setTimeOfDay(e.target.value as DayPeriod)}>
+              {Object.entries(dayPeriodLabels).map(([value, label]) => (
                 <option key={value} value={value}>
                   {label}
                 </option>
@@ -483,7 +500,8 @@ export function StartPage() {
     });
     if (result) {
       const session = await getSession().catch(() => null);
-      if (session && recommendationId) void acceptRecommendation(session.access_token, recommendationId);
+      if (session && recommendationId)
+        void acceptRecommendation(session.access_token, recommendationId);
       nav(`/foco/${result.id}`);
     }
   }
@@ -926,6 +944,8 @@ export function CalendarPage() {
   }
   const count = new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate();
   const tasks = orderedTasks(items);
+  const selectedTasks = tasks.filter((t) => t.payload.date === selected);
+  const periods: DayPeriod[] = ['morning', 'afternoon', 'night', 'anytime'];
   return (
     <>
       <Heading tag="Espaço para o que importa" title="Seu calendário, com respiro." />
@@ -1005,29 +1025,36 @@ export function CalendarPage() {
               month: 'long',
             })}
           </h2>
-          {tasks
-            .filter((t) => t.payload.date === selected)
-            .map((t) => (
-              <div className="micro-step" key={t.id}>
-                <input
-                  type="checkbox"
-                  aria-label={`Concluir ${t.payload.title}`}
-                  checked={t.payload.done}
-                  disabled={busy}
-                  onChange={() => void save('task', { ...t.payload, done: !t.payload.done }, t)}
-                />
-                <Link to={`/tarefa?task=${t.id}`}>
-                  {t.payload.done ? '✓ ' : ''}
-                  {t.payload.title}
-                </Link>
-                {(t.payload.recurrence ?? 'none') !== 'none' && (
-                  <small>{recurrenceLabels[t.payload.recurrence ?? 'none']}</small>
-                )}
-              </div>
-            ))}
-          {!tasks.some((t) => t.payload.date === selected) && (
-            <p>Um dia com espaço. Você decide o que cabe aqui.</p>
-          )}
+          {periods.map((period) => {
+            const periodTasks = selectedTasks.filter(
+              (t) => (t.payload.timeOfDay ?? 'anytime') === period,
+            );
+            if (!periodTasks.length) return null;
+            return (
+              <section className="agenda-period" key={period}>
+                <p className="eyebrow">{dayPeriodLabels[period]}</p>
+                {periodTasks.map((t) => (
+                  <div className="micro-step" key={t.id}>
+                    <input
+                      type="checkbox"
+                      aria-label={`Concluir ${t.payload.title}`}
+                      checked={t.payload.done}
+                      disabled={busy}
+                      onChange={() => void save('task', { ...t.payload, done: !t.payload.done }, t)}
+                    />
+                    <Link to={`/tarefa?task=${t.id}`}>
+                      {t.payload.done ? '✓ ' : ''}
+                      {t.payload.title}
+                    </Link>
+                    {(t.payload.recurrence ?? 'none') !== 'none' && (
+                      <small>{recurrenceLabels[t.payload.recurrence ?? 'none']}</small>
+                    )}
+                  </div>
+                ))}
+              </section>
+            );
+          })}
+          {!selectedTasks.length && <p>Um dia com espaço. Você decide o que cabe aqui.</p>}
           <Link className="button secondary" to="/tarefas">
             Organizar tarefas
           </Link>
@@ -1343,7 +1370,7 @@ export function WelcomePage() {
               width="90"
               height="110"
               rx="10"
-              fill="#efe6d6"
+              fill="#eee4d5"
               stroke="#d9ccb2"
               strokeWidth="3"
             />
@@ -1401,8 +1428,8 @@ export function SplashPage({ signedIn }: { signedIn: boolean }) {
         <path d="M290 110l2 5 5 2-5 2-2 5-2-5-5-2 5-2z" fill="#c8a05a" />
         <path d="M0 260c40-70 100-96 160-96s120 26 160 96H0z" fill="#a9a06f" />
         <path d="M0 260c50-50 108-64 160-64s110 14 160 64H0z" fill="#8f8a52" />
-        <path d="M150 150c-10 8-14 26-14 40h44c2-16-2-34-12-42-6-4-12-3-18 2z" fill="#5c6b4a" />
-        <path d="M150 190c-14 2-22 8-28 18h30zM178 190c12 2 20 8 24 16h-26z" fill="#5c6b4a" />
+        <path d="M150 150c-10 8-14 26-14 40h44c2-16-2-34-12-42-6-4-12-3-18 2z" fill="#526148" />
+        <path d="M150 190c-14 2-22 8-28 18h30zM178 190c12 2 20 8 24 16h-26z" fill="#526148" />
         <circle cx="163" cy="132" r="15" fill="#c88a63" />
         <path d="M150 128c0-12 8-18 15-18s14 6 14 16c-6-4-10-4-16-2-5 2-9 3-13 4z" fill="#4a3f34" />
       </svg>

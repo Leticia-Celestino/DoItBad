@@ -114,12 +114,12 @@ export function Ring({
       >
         <Defs>
           <LinearGradient id="ring" x1="0" y1="0" x2="1" y2="1">
-            <Stop offset="0" stopColor="#e4c579" />
-            <Stop offset="0.55" stopColor="#ebb89a" />
-            <Stop offset="1" stopColor="#c87e5a" />
+            <Stop offset="0" stopColor={colors.butter} />
+            <Stop offset="0.55" stopColor={colors.peach} />
+            <Stop offset="1" stopColor={colors.terracotta} />
           </LinearGradient>
         </Defs>
-        <Circle cx={120} cy={120} r={105} fill="none" stroke="#e7decd" strokeWidth={12} />
+        <Circle cx={120} cy={120} r={105} fill="none" stroke={colors.line} strokeWidth={12} />
         <Circle
           cx={120}
           cy={120}
@@ -185,7 +185,7 @@ export function MoodChart({ values }: { values: { label: string; value: number |
       {[1, 2, 3, 4, 5].map((n) => (
         <Path key={n} d={`M16 ${140 - n * 23}H304`} stroke={colors.line} strokeDasharray="3 5" />
       ))}
-      <Path d={path} fill="none" stroke="#c87e5a" strokeWidth={2.5} />
+      <Path d={path} fill="none" stroke={colors.terracotta} strokeWidth={2.5} />
       {points.map((p, i) => (
         <ViewlessPoint key={i} x={p.x} y={p.y} label={values[i].label} />
       ))}
@@ -196,7 +196,14 @@ function ViewlessPoint({ x, y, label }: { x: number; y: number | null; label: st
   return (
     <>
       {y !== null && (
-        <Circle cx={x} cy={y} r={4} fill={colors.surface} stroke="#c87e5a" strokeWidth={2} />
+        <Circle
+          cx={x}
+          cy={y}
+          r={4}
+          fill={colors.surface}
+          stroke={colors.terracotta}
+          strokeWidth={2}
+        />
       )}
       <SvgText x={x} y={165} textAnchor="middle" fontSize={11} fill={colors.muted}>
         {label}

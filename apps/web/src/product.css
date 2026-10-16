@@ -1,11 +1,19 @@
 :root {
   --canvas: #f4ede1;
+  --canvas-soft: #eee4d5;
   --surface: #fbf6ec;
-  --ink: #3d392f;
-  --muted: #665e51;
-  --line: #ddd3c2;
-  --sage: #5c6b4a;
-  --terracotta: #b36a49;
+  --surface-raised: #fffaf1;
+  --ink: #343e31;
+  --ink-soft: #635e53;
+  --muted: #625d53;
+  --line: #dcd1bf;
+  --sage: #526148;
+  --sage-soft: #dce1cd;
+  --terracotta: #985033;
+  --butter: #e8c77f;
+  --peach: #e8af8d;
+  --night: #171c19;
+  --night-ink: #f4ecdc;
   color: var(--ink);
 }
 body {
@@ -158,11 +166,11 @@ small {
 }
 .sidebar nav a.active {
   color: var(--sage);
-  background: #e8ebdf;
+  background: var(--sage-soft);
   font-weight: 650;
 }
 .sidebar nav a:hover {
-  background: #eee9df;
+  background: var(--canvas-soft);
 }
 .sidebar-bottom {
   margin-top: auto;
@@ -276,7 +284,7 @@ small {
   align-items: center;
   min-height: 310px;
   border-radius: 24px;
-  background: #e5e9d9;
+  background: var(--sage-soft);
   padding: 32px;
   overflow: hidden;
 }
@@ -312,7 +320,7 @@ small {
   font-weight: 650;
 }
 .quiet-card {
-  background: #eee3d4;
+  background: var(--canvas-soft);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -404,6 +412,36 @@ textarea {
   color: var(--ink);
   margin: 8px 0 14px;
 }
+select {
+  appearance: none;
+  padding-right: 42px;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--sage) 50%),
+    linear-gradient(135deg, var(--sage) 50%, transparent 50%);
+  background-position:
+    calc(100% - 18px) 52%,
+    calc(100% - 13px) 52%;
+  background-size:
+    5px 5px,
+    5px 5px;
+  background-repeat: no-repeat;
+}
+select option {
+  color: var(--ink);
+  background: var(--surface-raised);
+}
+input:hover,
+select:hover,
+textarea:hover {
+  border-color: color-mix(in srgb, var(--sage) 55%, var(--line));
+}
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+.choice:focus-within {
+  border-color: var(--focus);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--focus) 20%, transparent);
+}
 textarea {
   min-height: 100px;
   resize: vertical;
@@ -413,8 +451,28 @@ input[type='checkbox'] {
   min-height: 20px;
   height: 20px;
   flex-shrink: 0;
-  accent-color: var(--sage);
+  appearance: none;
+  display: grid;
+  place-content: center;
+  border: 1.5px solid var(--sage);
+  border-radius: 6px;
+  background: var(--surface-raised);
   margin: 0;
+}
+input[type='checkbox']::before {
+  width: 10px;
+  height: 10px;
+  background: var(--surface-raised);
+  clip-path: polygon(14% 44%, 0 59%, 40% 100%, 100% 19%, 84% 4%, 38% 70%);
+  content: '';
+  transform: scale(0);
+  transition: transform 120ms ease;
+}
+input[type='checkbox']:checked {
+  background: var(--sage);
+}
+input[type='checkbox']:checked::before {
+  transform: scale(1);
 }
 .task-row {
   display: flex;
@@ -433,7 +491,7 @@ input[type='checkbox'] {
   align-items: center;
   gap: 16px;
   margin-bottom: 18px;
-  background: #e8ebdf;
+  background: var(--sage-soft);
 }
 .next-step-card p {
   margin: 4px 0 0;
@@ -496,7 +554,7 @@ input[type='checkbox'] {
   align-items: center;
 }
 .choice:has(:checked) {
-  background: #e8ebdf;
+  background: var(--sage-soft);
   border-color: var(--sage);
 }
 .timer-card {
@@ -547,7 +605,7 @@ input[type='checkbox'] {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: #e5e9d9;
+  background: var(--sage-soft);
   color: var(--sage);
   flex-shrink: 0;
 }
@@ -621,8 +679,8 @@ progress {
 .night-panel {
   border-radius: 30px;
   padding: clamp(26px, 5vw, 70px);
-  background: #2c3140;
-  color: #fbf6ec;
+  background: var(--night);
+  color: var(--night-ink);
   max-width: 1100px;
   margin: auto;
 }
@@ -656,7 +714,7 @@ progress {
 }
 .mood-chart span {
   display: block;
-  background: #b36a49;
+  background: var(--terracotta);
   border-radius: 8px 8px 0 0;
 }
 .mood-chart small {
@@ -827,7 +885,7 @@ progress {
   height: 34px;
   place-items: center;
   border-radius: 12px;
-  background: #e8eadc;
+  background: var(--sage-soft);
   color: var(--sage);
 }
 .history-metrics strong {
@@ -1180,6 +1238,14 @@ textarea {
   min-height: 44px;
   padding: 8px 0;
 }
+.agenda-period + .agenda-period {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+.agenda-period .eyebrow {
+  margin: 0 0 4px;
+}
 .micro-step:has(:checked) span {
   text-decoration: line-through;
   color: var(--muted);
@@ -1193,7 +1259,7 @@ textarea {
 .task-tags span {
   padding: 3px 9px;
   border-radius: 20px;
-  background: #e8ebdf;
+  background: var(--sage-soft);
   color: var(--sage);
   font-size: 0.72rem;
 }

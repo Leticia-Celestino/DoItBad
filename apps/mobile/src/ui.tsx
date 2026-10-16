@@ -103,8 +103,27 @@ export const s = StyleSheet.create({
     borderColor: colors.line,
     backgroundColor: colors.surface,
   },
-  selected: { backgroundColor: '#dce4cf', borderColor: colors.sage },
+  selected: { borderColor: colors.sage, borderWidth: 2 },
 });
+export function choiceState(night: boolean, selected: boolean): ViewStyle {
+  return {
+    backgroundColor: selected
+      ? night
+        ? colors.nightRaised
+        : colors.sageSoft
+      : night
+        ? colors.nightSurface
+        : colors.surface,
+    borderColor: selected
+      ? night
+        ? colors.nightMuted
+        : colors.sage
+      : night
+        ? colors.nightLine
+        : colors.line,
+    borderWidth: selected ? 2 : 1,
+  };
+}
 export function Page({
   children,
   back = false,
@@ -195,7 +214,7 @@ export function Page({
                         height: 6,
                         width: n <= step ? 22 : 7,
                         borderRadius: 4,
-                        backgroundColor: n <= step ? '#c87e5a' : colors.line,
+                        backgroundColor: n <= step ? colors.terracotta : colors.line,
                       }}
                     />
                   ))}
@@ -260,19 +279,25 @@ export function DateField({
 export function Title({ children, style }: { children: ReactNode; style?: StyleProp<TextStyle> }) {
   const { night } = useStore();
   return (
-    <Text accessibilityRole="header" style={[s.title, night && { color: '#f4ede1' }, style]}>
+    <Text accessibilityRole="header" style={[s.title, night && { color: colors.nightInk }, style]}>
       {children}
     </Text>
   );
 }
 export function Copy({ children, style }: { children: ReactNode; style?: StyleProp<TextStyle> }) {
   const { night } = useStore();
-  return <Text style={[s.text, night && { color: '#c9c0ac' }, style]}>{children}</Text>;
+  return <Text style={[s.text, night && { color: colors.nightMuted }, style]}>{children}</Text>;
 }
 export function Card({ children, style }: { children: ReactNode; style?: StyleProp<ViewStyle> }) {
   const { night } = useStore();
   return (
-    <View style={[s.card, night && { backgroundColor: '#2c3140', borderColor: '#464c5d' }, style]}>
+    <View
+      style={[
+        s.card,
+        style,
+        night && { backgroundColor: colors.nightSurface, borderColor: colors.nightLine },
+      ]}
+    >
       {children}
     </View>
   );
@@ -317,7 +342,7 @@ export function Button({
           variant === 'text' && {
             fontSize: 14,
             textDecorationLine: 'underline',
-            color: night ? '#c9c0ac' : colors.muted,
+            color: night ? colors.nightMuted : colors.muted,
           },
           textStyle,
         ]}
@@ -332,16 +357,22 @@ export function Field({ label, style, ...props }: TextInputProps & { label: stri
   return (
     <View style={{ gap: 8 }}>
       {!!label && (
-        <Text style={[s.text, night && { color: '#c9c0ac' }, { fontSize: 13, lineHeight: 18 }]}>
+        <Text
+          style={[s.text, night && { color: colors.nightMuted }, { fontSize: 13, lineHeight: 18 }]}
+        >
           {label}
         </Text>
       )}
       <TextInput
         accessibilityLabel={label}
-        placeholderTextColor={night ? '#9ea4b2' : colors.muted}
+        placeholderTextColor={night ? colors.nightMuted : colors.muted}
         style={[
           s.input,
-          night && { backgroundColor: '#2c3140', borderColor: '#464c5d', color: '#f4ede1' },
+          night && {
+            backgroundColor: colors.nightSurface,
+            borderColor: colors.nightLine,
+            color: colors.nightInk,
+          },
           props.multiline && { minHeight: 100, textAlignVertical: 'top' },
           style,
         ]}
@@ -369,7 +400,7 @@ export function ListRow({
       onPress={onPress}
       style={({ pressed }) => [
         s.card,
-        night && { backgroundColor: '#2c3140', borderColor: '#464c5d' },
+        night && { backgroundColor: colors.nightSurface, borderColor: colors.nightLine },
         {
           flexDirection: 'row',
           alignItems: 'center',
@@ -379,7 +410,13 @@ export function ListRow({
         },
       ]}
     >
-      <View style={{ backgroundColor: '#e8eadc', borderRadius: 12, padding: 10 }}>
+      <View
+        style={{
+          backgroundColor: night ? colors.nightRaised : colors.sageSoft,
+          borderRadius: 12,
+          padding: 10,
+        }}
+      >
         <Icon name={icon} />
       </View>
       <View style={{ flex: 1, gap: 4 }}>
@@ -387,13 +424,19 @@ export function ListRow({
           style={{
             fontFamily: 'Inter_600SemiBold',
             fontSize: 14,
-            color: night ? '#f4ede1' : colors.ink,
+            color: night ? colors.nightInk : colors.ink,
           }}
         >
           {title}
         </Text>
         {meta && (
-          <Text style={[s.text, night && { color: '#c9c0ac' }, { fontSize: 12, lineHeight: 18 }]}>
+          <Text
+            style={[
+              s.text,
+              night && { color: colors.nightMuted },
+              { fontSize: 12, lineHeight: 18 },
+            ]}
+          >
             {meta}
           </Text>
         )}
@@ -403,11 +446,12 @@ export function ListRow({
   );
 }
 export function Pill({ children }: { children: string }) {
+  const { night } = useStore();
   return (
     <View
       style={{
         alignSelf: 'flex-start',
-        backgroundColor: '#e5e7d8',
+        backgroundColor: night ? colors.nightRaised : colors.sageSoft,
         paddingHorizontal: 13,
         paddingVertical: 7,
         borderRadius: 30,

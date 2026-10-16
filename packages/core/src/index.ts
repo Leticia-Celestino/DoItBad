@@ -2,16 +2,35 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 
 export const colors = {
   canvas: '#F4EDE1',
+  canvasSoft: '#EEE4D5',
   surface: '#FBF6EC',
-  ink: '#3D392F',
-  muted: '#94897A',
-  sage: '#5C6B4A',
-  terracotta: '#C87E5A',
-  line: '#E7DECD',
-  night: '#2C3140',
+  surfaceRaised: '#FFFAF1',
+  ink: '#343E31',
+  inkSoft: '#635E53',
+  muted: '#625D53',
+  line: '#DCD1BF',
+  sage: '#526148',
+  sageSoft: '#DCE1CD',
+  terracotta: '#985033',
+  butter: '#E8C77F',
+  butterSoft: '#F4E8C8',
+  peach: '#E8AF8D',
+  night: '#171C19',
+  nightSurface: '#222A24',
+  nightRaised: '#293229',
+  nightInk: '#F4ECDC',
+  nightMuted: '#B7AE9D',
+  nightLine: '#3B463C',
 };
 export type Priority = 'alta' | 'media' | 'baixa';
 export type Recurrence = 'none' | 'daily' | 'weekly';
+export type DayPeriod = 'morning' | 'afternoon' | 'night' | 'anytime';
+export const dayPeriodLabels: Record<DayPeriod, string> = {
+  morning: 'Manhã',
+  afternoon: 'Tarde',
+  night: 'Noite',
+  anytime: 'Qualquer horário',
+};
 export type Project = { title: string; color: string };
 export type Task = {
   title: string;
@@ -23,9 +42,10 @@ export type Task = {
   completedSteps?: number[];
   dependsOn?: string[];
   recurrence?: Recurrence;
+  timeOfDay?: DayPeriod;
   projectId?: string | null;
 };
-export const projectColors = ['#5C6B4A', '#C87E5A', '#E4C579', '#EBB89A', '#2C3140'];
+export const projectColors = ['#526148', '#985033', '#E8C77F', '#E8AF8D', '#635E53'];
 export const priorityLabels = { alta: 'Alta', media: 'Média', baixa: 'Baixa' };
 export const recurrenceLabels = { none: 'Uma vez', daily: 'Diária', weekly: 'Semanal' };
 export function isTaskBlocked(task: Item<'task'>, items: Item[]): boolean {
@@ -143,6 +163,11 @@ export function validate<K extends Kind>(kind: K, payload: Payloads[K]) {
       throw new Error('Escolha uma prioridade válida.');
     if (p.recurrence !== undefined && !['none', 'daily', 'weekly'].includes(p.recurrence))
       throw new Error('Escolha uma recorrência válida.');
+    if (
+      p.timeOfDay !== undefined &&
+      !['morning', 'afternoon', 'night', 'anytime'].includes(p.timeOfDay)
+    )
+      throw new Error('Escolha um período válido.');
     if (
       p.dependsOn &&
       (new Set(p.dependsOn).size !== p.dependsOn.length ||

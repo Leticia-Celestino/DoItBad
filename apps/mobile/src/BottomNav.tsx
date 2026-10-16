@@ -11,10 +11,10 @@ export default function BottomNav() {
   const { width, height, fontScale } = useWindowDimensions();
   const path = usePathname();
   const { night } = useStore();
-  const surface = night ? '#2c3140' : colors.surface;
-  const line = night ? '#464c5d' : colors.line;
-  const ink = night ? '#f4ede1' : colors.ink;
-  const muted = night ? '#c9c0ac' : colors.muted;
+  const surface = night ? colors.nightSurface : colors.surface;
+  const line = night ? colors.nightLine : colors.line;
+  const ink = night ? colors.nightInk : colors.ink;
+  const muted = night ? colors.nightMuted : colors.muted;
   const rail = width >= 768 || (width >= 600 && width > height);
   const [keyboard, setKeyboard] = useState(false);
   useEffect(() => {
@@ -112,8 +112,8 @@ export default function BottomNav() {
                     ? colors.sage
                     : active
                       ? night
-                        ? '#394235'
-                        : '#e5e7d8'
+                        ? colors.nightRaised
+                        : colors.sageSoft
                       : 'transparent',
                   alignItems: 'center',
                   justifyContent: 'center',
