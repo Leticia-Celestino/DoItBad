@@ -18,12 +18,17 @@ test('splash, welcome, sign-up and sign-in are connected', async ({ page }) => {
   await page.getByRole('link', { name: 'Voltar' }).click();
   await page.getByRole('link', { name: 'Já tenho uma conta' }).click();
   await expect(page.getByRole('heading', { name: 'Bem-vindo de volta' })).toBeVisible();
+  await page.goto(`${base}/entrar?mode=reset`);
+  await expect(page.getByRole('heading', { name: 'Vamos recuperar seu acesso' })).toBeVisible();
+  await page.goto(`${base}/redefinir-senha`);
+  await expect(page.getByRole('heading', { name: 'Uma nova senha para continuar.' })).toBeVisible();
+  await expect(page.getByLabel('Nova senha')).toBeVisible();
 });
 
 test('complete focus cycle survives reload, pause and retry without duplicate history', async ({
   page,
 }) => {
-  await page.getByRole('link', { name: 'Dar o primeiro passo' }).click();
+  await page.goto(`${base}/tarefa`);
   await page.getByLabel('Sua tarefa', { exact: true }).fill('Revisar o capítulo');
   await page.getByRole('button', { name: 'Continuar' }).click();
   await page.getByLabel('Parece coisa demais').check();
@@ -94,11 +99,13 @@ test('running timer completes automatically at zero without duplicating the sess
 
 test('tasks feed calendar and map; emotional records persist', async ({ page }) => {
   await page.goto(`${base}/tarefas`);
+  await page.getByRole('button', { name: '+ Nova tarefa' }).click();
   await page.getByLabel('O que você quer fazer?').fill('Preparar apresentação');
+  await page.getByText('Mais opções', { exact: true }).click();
   await page.getByLabel('Projeto (opcional)').fill('Trabalho');
   await page.getByLabel('Pequenos passos (um por linha)').fill('Abrir slides\nEscrever uma frase');
-  await page.getByRole('button', { name: 'Adicionar tarefa' }).click();
-  await expect(page.getByRole('heading', { name: 'Preparar apresentação' })).toBeVisible();
+  await page.getByRole('button', { name: 'Adicionar ao dia' }).click();
+  await expect(page.getByText('Preparar apresentação', { exact: true })).toBeVisible();
   const localRecords = await page.evaluate(() =>
     JSON.parse(localStorage.getItem('doitbad-workspace-v1') ?? '[]'),
   );
@@ -139,6 +146,7 @@ test('navigation and desktop layout use available space with accessible empty sc
     'retomada',
     'zen',
     'intencoes',
+    'configuracoes',
   ]) {
     await page.goto(`${base}/${path}`);
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
@@ -166,20 +174,60 @@ test('night theme applies to every route and persists', async ({ page }) => {
   await expect(page.getByRole('button', { name: 'Ativar modo claro' })).toBeVisible();
 });
 
+test('settings personalize the greeting and keep navigation controls available', async ({
+  page,
+}) => {
+  await page.goto(`${base}/configuracoes`);
+  await expect(page.getByRole('heading', { name: 'Como podemos chamar você?' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Uma luz confortável para você.' })).toHaveCount(
+    0,
+  );
+  await page.getByLabel('Seu nome').fill('Letícia');
+  await page.getByRole('button', { name: 'Salvar nome' }).click();
+  await page.goto(`${base}/atividade`);
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('Letícia');
+
+  const headerPosition = await page
+    .locator('.app-header')
+    .evaluate((element) => getComputedStyle(element).position);
+  expect(headerPosition).toBe('sticky');
+  if (page.viewportSize()!.width > 760) {
+    const expandedWidth = (await page.locator('.sidebar').boundingBox())!.width;
+    await page.getByRole('button', { name: 'Recolher barra lateral' }).click();
+    const collapsedWidth = (await page.locator('.sidebar').boundingBox())!.width;
+    expect(collapsedWidth).toBeLessThan(expandedWidth);
+    await page.locator('summary[title="Meu caminho"]').click();
+    await expect(page.getByRole('link', { name: 'Passos registrados' })).toBeVisible();
+    expect((await page.locator('.sidebar').boundingBox())!.width).toBeGreaterThan(collapsedWidth);
+  }
+
+  await page.goto(`${base}/configuracoes?section=aparencia`);
+  await expect(page.getByRole('heading', { name: 'Uma luz confortável para você.' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Como podemos chamar você?' })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Perfil' }).click();
+  await page.getByLabel('Nova senha', { exact: true }).fill('senhasegura1');
+  await page.getByLabel('Confirmar nova senha').fill('senhasegura2');
+  await page.getByRole('button', { name: 'Atualizar senha' }).click();
+  await expect(page.getByText('As senhas precisam ser iguais.')).toBeVisible();
+});
+
 test('priority and microactions persist between task list, map and edited steps', async ({
   page,
 }) => {
   await page.goto(`${base}/tarefas`);
+  await page.getByRole('button', { name: '+ Nova tarefa' }).click();
   await page.getByLabel('O que você quer fazer?').fill('Organizar minha apresentação');
+  await page.getByText('Mais opções', { exact: true }).click();
   await page.getByRole('combobox', { name: 'Prioridade', exact: true }).selectOption('alta');
   await page.getByLabel('Pequenos passos (um por linha)').fill('Abrir documento\nEscrever título');
-  await page.getByRole('button', { name: 'Adicionar tarefa' }).click();
+  await page.getByRole('button', { name: 'Adicionar ao dia' }).click();
   await expect(page.getByText('Prioridade Alta')).toBeVisible();
   await page.goto(`${base}/mapa`);
   await page.getByRole('checkbox', { name: 'Escrever título', exact: true }).check();
   await page.reload();
   await expect(page.getByRole('checkbox', { name: 'Escrever título', exact: true })).toBeChecked();
   await page.goto(`${base}/tarefas`);
+  await page.getByLabel('Mais opções para Organizar minha apresentação').click();
   await page.getByRole('button', { name: 'Editar', exact: true }).click();
   await page
     .getByLabel('Pequenos passos (um por linha)')
@@ -202,13 +250,16 @@ test('priority and microactions persist between task list, map and edited steps'
 
 test('dependencies, recurrence and task removal persist', async ({ page }) => {
   await page.goto(`${base}/tarefas`);
+  await page.getByRole('button', { name: '+ Nova tarefa' }).click();
   await page.getByLabel('O que você quer fazer?').fill('Preparar material');
-  await page.getByRole('button', { name: 'Adicionar tarefa' }).click();
+  await page.getByRole('button', { name: 'Adicionar ao dia' }).click();
 
+  await page.getByRole('button', { name: '+ Nova tarefa' }).click();
   await page.getByLabel('O que você quer fazer?').fill('Enviar material');
-  await page.getByLabel('Só faça depois de').selectOption({ label: 'Preparar material' });
+  await page.getByText('Mais opções', { exact: true }).click();
+  await page.getByLabel('Começar depois de').selectOption({ label: 'Preparar material' });
   await page.getByLabel('Repetir').selectOption('weekly');
-  await page.getByRole('button', { name: 'Adicionar tarefa' }).click();
+  await page.getByRole('button', { name: 'Adicionar ao dia' }).click();
 
   const dependent = page.getByRole('article').filter({ hasText: 'Enviar material' });
   await expect(dependent.getByText('Semanal')).toBeVisible();
@@ -225,10 +276,11 @@ test('dependencies, recurrence and task removal persist', async ({ page }) => {
   await expect(dependent.getByText('Semanal')).toBeVisible();
 
   page.once('dialog', (dialog) => dialog.accept());
+  await dependent.getByLabel('Mais opções para Enviar material').click();
   await dependent.getByRole('button', { name: 'Remover' }).click();
-  await expect(page.getByRole('heading', { name: 'Enviar material' })).toHaveCount(0);
+  await expect(page.getByText('Enviar material', { exact: true })).toHaveCount(0);
   await page.reload();
-  await expect(page.getByRole('heading', { name: 'Enviar material' })).toHaveCount(0);
+  await expect(page.getByText('Enviar material', { exact: true })).toHaveCount(0);
 });
 
 test('compact, landscape and large layouts keep content within viewport', async ({
@@ -287,11 +339,12 @@ test('compact, landscape and large layouts keep content within viewport', async 
   }
   await page.setViewportSize({ width: 320, height: 568 });
   await page.goto(`${base}/tarefas`);
+  await page.getByRole('button', { name: '+ Nova tarefa' }).click();
   await page
     .getByLabel('O que você quer fazer?')
     .fill('Uma tarefa com um título muito longo para conferir a quebra de linhas no menor celular');
-  await page.getByRole('button', { name: 'Adicionar tarefa' }).click();
-  await expect(page.getByRole('heading', { name: /Uma tarefa com um título/ })).toBeVisible();
+  await page.getByRole('button', { name: 'Adicionar ao dia' }).click();
+  await expect(page.getByRole('article').getByText(/Uma tarefa com um título/)).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.screenshot({ path: info.outputPath('tasks-320-long-title.png'), fullPage: true });
 });

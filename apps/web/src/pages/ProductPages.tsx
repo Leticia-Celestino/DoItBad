@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
   dayKey,
   elapsedSeconds,
@@ -8,10 +8,12 @@ import {
   type Item,
   type Focus,
   type Priority,
+  type CognitiveLoad,
   type Recurrence,
   type DayPeriod,
   dayPeriodLabels,
   priorityLabels,
+  cognitiveLoadLabels,
   recurrenceLabels,
   projectColors,
   isTaskBlocked,
@@ -19,24 +21,19 @@ import {
   toggleStep,
   editSteps,
   type ActivityEvent,
-  groupTasksByHorizon,
-  taskHorizonLabels,
-  type TaskHorizon,
-  firstName,
-  greetingForHour,
   presenceDays,
 } from '@doitbad/core';
 import { useWorkspace } from '../lib/workspace';
-import { getSession, updateProfileName } from '../lib/auth';
+import { getSession, updatePassword, updateProfileName } from '../lib/auth';
 import {
   getPreferences,
-  preferencesEvent,
   savePreferences,
   type Preferences,
   type ThemePreference,
 } from '../lib/preferences';
 import { acceptRecommendation, recommendNextStep } from '../lib/ai';
 import Garden from '../components/Garden';
+import Companion from '../components/Companion';
 import Ambience from '../components/Ambience';
 
 export function Heading({
@@ -59,128 +56,7 @@ export function Heading({
 function Empty({ children }: { children: ReactNode }) {
   return <div className="empty-state">{children}</div>;
 }
-export function Dashboard() {
-  const { items } = useWorkspace();
-  const [name, setName] = useState('você');
-  const [preferences, setPreferences] = useState(getPreferences);
-  useEffect(() => {
-    void getSession().then((session) =>
-      setName(firstName(String(session?.user.user_metadata?.name ?? ''), session?.user.email)),
-    );
-  }, []);
-  useEffect(() => {
-    const update = (event: Event) =>
-      setPreferences((event as CustomEvent<Preferences>).detail ?? getPreferences());
-    window.addEventListener(preferencesEvent, update);
-    return () => window.removeEventListener(preferencesEvent, update);
-  }, []);
-  const stats = summarize(items);
-  const active = items.find(
-    (i): i is Item<'focus'> => i.kind === 'focus' && i.payload.status === 'active',
-  );
-  const tasks = items.filter((i): i is Item<'task'> => i.kind === 'task' && !i.payload.done);
-  const horizons = groupTasksByHorizon(items);
-  return (
-    <>
-      <Heading
-        tag={new Date().toLocaleDateString('pt-BR', {
-          weekday: 'long',
-          day: 'numeric',
-          month: 'long',
-        })}
-        title={`${preferences.contextualGreeting ? greetingForHour() : 'Olá'}, ${name}.`}
-      >
-        Seu ritmo. Seu próximo passo. Não precisa fazer tudo hoje.
-      </Heading>
-      <div className="dashboard-grid">
-        <section className="hero-panel">
-          <div>
-            <span className="pill">Um começo possível</span>
-            <h2>{active ? 'Vamos guardar o fio da meada?' : 'O começo pode ser pequeno.'}</h2>
-            <p>
-              {active
-                ? active.payload.title
-                : 'Dois minutos de presença já podem abrir um caminho.'}
-            </p>
-            <Link className="button" to={active ? `/foco/${active.id}` : '/tarefa'}>
-              {active ? 'Retomar meu passo' : 'Dar o primeiro passo'}{' '}
-              <span aria-hidden="true">↗</span>
-            </Link>
-          </div>
-          <Garden />
-        </section>
-        <section className="card quiet-card">
-          <span className="eyebrow">Sem pressa</span>
-          <h2>Você pode voltar quantas vezes precisar.</h2>
-          <p>Uma pausa faz parte do caminho.</p>
-          <Link to="/retomada">Encontrar meu fio da meada →</Link>
-        </section>
-      </div>
-      <div className="metrics">
-        <div>
-          <strong>{stats.steps}</strong>
-          <span>passos registrados</span>
-        </div>
-        <div>
-          <strong>{stats.minutes}</strong>
-          <span>minutos de presença</span>
-        </div>
-        <div>
-          <strong>{tasks.length}</strong>
-          <span>tarefas abertas</span>
-        </div>
-      </div>
-      <div className="section-title">
-        <div>
-          <span className="eyebrow">Seu dia continua daqui</span>
-          <h2>Agora, depois, quando couber.</h2>
-        </div>
-        <Link to="/tarefas">Todas as tarefas →</Link>
-      </div>
-      {tasks.length ? (
-        <div className="day-horizons">
-          {(Object.keys(horizons) as TaskHorizon[]).map((horizon) => (
-            <section className={`card horizon horizon-${horizon}`} key={horizon}>
-              <div className="horizon-heading">
-                <span className="horizon-dot" aria-hidden="true" />
-                <h3>{taskHorizonLabels[horizon]}</h3>
-                <small>{horizons[horizon].length}</small>
-              </div>
-              {horizons[horizon].length ? (
-                horizons[horizon].slice(0, 3).map((task) => (
-                  <Link className="horizon-task" to={`/tarefa?task=${task.id}`} key={task.id}>
-                    <span>{task.payload.title}</span>
-                    <small>
-                      {isTaskBlocked(task, items)
-                        ? 'Esperando um passo anterior'
-                        : dayPeriodLabels[task.payload.timeOfDay ?? 'anytime']}
-                    </small>
-                  </Link>
-                ))
-              ) : (
-                <p>Há espaço aqui.</p>
-              )}
-            </section>
-          ))}
-        </div>
-      ) : (
-        <Empty>
-          Seu espaço está pronto. <Link to="/tarefas">Adicione sua primeira tarefa.</Link>
-        </Empty>
-      )}
-      <Link className="presence-invite card" to="/pequenos-comecos">
-        <span className="round-icon" aria-hidden="true">
-          ✦
-        </span>
-        <span className="grow">
-          <strong>Pequenos começos</strong>
-          <small>Veja os dias em que você esteve presente, sem sequências obrigatórias.</small>
-        </span>
-        <span aria-hidden="true">→</span>
-      </Link>
-    </>
-  );
-}
+export { default as Dashboard } from './DayHome';
 export function TasksPage() {
   const { items, save, remove, busy } = useWorkspace();
   const query = new URLSearchParams(window.location.search);
@@ -196,13 +72,14 @@ export function TasksPage() {
   const [title, setTitle] = useState('');
   const [project, setProject] = useState('');
   const [priority, setPriority] = useState<Priority>('media');
+  const [cognitiveLoad, setCognitiveLoad] = useState<CognitiveLoad>(2);
   const [recurrence, setRecurrence] = useState<Recurrence>('none');
   const [timeOfDay, setTimeOfDay] = useState<DayPeriod>(initialPeriod);
   const [dependsOn, setDependsOn] = useState('');
   const [date, setDate] = useState(initialDate);
   const [steps, setSteps] = useState('');
   const [search, setSearch] = useState('');
-  const [filter, setFilter] = useState('open');
+  const [filter, setFilter] = useState('all');
   const [editing, setEditing] = useState<Item<'task'> | undefined>();
   const [editorOpen, setEditorOpen] = useState(query.get('new') === '1');
   const [selectedDate, setSelectedDate] = useState(initialDate);
@@ -236,6 +113,7 @@ export function TasksPage() {
     setProject('');
     setSteps('');
     setPriority('media');
+    setCognitiveLoad(2);
     setRecurrence('none');
     setTimeOfDay('anytime');
     setDependsOn('');
@@ -252,6 +130,7 @@ export function TasksPage() {
     setTitle(task.payload.title);
     setProject(task.payload.project);
     setPriority(task.payload.priority ?? 'media');
+    setCognitiveLoad(task.payload.cognitiveLoad ?? 2);
     setRecurrence(task.payload.recurrence ?? 'none');
     setTimeOfDay(task.payload.timeOfDay ?? 'anytime');
     setDependsOn(task.payload.dependsOn?.[0] ?? '');
@@ -294,6 +173,7 @@ export function TasksPage() {
           ...editing?.payload,
           title: title.trim(),
           priority,
+          cognitiveLoad,
           recurrence,
           timeOfDay,
           dependsOn: dependsOn ? [dependsOn] : [],
@@ -512,7 +392,29 @@ export function TasksPage() {
                                 {task.payload.steps.length} passos
                               </span>
                             )}
-                            {blocked && <span>Depois de outra tarefa</span>}
+                            <span>
+                              Prioridade {priorityLabels[task.payload.priority ?? 'media']}
+                            </span>
+                            {(task.payload.recurrence ?? 'none') !== 'none' && (
+                              <span>{recurrenceLabels[task.payload.recurrence ?? 'none']}</span>
+                            )}
+                            <span
+                              className="cognitive-load"
+                              aria-label={`Carga cognitiva ${cognitiveLoadLabels[task.payload.cognitiveLoad ?? 2]}`}
+                            >
+                              <i aria-hidden="true">
+                                {[1, 2, 3].map((level) => (
+                                  <b
+                                    key={level}
+                                    className={
+                                      level <= (task.payload.cognitiveLoad ?? 2) ? 'filled' : ''
+                                    }
+                                  />
+                                ))}
+                              </i>
+                              {cognitiveLoadLabels[task.payload.cognitiveLoad ?? 2]}
+                            </span>
+                            {blocked && <span>Bloqueada por outra tarefa</span>}
                           </div>
                           {task.payload.steps.length > 0 && (
                             <details className="task-steps-details">
@@ -614,12 +516,31 @@ export function TasksPage() {
             <label>
               Pequenos passos <span className="optional-label">opcional</span>
               <textarea
+                aria-label="Pequenos passos (um por linha)"
                 value={steps}
                 onChange={(event) => setSteps(event.target.value)}
                 maxLength={2000}
                 placeholder="Abrir o documento&#10;Escrever uma frase"
               />
             </label>
+            <fieldset className="cognitive-load-options">
+              <legend>Quanto de energia mental isso parece pedir?</legend>
+              {([1, 2, 3] as CognitiveLoad[]).map((value) => (
+                <button
+                  type="button"
+                  key={value}
+                  aria-pressed={cognitiveLoad === value}
+                  onClick={() => setCognitiveLoad(value)}
+                >
+                  <span aria-hidden="true">
+                    {[1, 2, 3].map((level) => (
+                      <i key={level} className={level <= value ? 'filled' : ''} />
+                    ))}
+                  </span>
+                  {cognitiveLoadLabels[value]}
+                </button>
+              ))}
+            </fieldset>
             <details className="editor-more">
               <summary>Mais opções</summary>
               <div className="stack">
@@ -627,6 +548,7 @@ export function TasksPage() {
                   Projeto
                   <input
                     value={project}
+                    aria-label="Projeto (opcional)"
                     maxLength={80}
                     onChange={(event) => setProject(event.target.value)}
                     placeholder="Pessoal, estudos, trabalho…"
@@ -702,15 +624,16 @@ export function StartPage() {
   const task = items.find(
     (i): i is Item<'task'> => i.kind === 'task' && i.id === params.get('task'),
   );
-  const [stage, setStage] = useState(0);
+  const suggestedStep = params.get('suggestion')?.slice(0, 240) ?? '';
+  const [stage, setStage] = useState(suggestedStep ? 2 : 0);
   const [title, setTitle] = useState(
     task?.payload.title ?? params.get('title')?.slice(0, 240) ?? '',
   );
   const [step, setStep] = useState(
-    task?.payload.steps.find((_, i) => !task.payload.completedSteps?.includes(i)) ?? '',
+    suggestedStep ||
+      (task?.payload.steps.find((_, i) => !task.payload.completedSteps?.includes(i)) ?? ''),
   );
   const [blockers, setBlockers] = useState<string[]>([]);
-  const [duration, setDuration] = useState(() => getPreferences().focusMinutes);
   const [recommendationBusy, setRecommendationBusy] = useState(false);
   const [recommendationId, setRecommendationId] = useState<string | null>(null);
   const [createdTask, setCreatedTask] = useState<Item<'task'> | null>(null);
@@ -736,7 +659,7 @@ export function StartPage() {
       title,
       step,
       blockers,
-      target: duration * 60,
+      target: 2 * 60,
       elapsed: 0,
       runningSince: Date.now(),
       status: 'active',
@@ -872,18 +795,12 @@ export function StartPage() {
             >
               Diminuir este passo
             </button>
-            <label>
-              Tempo de foco
-              <select value={duration} onChange={(e) => setDuration(Number(e.target.value))}>
-                {[2, 5, 10, 15, 25].map((n) => (
-                  <option key={n} value={n}>
-                    {n} minutos
-                  </option>
-                ))}
-              </select>
-            </label>
+            <div className="two-minute-principle">
+              <strong>Dois minutos. Só o primeiro começo.</strong>
+              <p>Quando o tempo terminar, você decide se quer parar ou continuar.</p>
+            </div>
             <button className="button" disabled={busy || !step.trim()} onClick={() => void start()}>
-              Iniciar {duration} minutos
+              Iniciar 2 minutos
             </button>
           </>
         )}
@@ -894,7 +811,7 @@ export function StartPage() {
         )}
       </section>
       <aside className="focus-aside">
-        <Garden />
+        <Companion state="welcome" />
         <h2>Não precisa sair perfeito.</h2>
         <p>Você só precisa de um começo possível. O restante pode esperar.</p>
       </aside>
@@ -1006,7 +923,7 @@ export function TimerPage() {
         )}
       </section>
       <aside className="focus-aside">
-        <Garden />
+        <Companion state={focus.runningSince ? 'focus' : 'pause'} />
         <h2>Só este momento.</h2>
         <p>O tempo é um convite. Você pode pausar ou encerrar quando precisar.</p>
       </aside>
@@ -1082,7 +999,7 @@ export function DonePage() {
         </div>
       </section>
       <aside className="focus-aside">
-        <Garden />
+        <Companion state="complete" />
         <h2>Pequeno também conta.</h2>
       </aside>
     </div>
@@ -1381,20 +1298,41 @@ export function CalendarPage() {
                   </Link>
                 </header>
                 {periodTasks.map((t) => (
-                  <div className="micro-step" key={t.id}>
-                    <input
-                      type="checkbox"
-                      aria-label={`Concluir ${t.payload.title}`}
-                      checked={t.payload.done}
-                      disabled={busy}
-                      onChange={() => void save('task', { ...t.payload, done: !t.payload.done }, t)}
-                    />
-                    <Link to={`/tarefa?task=${t.id}`}>
-                      {t.payload.done ? '✓ ' : ''}
-                      {t.payload.title}
-                    </Link>
-                    {(t.payload.recurrence ?? 'none') !== 'none' && (
-                      <small>{recurrenceLabels[t.payload.recurrence ?? 'none']}</small>
+                  <div className="agenda-task" key={t.id}>
+                    <div className="micro-step">
+                      <input
+                        type="checkbox"
+                        aria-label={`Concluir ${t.payload.title}`}
+                        checked={t.payload.done}
+                        disabled={busy}
+                        onChange={() =>
+                          void save('task', { ...t.payload, done: !t.payload.done }, t)
+                        }
+                      />
+                      <Link to={`/tarefa?task=${t.id}`}>
+                        {t.payload.done ? '✓ ' : ''}
+                        {t.payload.title}
+                      </Link>
+                      {(t.payload.recurrence ?? 'none') !== 'none' && (
+                        <small>{recurrenceLabels[t.payload.recurrence ?? 'none']}</small>
+                      )}
+                    </div>
+                    {t.payload.steps.length > 0 && (
+                      <ul
+                        className="agenda-microactions"
+                        aria-label={`Microações de ${t.payload.title}`}
+                      >
+                        {t.payload.steps.map((taskStep, stepIndex) => (
+                          <li
+                            className={
+                              t.payload.completedSteps?.includes(stepIndex) ? 'is-complete' : ''
+                            }
+                            key={`${taskStep}-${stepIndex}`}
+                          >
+                            {taskStep}
+                          </li>
+                        ))}
+                      </ul>
                     )}
                   </div>
                 ))}
@@ -1512,18 +1450,18 @@ export function ChallengesPage() {
 }
 export function RecoveryPage() {
   const { items, save, busy } = useWorkspace();
-  const [note, setNote] = useState('');
   const [saved, setSaved] = useState(false);
   const active = items.find(
     (i): i is Item<'focus'> => i.kind === 'focus' && i.payload.status === 'active',
   );
+  const [note, setNote] = useState(active?.payload.note ?? '');
   const last = summarize(items).sessions[0];
   return (
     <section className="night-panel">
       <span className="eyebrow">Seu fio da meada</span>
       <h1>Você pode voltar de onde está.</h1>
       <p>Não precisa recuperar o tempo. Só encontrar o próximo gesto.</p>
-      <Garden />
+      <Companion state="pause" />
       {active ? (
         <div className="card">
           <h2>{active.payload.title}</h2>
@@ -1705,16 +1643,38 @@ export function ZenPage() {
 
 export function SettingsPage() {
   const [preferences, setPreferences] = useState(getPreferences);
-  const [name, setName] = useState('');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestedSection = searchParams.get('section');
+  const [section, setSection] = useState<'perfil' | 'aparencia' | 'foco' | 'privacidade'>(
+    requestedSection === 'aparencia' ||
+      requestedSection === 'foco' ||
+      requestedSection === 'privacidade'
+      ? requestedSection
+      : 'perfil',
+  );
+  const [name, setName] = useState(() => getPreferences().displayName);
   const [email, setEmail] = useState('');
   const [savingProfile, setSavingProfile] = useState(false);
   const [profileMessage, setProfileMessage] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [savingPassword, setSavingPassword] = useState(false);
+  const [passwordMessage, setPasswordMessage] = useState('');
   useEffect(() => {
     void getSession().then((session) => {
-      setName(String(session?.user.user_metadata?.name ?? ''));
+      setName((current) => current || String(session?.user.user_metadata?.name ?? ''));
       setEmail(session?.user.email ?? '');
     });
   }, []);
+  useEffect(() => {
+    if (
+      requestedSection === 'perfil' ||
+      requestedSection === 'aparencia' ||
+      requestedSection === 'foco' ||
+      requestedSection === 'privacidade'
+    )
+      setSection(requestedSection);
+  }, [requestedSection]);
   function updatePreferences(next: Partial<Preferences>) {
     const value = { ...preferences, ...next };
     setPreferences(value);
@@ -1727,174 +1687,250 @@ export function SettingsPage() {
       </Heading>
       <div className="settings-layout">
         <nav className="settings-index" aria-label="Seções de configurações">
-          <a href="#perfil">Perfil</a>
-          <a href="#aparencia">Aparência</a>
-          <a href="#foco">Foco e som</a>
-          <a href="#privacidade">Dados e privacidade</a>
-        </nav>
-        <div className="settings-sections">
-          <section className="card settings-card" id="perfil">
-            <header>
-              <div>
-                <p className="eyebrow">Perfil</p>
-                <h2>Como podemos chamar você?</h2>
-              </div>
-              <span className="settings-icon" aria-hidden="true">
-                ☺
-              </span>
-            </header>
-            <form
-              className="stack"
-              onSubmit={async (event) => {
-                event.preventDefault();
-                setSavingProfile(true);
-                setProfileMessage('');
-                try {
-                  await updateProfileName(name);
-                  setProfileMessage('Nome atualizado. Que bom ter você por aqui.');
-                } catch {
-                  setProfileMessage('Não foi possível atualizar agora. Tente novamente.');
-                } finally {
-                  setSavingProfile(false);
-                }
+          {(
+            [
+              ['perfil', '☺', 'Perfil'],
+              ['aparencia', '☾', 'Aparência'],
+              ['foco', '◷', 'Foco e som'],
+              ['privacidade', '◇', 'Dados e privacidade'],
+            ] as const
+          ).map(([value, icon, label]) => (
+            <button
+              type="button"
+              key={value}
+              aria-current={section === value ? 'page' : undefined}
+              onClick={() => {
+                setSection(value);
+                setSearchParams({ section: value }, { replace: true });
               }}
             >
-              <label>
-                Seu nome
-                <input
-                  value={name}
-                  maxLength={80}
-                  onChange={(event) => setName(event.target.value)}
-                />
-              </label>
-              <label>
-                E-mail da conta
-                <input value={email} disabled readOnly />
-              </label>
-              <div className="settings-action-row">
-                <button className="button" disabled={savingProfile || !name.trim()}>
-                  {savingProfile ? 'Salvando…' : 'Salvar nome'}
-                </button>
-                {profileMessage && <p role="status">{profileMessage}</p>}
-              </div>
-            </form>
-          </section>
-
-          <section className="card settings-card" id="aparencia">
-            <header>
-              <div>
-                <p className="eyebrow">Aparência</p>
-                <h2>Uma luz confortável para você.</h2>
-              </div>
-              <span className="settings-icon" aria-hidden="true">
-                ☾
-              </span>
-            </header>
-            <fieldset className="preference-options">
-              <legend>Tema</legend>
-              {(
-                [
-                  ['light', 'Claro', 'Creme e superfícies quentes'],
-                  ['dark', 'Noturno', 'Verde profundo e contraste suave'],
-                  ['system', 'Do dispositivo', 'Acompanha o sistema automaticamente'],
-                ] as [ThemePreference, string, string][]
-              ).map(([value, label, description]) => (
-                <label className="preference-choice" key={value}>
+              <span aria-hidden="true">{icon}</span>
+              {label}
+            </button>
+          ))}
+        </nav>
+        <div className="settings-sections">
+          {section === 'perfil' && (
+            <section className="card settings-card" id="perfil">
+              <header>
+                <div>
+                  <p className="eyebrow">Perfil</p>
+                  <h2>Como podemos chamar você?</h2>
+                </div>
+                <span className="settings-icon" aria-hidden="true">
+                  ☺
+                </span>
+              </header>
+              <form
+                className="stack"
+                onSubmit={async (event) => {
+                  event.preventDefault();
+                  setSavingProfile(true);
+                  setProfileMessage('');
+                  try {
+                    updatePreferences({ displayName: name.trim() });
+                    await updateProfileName(name);
+                    setProfileMessage('Nome atualizado. Que bom ter você por aqui.');
+                  } catch {
+                    setProfileMessage('Não foi possível atualizar agora. Tente novamente.');
+                  } finally {
+                    setSavingProfile(false);
+                  }
+                }}
+              >
+                <label>
+                  Seu nome
                   <input
-                    type="radio"
-                    name="theme"
-                    value={value}
-                    checked={preferences.theme === value}
-                    onChange={() => updatePreferences({ theme: value })}
+                    value={name}
+                    maxLength={80}
+                    onChange={(event) => setName(event.target.value)}
                   />
-                  <span>
-                    <strong>{label}</strong>
-                    <small>{description}</small>
-                  </span>
                 </label>
-              ))}
-            </fieldset>
-            <label className="setting-toggle">
-              <span>
-                <strong>Saudação pelo horário</strong>
-                <small>Usar “Bom dia”, “Boa tarde” ou “Boa noite”.</small>
-              </span>
-              <input
-                type="checkbox"
-                checked={preferences.contextualGreeting}
-                onChange={(event) =>
-                  updatePreferences({ contextualGreeting: event.target.checked })
-                }
-              />
-            </label>
-          </section>
+                <label>
+                  E-mail da conta
+                  <input value={email} disabled readOnly />
+                </label>
+                <div className="settings-action-row">
+                  <button className="button" disabled={savingProfile || !name.trim()}>
+                    {savingProfile ? 'Salvando…' : 'Salvar nome'}
+                  </button>
+                  {profileMessage && <p role="status">{profileMessage}</p>}
+                </div>
+              </form>
+              <div className="settings-divider" />
+              <form
+                className="stack"
+                onSubmit={async (event) => {
+                  event.preventDefault();
+                  setPasswordMessage('');
+                  if (newPassword !== confirmPassword) {
+                    setPasswordMessage('As senhas precisam ser iguais.');
+                    return;
+                  }
+                  setSavingPassword(true);
+                  try {
+                    await updatePassword(newPassword);
+                    setNewPassword('');
+                    setConfirmPassword('');
+                    setPasswordMessage('Senha atualizada com segurança.');
+                  } catch {
+                    setPasswordMessage('Não foi possível atualizar a senha agora.');
+                  } finally {
+                    setSavingPassword(false);
+                  }
+                }}
+              >
+                <div>
+                  <h3>Alterar senha</h3>
+                  <p className="settings-help">Use pelo menos 8 caracteres.</p>
+                </div>
+                <label>
+                  Nova senha
+                  <input
+                    type="password"
+                    autoComplete="new-password"
+                    minLength={8}
+                    value={newPassword}
+                    onChange={(event) => setNewPassword(event.target.value)}
+                    required
+                  />
+                </label>
+                <label>
+                  Confirmar nova senha
+                  <input
+                    type="password"
+                    autoComplete="new-password"
+                    minLength={8}
+                    value={confirmPassword}
+                    onChange={(event) => setConfirmPassword(event.target.value)}
+                    required
+                  />
+                </label>
+                <div className="settings-action-row">
+                  <button
+                    className="button"
+                    disabled={savingPassword || newPassword.length < 8 || !confirmPassword}
+                  >
+                    {savingPassword ? 'Atualizando…' : 'Atualizar senha'}
+                  </button>
+                  {passwordMessage && <p role="status">{passwordMessage}</p>}
+                </div>
+              </form>
+            </section>
+          )}
 
-          <section className="card settings-card" id="foco">
-            <header>
-              <div>
-                <p className="eyebrow">Foco e som</p>
-                <h2>Começar com o tamanho certo.</h2>
-              </div>
-              <span className="settings-icon" aria-hidden="true">
-                ◷
-              </span>
-            </header>
-            <fieldset className="compact-options">
-              <legend>Duração sugerida para novos focos</legend>
-              {[2, 5, 10, 15, 25].map((minutes) => (
-                <button
-                  type="button"
-                  key={minutes}
-                  aria-pressed={preferences.focusMinutes === minutes}
-                  onClick={() => updatePreferences({ focusMinutes: minutes })}
-                >
-                  {minutes} min
-                </button>
-              ))}
-            </fieldset>
-            <label className="volume-setting">
-              <span>
-                <strong>Volume dos sons suaves</strong>
-                <small>O som só começa quando você pedir.</small>
-              </span>
-              <span className="volume-control">
+          {section === 'aparencia' && (
+            <section className="card settings-card" id="aparencia">
+              <header>
+                <div>
+                  <p className="eyebrow">Aparência</p>
+                  <h2>Uma luz confortável para você.</h2>
+                </div>
+                <span className="settings-icon" aria-hidden="true">
+                  ☾
+                </span>
+              </header>
+              <fieldset className="preference-options">
+                <legend>Tema</legend>
+                {(
+                  [
+                    ['light', 'Claro', 'Creme e superfícies quentes'],
+                    ['dark', 'Noturno', 'Verde profundo e contraste suave'],
+                    ['system', 'Do dispositivo', 'Acompanha o sistema automaticamente'],
+                  ] as [ThemePreference, string, string][]
+                ).map(([value, label, description]) => (
+                  <label className="preference-choice" key={value}>
+                    <input
+                      type="radio"
+                      name="theme"
+                      value={value}
+                      checked={preferences.theme === value}
+                      onChange={() => updatePreferences({ theme: value })}
+                    />
+                    <span>
+                      <strong>{label}</strong>
+                      <small>{description}</small>
+                    </span>
+                  </label>
+                ))}
+              </fieldset>
+              <label className="setting-toggle">
+                <span>
+                  <strong>Saudação pelo horário</strong>
+                  <small>Usar “Boa madrugada”, “Bom dia”, “Boa tarde” ou “Boa noite”.</small>
+                </span>
                 <input
-                  type="range"
-                  min="0"
-                  max="0.6"
-                  step="0.05"
-                  value={preferences.soundVolume}
+                  type="checkbox"
+                  checked={preferences.contextualGreeting}
                   onChange={(event) =>
-                    updatePreferences({ soundVolume: Number(event.target.value) })
+                    updatePreferences({ contextualGreeting: event.target.checked })
                   }
                 />
-                <output>{Math.round(preferences.soundVolume * 100)}%</output>
-              </span>
-            </label>
-          </section>
+              </label>
+            </section>
+          )}
 
-          <section className="card settings-card" id="privacidade">
-            <header>
-              <div>
-                <p className="eyebrow">Dados e privacidade</p>
-                <h2>Seu espaço continua sendo seu.</h2>
+          {section === 'foco' && (
+            <section className="card settings-card" id="foco">
+              <header>
+                <div>
+                  <p className="eyebrow">Foco e som</p>
+                  <h2>Começar com o tamanho certo.</h2>
+                </div>
+                <span className="settings-icon" aria-hidden="true">
+                  ◷
+                </span>
+              </header>
+              <div className="two-minute-principle">
+                <strong>Todo começo parte de 2 minutos.</strong>
+                <p>Depois desse primeiro ciclo, continuar é sempre uma escolha sua.</p>
               </div>
-              <span className="settings-icon" aria-hidden="true">
-                ◇
-              </span>
-            </header>
-            <p>
-              Suas tarefas, sessões e registros ficam ligados à sua conta para sincronizar web e
-              aplicativo.
-            </p>
-            <div className="privacy-note">
-              <strong>Excluir dados</strong>
+              <label className="volume-setting">
+                <span>
+                  <strong>Volume dos sons suaves</strong>
+                  <small>O som só começa quando você pedir.</small>
+                </span>
+                <span className="volume-control">
+                  <input
+                    type="range"
+                    min="0"
+                    max="0.6"
+                    step="0.05"
+                    value={preferences.soundVolume}
+                    onChange={(event) =>
+                      updatePreferences({ soundVolume: Number(event.target.value) })
+                    }
+                  />
+                  <output>{Math.round(preferences.soundVolume * 100)}%</output>
+                </span>
+              </label>
+            </section>
+          )}
+
+          {section === 'privacidade' && (
+            <section className="card settings-card" id="privacidade">
+              <header>
+                <div>
+                  <p className="eyebrow">Dados e privacidade</p>
+                  <h2>Seu espaço continua sendo seu.</h2>
+                </div>
+                <span className="settings-icon" aria-hidden="true">
+                  ◇
+                </span>
+              </header>
               <p>
-                Para evitar uma exclusão acidental, o fluxo definitivo de remoção da conta será
-                confirmado em uma etapa protegida.
+                Suas tarefas, sessões e registros ficam ligados à sua conta para sincronizar web e
+                aplicativo.
               </p>
-            </div>
-          </section>
+              <div className="privacy-note">
+                <strong>Excluir dados</strong>
+                <p>
+                  Para evitar uma exclusão acidental, o fluxo definitivo de remoção da conta será
+                  confirmado em uma etapa protegida.
+                </p>
+              </div>
+            </section>
+          )}
         </div>
       </div>
     </section>

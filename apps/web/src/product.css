@@ -139,7 +139,10 @@ small {
 }
 .brand span {
   display: inline-block;
+}
+.brand .brand-b {
   transform: scaleX(-1);
+  transform-origin: center;
 }
 .sidebar-caption {
   font-size: 0.75rem;
@@ -2054,6 +2057,34 @@ textarea {
   border-radius: 12px;
   background: var(--canvas-soft);
   font-size: 0.78rem;
+}
+.agenda-task + .agenda-task {
+  border-top: 1px dashed var(--line);
+}
+.agenda-microactions {
+  display: grid;
+  gap: 6px;
+  margin: -2px 0 8px 31px;
+  padding: 0;
+  list-style: none;
+}
+.agenda-microactions li {
+  position: relative;
+  padding-left: 15px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  line-height: 1.45;
+}
+.agenda-microactions li::before {
+  content: '·';
+  position: absolute;
+  left: 3px;
+  color: var(--terracotta);
+  font-weight: 800;
+}
+.agenda-microactions li.is-complete {
+  text-decoration: line-through;
+  opacity: 0.65;
 }
 .micro-step:has(:checked) span {
   text-decoration: line-through;

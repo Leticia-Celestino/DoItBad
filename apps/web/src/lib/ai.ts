@@ -4,7 +4,7 @@ export type AIRecommendation = {
   task_revision: number;
   microaction: string;
   reason: string;
-  estimated_minutes: number;
+  estimated_minutes: 2;
   source: 'llama' | 'deterministic';
   model: string | null;
 };

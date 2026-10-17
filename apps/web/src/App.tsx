@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import AppShell from './components/AppShell';
 import ActivityPage from './pages/ActivityPage';
@@ -26,6 +26,7 @@ import { getSession, subscribeToAuth } from './lib/auth';
 import { isSupabaseConfigured } from './lib/supabase';
 
 export default function App() {
+  const location = useLocation();
   const [authReady, setAuthReady] = useState(!isSupabaseConfigured);
   const [signedIn, setSignedIn] = useState(!isSupabaseConfigured);
   const [userId, setUserId] = useState('local');
@@ -93,7 +94,7 @@ export default function App() {
       >
         <Route path="/atividade" element={<Dashboard />} />
         <Route path="/intencoes" element={<ActivityPage />} />
-        <Route path="/tarefas" element={<TasksPage />} />
+        <Route path="/tarefas" element={<TasksPage key={location.key} />} />
         <Route path="/tarefa" element={<StartPage />} />
         <Route path="/foco/:id" element={<TimerPage />} />
         <Route path="/conclusao/:id" element={<DonePage />} />

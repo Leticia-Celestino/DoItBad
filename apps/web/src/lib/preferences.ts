@@ -5,6 +5,7 @@ export type Preferences = {
   focusMinutes: number;
   soundVolume: number;
   contextualGreeting: boolean;
+  displayName: string;
 };
 
 const key = 'doitbad:preferences';
@@ -15,6 +16,7 @@ const defaults: Preferences = {
   focusMinutes: 2,
   soundVolume: 0.25,
   contextualGreeting: true,
+  displayName: '',
 };
 
 export function getPreferences(): Preferences {
@@ -35,6 +37,8 @@ export function getPreferences(): Preferences {
         : defaults.focusMinutes,
       soundVolume: Math.min(0.6, Math.max(0, Number(saved.soundVolume ?? defaults.soundVolume))),
       contextualGreeting: saved.contextualGreeting !== false,
+      displayName:
+        typeof saved.displayName === 'string' ? saved.displayName.trim().slice(0, 80) : '',
     };
   } catch {
     return defaults;

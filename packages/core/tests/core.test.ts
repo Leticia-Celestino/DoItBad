@@ -216,6 +216,7 @@ test('presence levels celebrate kinds of progress without counting volume', asyn
 
 test('greetings and first names stay human without requiring profile data', async () => {
   const { firstName, greetingForHour } = await import('../src/index.ts');
+  assert.equal(greetingForHour(2), 'Boa madrugada');
   assert.equal(greetingForHour(8), 'Bom dia');
   assert.equal(greetingForHour(14), 'Boa tarde');
   assert.equal(greetingForHour(22), 'Boa noite');

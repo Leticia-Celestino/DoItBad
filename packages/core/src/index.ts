@@ -23,6 +23,7 @@ export const colors = {
   nightLine: '#3B463C',
 };
 export type Priority = 'alta' | 'media' | 'baixa';
+export type CognitiveLoad = 1 | 2 | 3;
 export type Recurrence = 'none' | 'daily' | 'weekly';
 export type DayPeriod = 'morning' | 'afternoon' | 'night' | 'anytime';
 export const dayPeriodLabels: Record<DayPeriod, string> = {
@@ -39,6 +40,7 @@ export type Task = {
   done: boolean;
   steps: string[];
   priority?: Priority;
+  cognitiveLoad?: CognitiveLoad;
   completedSteps?: number[];
   dependsOn?: string[];
   recurrence?: Recurrence;
@@ -47,6 +49,11 @@ export type Task = {
 };
 export const projectColors = ['#526148', '#985033', '#E8C77F', '#E8AF8D', '#635E53'];
 export const priorityLabels = { alta: 'Alta', media: 'Média', baixa: 'Baixa' };
+export const cognitiveLoadLabels: Record<CognitiveLoad, string> = {
+  1: 'Leve',
+  2: 'Moderada',
+  3: 'Intensa',
+};
 export const recurrenceLabels = { none: 'Uma vez', daily: 'Diária', weekly: 'Semanal' };
 export function isTaskBlocked(task: Item<'task'>, items: Item[]): boolean {
   return (task.payload.dependsOn ?? []).some((id) => {
@@ -187,7 +194,8 @@ export function dayKey(date = new Date()): string {
 }
 export function greetingForHour(
   hour = new Date().getHours(),
-): 'Bom dia' | 'Boa tarde' | 'Boa noite' {
+): 'Boa madrugada' | 'Bom dia' | 'Boa tarde' | 'Boa noite' {
+  if (hour < 5) return 'Boa madrugada';
   if (hour < 12) return 'Bom dia';
   if (hour < 18) return 'Boa tarde';
   return 'Boa noite';

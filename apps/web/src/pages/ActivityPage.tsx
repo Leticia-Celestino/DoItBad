@@ -4,6 +4,7 @@ import { listIntentions, saveIntention } from '../lib/intentions';
 import type { Intention } from '../lib/intentions';
 import { isSupabaseConfigured } from '../lib/supabase';
 import { Link } from 'react-router-dom';
+import Companion from '../components/Companion';
 
 type LoadState = 'loading' | 'ready' | 'error';
 type SaveState = 'idle' | 'saving' | 'saved' | 'error';
@@ -43,10 +44,15 @@ export default function ActivityPage() {
   }
 
   return (
-    <section aria-labelledby="activity-title">
-      <p className="eyebrow">Seu ponto de partida</p>
-      <h1 id="activity-title">O que você quer tornar um pouco mais possível?</h1>
-      <p className="lede">Guarde uma intenção. O próximo passo será construído com você.</p>
+    <section className="intention-page" aria-labelledby="activity-title">
+      <div className="intention-intro">
+        <div>
+          <p className="eyebrow">Seu ponto de partida</p>
+          <h1 id="activity-title">O que você quer tornar um pouco mais possível?</h1>
+          <p className="lede">Guarde uma intenção. O próximo passo será construído com você.</p>
+        </div>
+        <Companion state="focus" />
+      </div>
 
       <form className="intention-form" onSubmit={submit}>
         <label htmlFor="intention">Minha intenção agora</label>
