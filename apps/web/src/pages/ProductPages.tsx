@@ -33,11 +33,13 @@ import {
   editSteps,
   type ActivityEvent,
   presenceDays,
+  firstName,
 } from '@doitbad/core';
 import { useWorkspace } from '../lib/workspace';
 import { getSession, updatePassword, updateProfileName } from '../lib/auth';
 import {
   getPreferences,
+  preferencesEvent,
   savePreferences,
   type Preferences,
   type ThemePreference,
@@ -1069,7 +1071,26 @@ export function DonePage() {
 }
 export function HistoryPage() {
   const { items } = useWorkspace();
+  const [name, setName] = useState(() => getPreferences().displayName);
   const [period, setPeriod] = useState<'Semana' | 'Mês' | 'Ano'>('Semana');
+  useEffect(() => {
+    let mounted = true;
+    void getSession()
+      .then((session) => {
+        if (mounted && session)
+          setName(
+            getPreferences().displayName ||
+              firstName(String(session.user.user_metadata?.name ?? ''), session.user.email),
+          );
+      })
+      .catch(() => undefined);
+    const update = () => setName(getPreferences().displayName);
+    window.addEventListener(preferencesEvent, update);
+    return () => {
+      mounted = false;
+      window.removeEventListener(preferencesEvent, update);
+    };
+  }, []);
   const cutoff = Date.now() - { Semana: 7, Mês: 30, Ano: 365 }[period] * 86400000;
   const stats = summarize(items.filter((i) => new Date(i.created_at).getTime() >= cutoff));
   const allSessions = summarize(items).sessions;
@@ -1090,7 +1111,7 @@ export function HistoryPage() {
         <div>
           <h1>{stats.minutes} minutos</h1>
           <h2>de execução</h2>
-          <p>Olá, você — cada começo faz parte do seu caminho.</p>
+          <p>Olá, {name || 'você'} — cada começo faz parte do seu caminho.</p>
         </div>
         <div className="history-goal" aria-label={`${goal}% da meta do período`}>
           <strong>{goal}%</strong>
