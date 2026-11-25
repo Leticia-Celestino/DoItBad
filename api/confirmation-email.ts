@@ -138,22 +138,27 @@ function oneClickUnsubscribeUrl(token: string) {
   return url.href;
 }
 
-export function buildConfirmationEmail(input: {
+export function buildBrandedEmail(input: {
   name: string | null;
   locale: string;
   confirmationToken?: string;
   unsubscribeToken?: string;
+  copy?: Partial<ConfirmationCopy>;
+  actionUrl?: string;
+  transactional?: boolean;
 }) {
   const locale: ConfirmationLocale = Object.prototype.hasOwnProperty.call(COPY, input.locale)
     ? (input.locale as ConfirmationLocale)
     : 'pt-BR';
-  const copy = COPY[locale];
+  const copy = { ...COPY[locale], ...input.copy };
   const name = input.name ? escapeHtml(input.name) : '';
   const greeting = `${copy.greeting}${name ? `, ${name}` : ''}!`;
   const title = copy.title.replace('\n', '<br>');
-  const url = input.confirmationToken
-    ? preferenceUrl(locale, 'confirm', input.confirmationToken)
-    : siteUrl(locale);
+  const url =
+    input.actionUrl ??
+    (input.confirmationToken
+      ? preferenceUrl(locale, 'confirm', input.confirmationToken)
+      : siteUrl(locale));
   const unsubscribeUrl = input.unsubscribeToken
     ? preferenceUrl(locale, 'unsubscribe', input.unsubscribeToken)
     : siteUrl(locale);
@@ -168,6 +173,7 @@ export function buildConfirmationEmail(input: {
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="x-apple-disable-message-reformatting">
     <title>${copy.subject}</title>
+    <style>@media only screen and (max-width:480px){td.email-pad{padding-left:22px!important;padding-right:22px!important}h1{font-size:36px!important;letter-spacing:-1.5px!important}td.email-step-icon{display:none!important}}</style>
   </head>
   <body style="margin:0;padding:0;background:#eee4d5;color:#343e31;font-family:Inter,Arial,sans-serif;">
     <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;">${copy.preheader}&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;</div>
@@ -218,7 +224,7 @@ export function buildConfirmationEmail(input: {
                 <table role="presentation" cellspacing="0" cellpadding="0" border="0">
                   <tr>
                     <td style="border-radius:999px;background:#985033;">
-                      <a href="${url}" style="display:inline-block;padding:15px 25px;font-family:'Trebuchet MS',Arial,sans-serif;font-size:14px;font-weight:700;color:#fffaf1;text-decoration:none;">${copy.button}&nbsp;&nbsp;↗</a>
+                      <a href="${escapeHtml(url)}" style="display:inline-block;padding:15px 25px;font-family:'Trebuchet MS',Arial,sans-serif;font-size:14px;font-weight:700;color:#fffaf1;text-decoration:none;">${copy.button}&nbsp;&nbsp;↗</a>
                     </td>
                   </tr>
                 </table>
@@ -230,7 +236,7 @@ export function buildConfirmationEmail(input: {
                 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
                   <tr>
                     <td valign="top" style="font-family:'Trebuchet MS',Arial,sans-serif;font-size:13px;font-weight:600;line-height:1.5;color:#f8f0df;">${copy.footer}</td>
-                    <td align="right" valign="top" style="padding-left:18px;font-size:10px;line-height:1.55;color:#cfc8ba;"><a href="${unsubscribeUrl}" style="color:#cfc8ba;">${copy.unsubscribe}</a></td>
+                    <td align="right" valign="top" style="padding-left:18px;font-size:10px;line-height:1.55;color:#cfc8ba;">${input.transactional ? 'Mensagem sobre sua conta DoItBad.' : `<a href="${escapeHtml(unsubscribeUrl)}" style="color:#cfc8ba;">${copy.unsubscribe}</a>`}</td>
                   </tr>
                 </table>
               </td>
@@ -259,15 +265,31 @@ export function buildConfirmationEmail(input: {
     copy.signoff,
     copy.team,
     '',
-    `${copy.unsubscribe}: ${unsubscribeUrl}`,
+    input.transactional
+      ? 'Mensagem sobre sua conta DoItBad.'
+      : `${copy.unsubscribe}: ${unsubscribeUrl}`,
   ].join('\n');
 
   return {
     subject: copy.subject,
-    html,
+    html: html
+      .replace(
+        /<td style="padding:([^";]*42px[^";]*);/g,
+        '<td class="email-pad" style="padding:$1;',
+      )
+      .replace('<td width="88"', '<td class="email-step-icon" width="88"'),
     text,
     confirmationUrl: url,
     unsubscribeUrl,
     oneClickUnsubscribeUrl: oneClickUrl,
   };
+}
+
+export function buildConfirmationEmail(input: {
+  name: string | null;
+  locale: string;
+  confirmationToken?: string;
+  unsubscribeToken?: string;
+}) {
+  return buildBrandedEmail(input);
 }

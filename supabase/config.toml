@@ -25,3 +25,62 @@ user = "resend"
 pass = "env(RESEND_API_KEY)"
 admin_email = "novidades@doitbad.tech"
 sender_name = "DoItBad"
+
+[auth.email.template.confirmation]
+subject = "Seu espaço está pronto ✦ DoItBad"
+content_path = "./supabase/templates/confirmation.html"
+
+[auth.email.template.recovery]
+subject = "Um caminho de volta ✦ DoItBad"
+content_path = "./supabase/templates/recovery.html"
+
+[auth.email.notification.password_changed]
+enabled = true
+subject = "Sua senha foi atualizada ✦ DoItBad"
+content_path = "./supabase/templates/password-changed.html"
+
+[auth.email.template.invite]
+subject = "Um convite para começar ✦ DoItBad"
+content_path = "./supabase/templates/invite.html"
+
+[auth.email.template.magic_link]
+subject = "Seu acesso está aqui ✦ DoItBad"
+content_path = "./supabase/templates/magic-link.html"
+
+[auth.email.template.email_change]
+subject = "Confirme a mudança ✦ DoItBad"
+content_path = "./supabase/templates/email-change.html"
+
+[auth.email.template.reauthentication]
+subject = "Confirme que é você ✦ DoItBad"
+content_path = "./supabase/templates/reauthentication.html"
+
+[auth.email.notification.email_changed]
+enabled = false
+subject = "Seu email foi atualizado ✦ DoItBad"
+content_path = "./supabase/templates/email-changed.html"
+
+[auth.email.notification.phone_changed]
+enabled = false
+subject = "Seu telefone foi atualizado ✦ DoItBad"
+content_path = "./supabase/templates/phone-changed.html"
+
+[auth.email.notification.identity_linked]
+enabled = false
+subject = "Uma forma de acesso foi adicionada ✦ DoItBad"
+content_path = "./supabase/templates/identity-linked.html"
+
+[auth.email.notification.identity_unlinked]
+enabled = false
+subject = "Uma forma de acesso foi removida ✦ DoItBad"
+content_path = "./supabase/templates/identity-unlinked.html"
+
+[auth.email.notification.mfa_factor_enrolled]
+enabled = false
+subject = "Uma proteção foi adicionada ✦ DoItBad"
+content_path = "./supabase/templates/mfa-factor-enrolled.html"
+
+[auth.email.notification.mfa_factor_unenrolled]
+enabled = false
+subject = "Uma proteção foi removida ✦ DoItBad"
+content_path = "./supabase/templates/mfa-factor-unenrolled.html"
