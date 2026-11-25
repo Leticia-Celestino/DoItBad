@@ -1451,12 +1451,14 @@ progress {
   }
 }
 .welcome-page {
+  width: min(1180px, 100%);
+  margin: 0 auto;
   min-height: 100dvh;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 50px;
+  gap: clamp(44px, 8vw, 104px);
   align-items: center;
-  padding: 8vw;
+  padding: clamp(48px, 8vw, 112px) clamp(24px, 7vw, 96px);
 }
 .welcome-copy {
   width: min(100%, 560px);
@@ -1466,6 +1468,10 @@ progress {
 }
 .welcome-copy > p {
   max-width: 360px;
+}
+.welcome-visual {
+  width: min(100%, 460px);
+  justify-self: center;
 }
 .welcome-art {
   overflow: hidden;
@@ -2238,8 +2244,6 @@ textarea {
   }
   .welcome-copy {
     display: flex;
-    min-height: calc(100dvh - 80px);
-    flex: 1;
     flex-direction: column;
     align-items: center;
   }
@@ -2250,13 +2254,15 @@ textarea {
   .welcome-copy > p {
     max-width: 280px;
   }
+  .welcome-visual {
+    width: 100%;
+  }
   .welcome-art {
     width: 100%;
     margin-top: 36px;
   }
-  .welcome-page .button-row {
+  .welcome-visual .button-row {
     width: 100%;
-    margin-top: auto;
     flex-direction: column;
     gap: 12px;
   }

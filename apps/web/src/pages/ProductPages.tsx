@@ -2015,6 +2015,8 @@ export function WelcomePage() {
         </Link>
         <h1>Que bom te ver por aqui!</h1>
         <p>Vamos transformar intenção em ação. Um passo de cada vez.</p>
+      </div>
+      <div className="welcome-visual">
         <div className="welcome-art">
           <svg viewBox="0 0 320 220" role="img" aria-label="Ambiente aconchegante com plantas">
             <rect
