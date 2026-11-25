@@ -1,0 +1,155 @@
+openapi: 3.1.0
+info:
+  title: DoItBad Journeys — contrato de ativação
+  version: 0.1.0
+  description: Rascunho, endpoints ainda não implementados. Não contém contrato de avaliação.
+security:
+  - bearerAuth: []
+paths:
+  /api/v1/journey-templates/resolve:
+    get:
+      operationId: resolveJourneyTemplate
+      description: Normalizar espaços externos e caixa do código. Autorizar no servidor. Nunca retornar gabaritos. Para template restrito, resposta indistinguível de inexistente sem autorização.
+      parameters:
+        - in: query
+          name: code
+          required: true
+          schema: { type: string, minLength: 3, maxLength: 64 }
+      responses:
+        '200':
+          description: Prévia; requer confirmação explícita para ativar.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Preview' }
+        '401': { $ref: '#/components/responses/Error' }
+        '404': { $ref: '#/components/responses/Error' }
+        '429': { $ref: '#/components/responses/Error' }
+  /api/v1/journey-enrollments:
+    post:
+      operationId: enrollInJourney
+      description: Operação atômica. Proprietário vem do JWT. Mesma chave e corpo retornam resultado anterior; corpo diferente retorna 409. Unicidade usuário/versão impede duplicação mesmo com chaves distintas. Matrícula anterior é preservada e apresentada antes de migrar.
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [templateVersionId, contentHash, preferences]
+              properties:
+                templateVersionId: { type: string, format: uuid }
+                contentHash: { type: string, pattern: '^[a-f0-9]{64}$' }
+                preferences: { $ref: '#/components/schemas/Preferences' }
+      responses:
+        '201':
+          description: Matrícula criada; não implica adesão à pesquisa nem agenda aceita.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Enrollment' }
+        '200':
+          description: Matrícula já existente ou replay bem-sucedido.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Enrollment' }
+        '400': { $ref: '#/components/responses/Error' }
+        '401': { $ref: '#/components/responses/Error' }
+        '404': { $ref: '#/components/responses/Error' }
+        '409': { $ref: '#/components/responses/Error' }
+        '422': { $ref: '#/components/responses/Error' }
+        '429': { $ref: '#/components/responses/Error' }
+        '503': { $ref: '#/components/responses/Error' }
+  /api/v1/me/journeys:
+    get:
+      operationId: listMyJourneys
+      responses:
+        '200':
+          description: Somente matrículas do usuário autenticado.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Enrollment' }
+        '401': { $ref: '#/components/responses/Error' }
+components:
+  securitySchemes:
+    bearerAuth: { type: http, scheme: bearer, bearerFormat: JWT }
+  responses:
+    Error:
+      description: Erro seguro e rastreável; sem detalhes de outros usuários ou gabaritos.
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            required: [code, message, requestId]
+            properties:
+              code:
+                type: string
+                enum:
+                  [
+                    INVALID_REQUEST,
+                    UNAUTHENTICATED,
+                    NOT_AVAILABLE,
+                    VERSION_CHANGED,
+                    IDEMPOTENCY_CONFLICT,
+                    EXISTING_VERSION,
+                    INVALID_PREFERENCES,
+                    RATE_LIMITED,
+                    TEMPORARILY_UNAVAILABLE,
+                  ]
+              message: { type: string }
+              requestId: { type: string }
+  schemas:
+    Preferences:
+      type: object
+      additionalProperties: false
+      required: [timezone, startDate, weekdays, dailyMinutes]
+      properties:
+        timezone: { type: string, description: Identificador IANA validado no servidor. }
+        startDate: { type: string, format: date }
+        weekdays:
+          type: array
+          minItems: 1
+          maxItems: 7
+          uniqueItems: true
+          items:
+            { type: integer, minimum: 1, maximum: 7, description: ISO segunda=1 até domingo=7. }
+        dailyMinutes: { type: integer, minimum: 2, maximum: 240 }
+    Preview:
+      type: object
+      additionalProperties: false
+      required:
+        [
+          templateVersionId,
+          contentHash,
+          title,
+          version,
+          disclaimer,
+          objectIds,
+          sources,
+          existingEnrollmentId,
+        ]
+      properties:
+        templateVersionId: { type: string, format: uuid }
+        contentHash: { type: string, pattern: '^[a-f0-9]{64}$' }
+        title: { type: string }
+        version: { type: string }
+        disclaimer: { type: string, description: Jornada independente; não oficial Inep/FIAP. }
+        objectIds: { type: array, items: { type: string } }
+        sources: { type: array, items: { type: string, format: uri } }
+        existingEnrollmentId: { type: [string, 'null'], format: uuid }
+    Enrollment:
+      type: object
+      additionalProperties: false
+      required: [id, templateVersionId, status, preferences, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        templateVersionId: { type: string, format: uuid }
+        status: { type: string, enum: [diagnostic_pending, active, paused, completed, suspended] }
+        preferences: { $ref: '#/components/schemas/Preferences' }
+        createdAt: { type: string, format: date-time }

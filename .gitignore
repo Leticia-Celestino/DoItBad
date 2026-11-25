@@ -22,3 +22,7 @@ __pycache__/
 supabase/.temp
 .env*
 !.env.example
+
+# Exported presentation copies belong in docs/interview when they are part of a release.
+/DoItBad-Apresentacao.pptx
+/DoItBad-Apresentacao.zip

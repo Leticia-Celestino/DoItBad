@@ -1,6 +1,8 @@
 # Primeiro estudo de caso: preparação para o Enade ADS 2026
 
 Status: proposta para discussão, sem implementação ou publicação do template.
+
+> Atualização após leitura dos materiais fornecidos: a especificação `../../DoItBad-Documentation/template-enade/DoItBad_Jornada_ENADE_ADS_2026_Especificacao.md` é a referência de escopo. A conciliação e o plano revisado estão em [JOURNEYS-ENADE-IMPLEMENTATION.md](JOURNEYS-ENADE-IMPLEMENTATION.md). O restante deste documento preserva a proposta inicial; código, entrada e escopo abaixo foram superados pela especificação fornecida. O código proposto correto é `ENADE-ADS26`, com ativação por código em web e app.
 Base do beta: commit `0235182`. Planejamento iniciado em 16/10/2026.
 
 ## Objetivo e hipótese

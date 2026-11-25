@@ -1,0 +1,738 @@
+{
+  "schemaVersion": 1,
+  "code": "ENADE-ADS26",
+  "slug": "enade-ads-2026",
+  "status": "DRAFT",
+  "publishable": false,
+  "reviewedAt": "2026-10-16",
+  "examDate": null,
+  "sources": [
+    {
+      "id": "INEP-169-2026",
+      "scope": "ADS",
+      "url": "https://www.in.gov.br/web/dou/-/portaria-n-169-de-14-de-abril-de-2026-699920629",
+      "evidence": "PDF fornecido em DoItBad-Documentation/template-enade; texto integral conferido",
+      "status": "LOCAL_TEXT_CHECKED",
+      "subsequentAmendmentsChecked": false
+    },
+    {
+      "id": "INEP-154-2026",
+      "scope": "FG",
+      "url": "https://www.in.gov.br/en/web/dou/-/portaria-n-154-de-14-de-abril-de-2026-699921720",
+      "mirror": "https://arquivos.ufsj.edu.br/arquivos/20260681894a6b14571044b12092f6360/Matrizes_de_Referncia_ENADE_2026_Contedo_da_Formao_Geral.pdf",
+      "evidence": "Reprodução do DOU hospedada pela UFSJ; texto conferido, acesso direto ao DOU indisponível na consulta",
+      "status": "INSTITUTIONAL_COPY_CHECKED",
+      "subsequentAmendmentsChecked": false
+    }
+  ],
+  "assessmentStructure": {
+    "generalObjective": 15,
+    "specificObjective": 30,
+    "specificDiscursive": 1,
+    "total": 46,
+    "durationMinutes": 240,
+    "authorityLevel": "NORMATIVE_EXACT",
+    "sourceIds": [
+      "INEP-169-2026",
+      "INEP-154-2026"
+    ]
+  },
+  "objects": [
+    {
+      "id": "ADS-01",
+      "label": "Algoritmos e programação",
+      "component": "ADS",
+      "sourceId": "INEP-169-2026",
+      "sourceLocator": "Art. 6º, I",
+      "authorityLevel": "NORMATIVE_EXACT",
+      "transcriptionNote": "Capitalização normalizada; detalhamento pedagógico separado.",
+      "pedagogy": {
+        "authorityLevel": "PEDAGOGICAL_INTERPRETATION",
+        "application": "Tipos, operadores, controle de fluxo, funções, pseudocódigo, recursão, rastreamento e depuração",
+        "expectedEvidence": "Executar mentalmente, corrigir ou escrever algoritmo",
+        "reviewStatus": "PENDING_INDEPENDENT_REVIEW"
+      },
+      "approvedQuestionIds": [],
+      "coverageStatus": "NO_APPROVED_ITEMS"
+    },
+    {
+      "id": "ADS-02",
+      "label": "Análise e arquitetura de sistemas computacionais",
+      "component": "ADS",
+      "sourceId": "INEP-169-2026",
+      "sourceLocator": "Art. 6º, II",
+      "authorityLevel": "NORMATIVE_EXACT",
+      "transcriptionNote": "Capitalização normalizada; detalhamento pedagógico separado.",
+      "pedagogy": {
+        "authorityLevel": "PEDAGOGICAL_INTERPRETATION",
+        "application": "Modelos arquiteturais, componentes, camadas, APIs, acoplamento, coesão, padrões e trade-offs",
+        "expectedEvidence": "Analisar arquitetura e justificar decisão",
+        "reviewStatus": "PENDING_INDEPENDENT_REVIEW"
+      },
+      "approvedQuestionIds": [],
+      "coverageStatus": "NO_APPROVED_ITEMS"
+    },
+    {
+      "id": "ADS-03",
+      "label": "Banco de dados",
+      "component": "ADS",
+      "sourceId": "INEP-169-2026",
+      "sourceLocator": "Art. 6º, III",
+      "authorityLevel": "NORMATIVE_EXACT",
+      "transcriptionNote": "Capitalização normalizada; detalhamento pedagógico separado.",
+      "pedagogy": {
+        "authorityLevel": "PEDAGOGICAL_INTERPRETATION",
+        "application": "MER, cardinalidades, chaves, normalização, SQL, junções, agregação, transações, integridade, índices e noções de NoSQL",
+        "expectedEvidence": "Interpretar modelo e consulta, corrigir inconsistências",
+        "reviewStatus": "PENDING_INDEPENDENT_REVIEW"
+      },
+      "approvedQuestionIds": [],
+      "coverageStatus": "NO_APPROVED_ITEMS"
+    },
+    {
+      "id": "ADS-04",
+      "label": "Empreendedorismo",
+      "component": "ADS",
+      "sourceId": "INEP-169-2026",
+      "sourceLocator": "Art. 6º, IV",
+      "authorityLevel": "NORMATIVE_EXACT",
+      "transcriptionNote": "Capitalização normalizada; detalhamento pedagógico separado.",
+      "pedagogy": {
+        "authorityLevel": "PEDAGOGICAL_INTERPRETATION",
+        "application": "Problema/oportunidade, proposta de valor, MVP, validação, custos, viabilidade e inovação",
+        "expectedEvidence": "Avaliar hipótese e decisão de negócio",
+        "reviewStatus": "PENDING_INDEPENDENT_REVIEW"
+      },
+      "approvedQuestionIds": [],
+      "coverageStatus": "NO_APPROVED_ITEMS"
+    },
+    {
+      "id": "ADS-05",
+      "label": "Engenharia de requisitos",
+      "component": "ADS",
+      "sourceId": "INEP-169-2026",
+      "sourceLocator": "Art. 6º, V",
+      "authorityLevel": "NORMATIVE_EXACT",
+      "transcriptionNote": "Capitalização normalizada; detalhamento pedagógico separado.",
+      "pedagogy": {
+        "authorityLevel": "PEDAGOGICAL_INTERPRETATION",
+        "application": "Elicitação, stakeholders, regras de negócio, RF/RNF, casos de uso, histórias, aceitação, rastreabilidade",
+        "expectedEvidence": "Reconhecer requisito mal definido e reescrevê-lo",
+        "reviewStatus": "PENDING_INDEPENDENT_REVIEW"
+      },
+      "approvedQuestionIds": [],
+      "coverageStatus": "NO_APPROVED_ITEMS"
+    },
+    {
+      "id": "ADS-06",
+      "label": "Estruturas de dados",
+      "component": "ADS",
+      "sourceId": "INEP-169-2026",
+      "sourceLocator": "Art. 6º, VI",
+      "authorityLevel": "NORMATIVE_EXACT",
+      "transcriptionNote": "Capitalização normalizada; detalhamento pedagógico separado.",
+      "pedagogy": {
+        "authorityLevel": "PEDAGOGICAL_INTERPRETATION",
+        "application": "Vetores, listas, pilhas, filas, árvores, hashes, ordenação, busca e complexidade",
+        "expectedEvidence": "Selecionar estrutura e avaliar custo",
+        "reviewStatus": "PENDING_INDEPENDENT_REVIEW"
+      },
+      "approvedQuestionIds": [],
+      "coverageStatus": "NO_APPROVED_ITEMS"
+    },
+    {
+      "id": "ADS-07",
+      "label": "Gerência de configuração",
+      "component": "ADS",
+      "sourceId": "INEP-169-2026",
+      "sourceLocator": "Art. 6º, VII",
+      "authorityLevel": "NORMATIVE_EXACT",
+      "transcriptionNote": "Capitalização normalizada; detalhamento pedagógico separado.",
+      "pedagogy": {
+        "authorityLevel": "PEDAGOGICAL_INTERPRETATION",
+        "application": "Git, controle de versão, branches, merges, baselines, gerenciamento de mudanças, builds e releases",
+        "expectedEvidence": "Decidir fluxo de mudança e rastrear artefatos",
+        "reviewStatus": "PENDING_INDEPENDENT_REVIEW"
+      },
+      "approvedQuestionIds": [],
+      "coverageStatus": "NO_APPROVED_ITEMS"
+    },
+    {
+      "id": "ADS-08",
+      "label": "Gerência de projetos",
+      "component": "ADS",
+      "sourceId": "INEP-169-2026",
+      "sourceLocator": "Art. 6º, VIII",
+      "authorityLevel": "NORMATIVE_EXACT",
+      "transcriptionNote": "Capitalização normalizada; detalhamento pedagógico separado.",
+      "pedagogy": {
+        "authorityLevel": "PEDAGOGICAL_INTERPRETATION",
+        "application": "Escopo, WBS/EAP, cronograma, estimativas, riscos, custo, comunicação, métodos ágeis e preditivos",
+        "expectedEvidence": "Interpretar dependências e resolver cenário de gestão",
+        "reviewStatus": "PENDING_INDEPENDENT_REVIEW"
+      },
+      "approvedQuestionIds": [],
+      "coverageStatus": "NO_APPROVED_ITEMS"
+    },
+    {
+      "id": "ADS-09",
+      "label": "Interação humano-computador",
+      "component": "ADS",
+      "sourceId": "INEP-169-2026",
+      "sourceLocator": "Art. 6º, IX",
+      "authorityLevel": "NORMATIVE_EXACT",
+      "transcriptionNote": "Capitalização normalizada; detalhamento pedagógico separado.",
+      "pedagogy": {
+        "authorityLevel": "PEDAGOGICAL_INTERPRETATION",
+        "application": "Usabilidade, acessibilidade, heurísticas, protótipos, avaliação de interface e experiência",
+        "expectedEvidence": "Diagnosticar problema de UX e justificar correção",
+        "reviewStatus": "PENDING_INDEPENDENT_REVIEW"
+      },
+      "approvedQuestionIds": [],
+      "coverageStatus": "NO_APPROVED_ITEMS"
+    },
+    {
+      "id": "ADS-10",
+      "label": "Legislação, normas técnicas, ética e responsabilidade socioambiental",
+      "component": "ADS",
+      "sourceId": "INEP-169-2026",
+      "sourceLocator": "Art. 6º, X",
+      "authorityLevel": "NORMATIVE_EXACT",
+      "transcriptionNote": "Capitalização normalizada; detalhamento pedagógico separado.",
+      "pedagogy": {
+        "authorityLevel": "PEDAGOGICAL_INTERPRETATION",
+        "application": "LGPD, privacidade, propriedade intelectual, acessibilidade, ética e impacto socioambiental",
+        "expectedEvidence": "Avaliar consequências e decidir conformidade",
+        "reviewStatus": "PENDING_INDEPENDENT_REVIEW"
+      },
+      "approvedQuestionIds": [],
+      "coverageStatus": "NO_APPROVED_ITEMS"
+    },
+    {
+      "id": "ADS-11",
+      "label": "Lógica matemática e teoria dos conjuntos",
+      "component": "ADS",
+      "sourceId": "INEP-169-2026",
+      "sourceLocator": "Art. 6º, XI",
+      "authorityLevel": "NORMATIVE_EXACT",
+      "transcriptionNote": "Capitalização normalizada; detalhamento pedagógico separado.",
+      "pedagogy": {
+        "authorityLevel": "PEDAGOGICAL_INTERPRETATION",
+        "application": "Proposições, tabelas-verdade, conectivos, quantificadores, equivalência, conjuntos, relações e funções",
+        "expectedEvidence": "Demonstrar equivalências e avaliar argumentos",
+        "reviewStatus": "PENDING_INDEPENDENT_REVIEW"
+      },
+      "approvedQuestionIds": [],
+      "coverageStatus": "NO_APPROVED_ITEMS"
+    },
+    {
+      "id": "ADS-12",
+      "label": "Operações e manutenção de software",
+      "component": "ADS",
+      "sourceId": "INEP-169-2026",
+      "sourceLocator": "Art. 6º, XII",
+      "authorityLevel": "NORMATIVE_EXACT",
+      "transcriptionNote": "Capitalização normalizada; detalhamento pedagógico separado.",
+      "pedagogy": {
+        "authorityLevel": "PEDAGOGICAL_INTERPRETATION",
+        "application": "Manutenção corretiva/adaptativa/perfectiva/preventiva, logs, monitoramento, incidentes, backup e continuidade",
+        "expectedEvidence": "Selecionar ação operacional e identificar risco",
+        "reviewStatus": "PENDING_INDEPENDENT_REVIEW"
+      },
+      "approvedQuestionIds": [],
+      "coverageStatus": "NO_APPROVED_ITEMS"
+    },
+    {
+      "id": "ADS-13",
+      "label": "Orientação a objetos",
+      "component": "ADS",
+      "sourceId": "INEP-169-2026",
+      "sourceLocator": "Art. 6º, XIII",
+      "authorityLevel": "NORMATIVE_EXACT",
+      "transcriptionNote": "Capitalização normalizada; detalhamento pedagógico separado.",
+      "pedagogy": {
+        "authorityLevel": "PEDAGOGICAL_INTERPRETATION",
+        "application": "Classes, objetos, abstração, encapsulamento, herança, polimorfismo, interfaces, composição e UML",
+        "expectedEvidence": "Interpretar ou refatorar modelo OO",
+        "reviewStatus": "PENDING_INDEPENDENT_REVIEW"
+      },
+      "approvedQuestionIds": [],
+      "coverageStatus": "NO_APPROVED_ITEMS"
+    },
+    {
+      "id": "ADS-14",
+      "label": "Princípios de arquitetura e organização de computadores",
+      "component": "ADS",
+      "sourceId": "INEP-169-2026",
+      "sourceLocator": "Art. 6º, XIV",
+      "authorityLevel": "NORMATIVE_EXACT",
+      "transcriptionNote": "Capitalização normalizada; detalhamento pedagógico separado.",
+      "pedagogy": {
+        "authorityLevel": "PEDAGOGICAL_INTERPRETATION",
+        "application": "CPU, memória, cache, E/S, hierarquia, ciclo de instrução, representação e desempenho",
+        "expectedEvidence": "Interpretar gargalo e funcionamento básico",
+        "reviewStatus": "PENDING_INDEPENDENT_REVIEW"
+      },
+      "approvedQuestionIds": [],
+      "coverageStatus": "NO_APPROVED_ITEMS"
+    },
+    {
+      "id": "ADS-15",
+      "label": "Princípios de estatística e análise de dados",
+      "component": "ADS",
+      "sourceId": "INEP-169-2026",
+      "sourceLocator": "Art. 6º, XV",
+      "authorityLevel": "NORMATIVE_EXACT",
+      "transcriptionNote": "Capitalização normalizada; detalhamento pedagógico separado.",
+      "pedagogy": {
+        "authorityLevel": "PEDAGOGICAL_INTERPRETATION",
+        "application": "Estatística descritiva, dispersão, amostras, viés, probabilidades básicas, tabelas e gráficos",
+        "expectedEvidence": "Interpretar resultados sem conclusões indevidas",
+        "reviewStatus": "PENDING_INDEPENDENT_REVIEW"
+      },
+      "approvedQuestionIds": [],
+      "coverageStatus": "NO_APPROVED_ITEMS"
+    },
+    {
+      "id": "ADS-16",
+      "label": "Princípios de redes de computadores e de sistemas distribuídos",
+      "component": "ADS",
+      "sourceId": "INEP-169-2026",
+      "sourceLocator": "Art. 6º, XVI",
+      "authorityLevel": "NORMATIVE_EXACT",
+      "transcriptionNote": "Capitalização normalizada; detalhamento pedagógico separado.",
+      "pedagogy": {
+        "authorityLevel": "PEDAGOGICAL_INTERPRETATION",
+        "application": "OSI/TCP-IP, IP, DNS, HTTP, TCP/UDP, APIs, latência, comunicação distribuída e falhas",
+        "expectedEvidence": "Diagnosticar comunicação e arquitetar solução",
+        "reviewStatus": "PENDING_INDEPENDENT_REVIEW"
+      },
+      "approvedQuestionIds": [],
+      "coverageStatus": "NO_APPROVED_ITEMS"
+    },
+    {
+      "id": "ADS-17",
+      "label": "Princípios de segurança cibernética",
+      "component": "ADS",
+      "sourceId": "INEP-169-2026",
+      "sourceLocator": "Art. 6º, XVII",
+      "authorityLevel": "NORMATIVE_EXACT",
+      "transcriptionNote": "Capitalização normalizada; detalhamento pedagógico separado.",
+      "pedagogy": {
+        "authorityLevel": "PEDAGOGICAL_INTERPRETATION",
+        "application": "CIA, ameaças, autenticação, autorização, criptografia, hashes, vulnerabilidades, defesa em profundidade",
+        "expectedEvidence": "Identificar ameaça e controle correspondente",
+        "reviewStatus": "PENDING_INDEPENDENT_REVIEW"
+      },
+      "approvedQuestionIds": [],
+      "coverageStatus": "NO_APPROVED_ITEMS"
+    },
+    {
+      "id": "ADS-18",
+      "label": "Princípios de sistemas operacionais",
+      "component": "ADS",
+      "sourceId": "INEP-169-2026",
+      "sourceLocator": "Art. 6º, XVIII",
+      "authorityLevel": "NORMATIVE_EXACT",
+      "transcriptionNote": "Capitalização normalizada; detalhamento pedagógico separado.",
+      "pedagogy": {
+        "authorityLevel": "PEDAGOGICAL_INTERPRETATION",
+        "application": "Processos, threads, escalonamento, memória, arquivos, concorrência, permissões e virtualização",
+        "expectedEvidence": "Analisar estado/processo e recurso de SO",
+        "reviewStatus": "PENDING_INDEPENDENT_REVIEW"
+      },
+      "approvedQuestionIds": [],
+      "coverageStatus": "NO_APPROVED_ITEMS"
+    },
+    {
+      "id": "ADS-19",
+      "label": "Processo de software",
+      "component": "ADS",
+      "sourceId": "INEP-169-2026",
+      "sourceLocator": "Art. 6º, XIX",
+      "authorityLevel": "NORMATIVE_EXACT",
+      "transcriptionNote": "Capitalização normalizada; detalhamento pedagógico separado.",
+      "pedagogy": {
+        "authorityLevel": "PEDAGOGICAL_INTERPRETATION",
+        "application": "Cascata, incremental, iterativo, ágil, Scrum, Kanban, atividades e ciclo de vida",
+        "expectedEvidence": "Escolher processo e identificar etapa inadequada",
+        "reviewStatus": "PENDING_INDEPENDENT_REVIEW"
+      },
+      "approvedQuestionIds": [],
+      "coverageStatus": "NO_APPROVED_ITEMS"
+    },
+    {
+      "id": "ADS-20",
+      "label": "Qualidade, verificação e validação de software",
+      "component": "ADS",
+      "sourceId": "INEP-169-2026",
+      "sourceLocator": "Art. 6º, XX",
+      "authorityLevel": "NORMATIVE_EXACT",
+      "transcriptionNote": "Capitalização normalizada; detalhamento pedagógico separado.",
+      "pedagogy": {
+        "authorityLevel": "PEDAGOGICAL_INTERPRETATION",
+        "application": "V&V, testes unitário/integração/sistema/aceitação, caixa-branca/preta, cobertura, critérios e automação",
+        "expectedEvidence": "Identificar lacuna de testes e justificar cobertura",
+        "reviewStatus": "PENDING_INDEPENDENT_REVIEW"
+      },
+      "approvedQuestionIds": [],
+      "coverageStatus": "NO_APPROVED_ITEMS"
+    },
+    {
+      "id": "FG-01",
+      "label": "Ética, democracia, cidadania e direitos humanos",
+      "component": "FG",
+      "sourceId": "INEP-154-2026",
+      "sourceLocator": "Art. 6º, I",
+      "authorityLevel": "NORMATIVE_EXACT",
+      "transcriptionNote": "Capitalização normalizada; detalhamento pedagógico separado.",
+      "pedagogy": {
+        "authorityLevel": "PEDAGOGICAL_INTERPRETATION",
+        "application": "Dilemas públicos, direitos e decisões responsáveis",
+        "expectedEvidence": null,
+        "reviewStatus": "PENDING_INDEPENDENT_REVIEW"
+      },
+      "approvedQuestionIds": [],
+      "coverageStatus": "NO_APPROVED_ITEMS"
+    },
+    {
+      "id": "FG-02",
+      "label": "Estado, sociedade e trabalho",
+      "component": "FG",
+      "sourceId": "INEP-154-2026",
+      "sourceLocator": "Art. 6º, II",
+      "authorityLevel": "NORMATIVE_EXACT",
+      "transcriptionNote": "Capitalização normalizada; detalhamento pedagógico separado.",
+      "pedagogy": {
+        "authorityLevel": "PEDAGOGICAL_INTERPRETATION",
+        "application": "Transformações sociais e relações de trabalho",
+        "expectedEvidence": null,
+        "reviewStatus": "PENDING_INDEPENDENT_REVIEW"
+      },
+      "approvedQuestionIds": [],
+      "coverageStatus": "NO_APPROVED_ITEMS"
+    },
+    {
+      "id": "FG-03",
+      "label": "Educação e desenvolvimento humano e social",
+      "component": "FG",
+      "sourceId": "INEP-154-2026",
+      "sourceLocator": "Art. 6º, III",
+      "authorityLevel": "NORMATIVE_EXACT",
+      "transcriptionNote": "Capitalização normalizada; detalhamento pedagógico separado.",
+      "pedagogy": {
+        "authorityLevel": "PEDAGOGICAL_INTERPRETATION",
+        "application": "Acesso à educação e desenvolvimento",
+        "expectedEvidence": null,
+        "reviewStatus": "PENDING_INDEPENDENT_REVIEW"
+      },
+      "approvedQuestionIds": [],
+      "coverageStatus": "NO_APPROVED_ITEMS"
+    },
+    {
+      "id": "FG-04",
+      "label": "Mudanças climáticas e questões socioambientais",
+      "component": "FG",
+      "sourceId": "INEP-154-2026",
+      "sourceLocator": "Art. 6º, IV",
+      "authorityLevel": "NORMATIVE_EXACT",
+      "transcriptionNote": "Capitalização normalizada; detalhamento pedagógico separado.",
+      "pedagogy": {
+        "authorityLevel": "PEDAGOGICAL_INTERPRETATION",
+        "application": "Dados ambientais e estratégias de mitigação",
+        "expectedEvidence": null,
+        "reviewStatus": "PENDING_INDEPENDENT_REVIEW"
+      },
+      "approvedQuestionIds": [],
+      "coverageStatus": "NO_APPROVED_ITEMS"
+    },
+    {
+      "id": "FG-05",
+      "label": "Equidade nas relações étnico-raciais, geracionais, de classe, de gênero e de sexualidade",
+      "component": "FG",
+      "sourceId": "INEP-154-2026",
+      "sourceLocator": "Art. 6º, V",
+      "authorityLevel": "NORMATIVE_EXACT",
+      "transcriptionNote": "Capitalização normalizada; detalhamento pedagógico separado.",
+      "pedagogy": {
+        "authorityLevel": "PEDAGOGICAL_INTERPRETATION",
+        "application": "Inclusão, desigualdades e políticas de equidade",
+        "expectedEvidence": null,
+        "reviewStatus": "PENDING_INDEPENDENT_REVIEW"
+      },
+      "approvedQuestionIds": [],
+      "coverageStatus": "NO_APPROVED_ITEMS"
+    },
+    {
+      "id": "FG-06",
+      "label": "Cultura, arte e comunicação",
+      "component": "FG",
+      "sourceId": "INEP-154-2026",
+      "sourceLocator": "Art. 6º, VI",
+      "authorityLevel": "NORMATIVE_EXACT",
+      "transcriptionNote": "Capitalização normalizada; detalhamento pedagógico separado.",
+      "pedagogy": {
+        "authorityLevel": "PEDAGOGICAL_INTERPRETATION",
+        "application": "Linguagens, representações, comunicação e acesso",
+        "expectedEvidence": null,
+        "reviewStatus": "PENDING_INDEPENDENT_REVIEW"
+      },
+      "approvedQuestionIds": [],
+      "coverageStatus": "NO_APPROVED_ITEMS"
+    },
+    {
+      "id": "FG-07",
+      "label": "Ciência, tecnologia e inovação",
+      "component": "FG",
+      "sourceId": "INEP-154-2026",
+      "sourceLocator": "Art. 6º, VII",
+      "authorityLevel": "NORMATIVE_EXACT",
+      "transcriptionNote": "Capitalização normalizada; detalhamento pedagógico separado.",
+      "pedagogy": {
+        "authorityLevel": "PEDAGOGICAL_INTERPRETATION",
+        "application": "Impactos e responsabilidade na inovação",
+        "expectedEvidence": null,
+        "reviewStatus": "PENDING_INDEPENDENT_REVIEW"
+      },
+      "approvedQuestionIds": [],
+      "coverageStatus": "NO_APPROVED_ITEMS"
+    },
+    {
+      "id": "FG-08",
+      "label": "Processos de globalização e política internacional",
+      "component": "FG",
+      "sourceId": "INEP-154-2026",
+      "sourceLocator": "Art. 6º, VIII",
+      "authorityLevel": "NORMATIVE_EXACT",
+      "transcriptionNote": "Capitalização normalizada; detalhamento pedagógico separado.",
+      "pedagogy": {
+        "authorityLevel": "PEDAGOGICAL_INTERPRETATION",
+        "application": "Fluxos globais e consequências econômicas/sociais",
+        "expectedEvidence": null,
+        "reviewStatus": "PENDING_INDEPENDENT_REVIEW"
+      },
+      "approvedQuestionIds": [],
+      "coverageStatus": "NO_APPROVED_ITEMS"
+    },
+    {
+      "id": "FG-09",
+      "label": "Campo, cidade e qualidade de vida",
+      "component": "FG",
+      "sourceId": "INEP-154-2026",
+      "sourceLocator": "Art. 6º, IX",
+      "authorityLevel": "NORMATIVE_EXACT",
+      "transcriptionNote": "Capitalização normalizada; detalhamento pedagógico separado.",
+      "pedagogy": {
+        "authorityLevel": "PEDAGOGICAL_INTERPRETATION",
+        "application": "Mobilidade, urbanização e serviços",
+        "expectedEvidence": null,
+        "reviewStatus": "PENDING_INDEPENDENT_REVIEW"
+      },
+      "approvedQuestionIds": [],
+      "coverageStatus": "NO_APPROVED_ITEMS"
+    },
+    {
+      "id": "FG-10",
+      "label": "Territórios, sociodiversidade e diversidade cultural",
+      "component": "FG",
+      "sourceId": "INEP-154-2026",
+      "sourceLocator": "Art. 6º, X",
+      "authorityLevel": "NORMATIVE_EXACT",
+      "transcriptionNote": "Capitalização normalizada; detalhamento pedagógico separado.",
+      "pedagogy": {
+        "authorityLevel": "PEDAGOGICAL_INTERPRETATION",
+        "application": "Comunidades, territórios, direitos e cultura",
+        "expectedEvidence": null,
+        "reviewStatus": "PENDING_INDEPENDENT_REVIEW"
+      },
+      "approvedQuestionIds": [],
+      "coverageStatus": "NO_APPROVED_ITEMS"
+    },
+    {
+      "id": "FG-11",
+      "label": "Acessibilidade e inclusão social",
+      "component": "FG",
+      "sourceId": "INEP-154-2026",
+      "sourceLocator": "Art. 6º, XI",
+      "authorityLevel": "NORMATIVE_EXACT",
+      "transcriptionNote": "Capitalização normalizada; detalhamento pedagógico separado.",
+      "pedagogy": {
+        "authorityLevel": "PEDAGOGICAL_INTERPRETATION",
+        "application": "Desenho inclusivo e eliminação de barreiras",
+        "expectedEvidence": null,
+        "reviewStatus": "PENDING_INDEPENDENT_REVIEW"
+      },
+      "approvedQuestionIds": [],
+      "coverageStatus": "NO_APPROVED_ITEMS"
+    },
+    {
+      "id": "FG-12",
+      "label": "Saúde e bem-estar",
+      "component": "FG",
+      "sourceId": "INEP-154-2026",
+      "sourceLocator": "Art. 6º, XII",
+      "authorityLevel": "NORMATIVE_EXACT",
+      "transcriptionNote": "Capitalização normalizada; detalhamento pedagógico separado.",
+      "pedagogy": {
+        "authorityLevel": "PEDAGOGICAL_INTERPRETATION",
+        "application": "Saúde coletiva, determinantes e bem-estar",
+        "expectedEvidence": null,
+        "reviewStatus": "PENDING_INDEPENDENT_REVIEW"
+      },
+      "approvedQuestionIds": [],
+      "coverageStatus": "NO_APPROVED_ITEMS"
+    }
+  ],
+  "skills": [
+    {
+      "id": "CI-H1",
+      "component": "ADS",
+      "summary": "Interpretar representações de dados",
+      "authorityLevel": "PEDAGOGICAL_INTERPRETATION",
+      "sourceId": "INEP-169-2026",
+      "sourceLocator": "Art. 5º, competência I, habilidade 1",
+      "approvedQuestionIds": []
+    },
+    {
+      "id": "CI-H2",
+      "component": "ADS",
+      "summary": "Compreender processo e ciclo de vida",
+      "authorityLevel": "PEDAGOGICAL_INTERPRETATION",
+      "sourceId": "INEP-169-2026",
+      "sourceLocator": "Art. 5º, competência I, habilidade 2",
+      "approvedQuestionIds": []
+    },
+    {
+      "id": "CI-H3",
+      "component": "ADS",
+      "summary": "Aplicar gestão e garantia da qualidade",
+      "authorityLevel": "PEDAGOGICAL_INTERPRETATION",
+      "sourceId": "INEP-169-2026",
+      "sourceLocator": "Art. 5º, competência I, habilidade 3",
+      "approvedQuestionIds": []
+    },
+    {
+      "id": "CI-H4",
+      "component": "ADS",
+      "summary": "Modelar negócio, requisitos e sistemas",
+      "authorityLevel": "PEDAGOGICAL_INTERPRETATION",
+      "sourceId": "INEP-169-2026",
+      "sourceLocator": "Art. 5º, competência I, habilidade 4",
+      "approvedQuestionIds": []
+    },
+    {
+      "id": "CI-H5",
+      "component": "ADS",
+      "summary": "Aplicar fundamentos computacionais e comunicação",
+      "authorityLevel": "PEDAGOGICAL_INTERPRETATION",
+      "sourceId": "INEP-169-2026",
+      "sourceLocator": "Art. 5º, competência I, habilidade 5",
+      "approvedQuestionIds": []
+    },
+    {
+      "id": "CII-H1",
+      "component": "ADS",
+      "summary": "Aplicar qualidade e segurança",
+      "authorityLevel": "PEDAGOGICAL_INTERPRETATION",
+      "sourceId": "INEP-169-2026",
+      "sourceLocator": "Art. 5º, competência II, habilidade 1",
+      "approvedQuestionIds": []
+    },
+    {
+      "id": "CII-H2",
+      "component": "ADS",
+      "summary": "Implementar programas",
+      "authorityLevel": "PEDAGOGICAL_INTERPRETATION",
+      "sourceId": "INEP-169-2026",
+      "sourceLocator": "Art. 5º, competência II, habilidade 2",
+      "approvedQuestionIds": []
+    },
+    {
+      "id": "CII-H3",
+      "component": "ADS",
+      "summary": "Modelar e gerenciar dados",
+      "authorityLevel": "PEDAGOGICAL_INTERPRETATION",
+      "sourceId": "INEP-169-2026",
+      "sourceLocator": "Art. 5º, competência II, habilidade 3",
+      "approvedQuestionIds": []
+    },
+    {
+      "id": "CII-H4",
+      "component": "ADS",
+      "summary": "Avaliar algoritmos e estruturas",
+      "authorityLevel": "PEDAGOGICAL_INTERPRETATION",
+      "sourceId": "INEP-169-2026",
+      "sourceLocator": "Art. 5º, competência II, habilidade 4",
+      "approvedQuestionIds": []
+    },
+    {
+      "id": "CII-H5",
+      "component": "ADS",
+      "summary": "Empregar arquitetura e programação",
+      "authorityLevel": "PEDAGOGICAL_INTERPRETATION",
+      "sourceId": "INEP-169-2026",
+      "sourceLocator": "Art. 5º, competência II, habilidade 5",
+      "approvedQuestionIds": []
+    },
+    {
+      "id": "CII-H6",
+      "component": "ADS",
+      "summary": "Propor soluções interdisciplinares",
+      "authorityLevel": "PEDAGOGICAL_INTERPRETATION",
+      "sourceId": "INEP-169-2026",
+      "sourceLocator": "Art. 5º, competência II, habilidade 6",
+      "approvedQuestionIds": []
+    },
+    {
+      "id": "FG-CI-H1",
+      "component": "FG",
+      "summary": "Analisar comunicação e construção de significados",
+      "authorityLevel": "PEDAGOGICAL_INTERPRETATION",
+      "sourceId": "INEP-154-2026",
+      "sourceLocator": "Art. 5º, competência I, habilidade 1",
+      "approvedQuestionIds": []
+    },
+    {
+      "id": "FG-CI-H2",
+      "component": "FG",
+      "summary": "Avaliar diálogo e compartilhamento de saberes",
+      "authorityLevel": "PEDAGOGICAL_INTERPRETATION",
+      "sourceId": "INEP-154-2026",
+      "sourceLocator": "Art. 5º, competência I, habilidade 2",
+      "approvedQuestionIds": []
+    },
+    {
+      "id": "FG-CII-H1",
+      "component": "FG",
+      "summary": "Analisar recursos para resolver problemas",
+      "authorityLevel": "PEDAGOGICAL_INTERPRETATION",
+      "sourceId": "INEP-154-2026",
+      "sourceLocator": "Art. 5º, competência II, habilidade 1",
+      "approvedQuestionIds": []
+    },
+    {
+      "id": "FG-CII-H2",
+      "component": "FG",
+      "summary": "Avaliar argumentos para decidir",
+      "authorityLevel": "PEDAGOGICAL_INTERPRETATION",
+      "sourceId": "INEP-154-2026",
+      "sourceLocator": "Art. 5º, competência II, habilidade 2",
+      "approvedQuestionIds": []
+    },
+    {
+      "id": "FG-CII-H3",
+      "component": "FG",
+      "summary": "Avaliar implicações sociais da atuação profissional",
+      "authorityLevel": "PEDAGOGICAL_INTERPRETATION",
+      "sourceId": "INEP-154-2026",
+      "sourceLocator": "Art. 5º, competência II, habilidade 3",
+      "approvedQuestionIds": []
+    }
+  ],
+  "releaseBlockers": [
+    "Banco de questões e revisores ainda não cadastrados",
+    "Calendário e retificações operacionais pendentes",
+    "Contrato de API ainda não implementado",
+    "Validação pedagógica e operacional do piloto pendente"
+  ]
+}
