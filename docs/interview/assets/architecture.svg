@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="900" viewBox="0 0 1400 900">
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0,0 L12,6 L0,12 z" fill="#5C6B4A"/>
+    </marker>
+    <style>
+      .title{font:700 34px 'DejaVu Sans';fill:#3D392F}.subtitle{font:400 17px 'DejaVu Sans';fill:#70675b}
+      .box{fill:#FBF6EC;stroke:#D5C9B5;stroke-width:2}.green{fill:#E4EAD8;stroke:#5C6B4A}.terra{fill:#F3DDD1;stroke:#C87E5A}
+      .night{fill:#303644;stroke:#303644}.head{font:700 21px 'DejaVu Sans';fill:#3D392F}.text{font:400 16px 'DejaVu Sans';fill:#5f584e}
+      .light{fill:#FBF6EC}.line{stroke:#5C6B4A;stroke-width:3;fill:none;marker-end:url(#arrow)}
+    </style>
+  </defs>
+  <rect width="1400" height="900" fill="#F4EDE1"/>
+  <text x="70" y="62" class="title">Arquitetura do ecossistema DoItBad</text>
+  <text x="70" y="93" class="subtitle">Canais independentes, domínio compartilhado e backend com isolamento por usuário</text>
+
+  <rect x="70" y="145" width="250" height="125" rx="24" class="box green"/>
+  <text x="95" y="182" class="head">Landing pública</text><text x="95" y="211" class="text">Astro + React Islands</text>
+  <text x="95" y="238" class="text">SEO, i18n, blog e waitlist</text>
+
+  <rect x="70" y="315" width="250" height="125" rx="24" class="box terra"/>
+  <text x="95" y="352" class="head">Beta web</text><text x="95" y="381" class="text">React + Vite + Router</text>
+  <text x="95" y="408" class="text">Workspace responsivo</text>
+
+  <rect x="70" y="485" width="250" height="125" rx="24" class="box green"/>
+  <text x="95" y="522" class="head">Aplicativo móvel</text><text x="95" y="551" class="text">Expo + React Native</text>
+  <text x="95" y="578" class="text">Android/iOS, deep links</text>
+
+  <rect x="405" y="315" width="260" height="125" rx="24" class="box"/>
+  <text x="430" y="352" class="head">@doitbad/core</text><text x="430" y="381" class="text">Contratos e validações</text>
+  <text x="430" y="408" class="text">Repository + revisão otimista</text>
+
+  <rect x="760" y="205" width="270" height="190" rx="24" class="box green"/>
+  <text x="785" y="244" class="head">Supabase</text><text x="785" y="276" class="text">Auth e sessões</text>
+  <text x="785" y="304" class="text">PostgreSQL + JSONB</text><text x="785" y="332" class="text">RLS por proprietário</text>
+  <text x="785" y="360" class="text">Triggers, RPCs e índices</text>
+
+  <rect x="760" y="455" width="270" height="155" rx="24" class="box terra"/>
+  <text x="785" y="494" class="head">API de IA</text><text x="785" y="525" class="text">FastAPI no Cloudflare Worker</text>
+  <text x="785" y="553" class="text">JWT Supabase + saída tipada</text><text x="785" y="581" class="text">Fallback determinístico</text>
+
+  <rect x="1110" y="175" width="220" height="120" rx="24" class="box"/>
+  <text x="1135" y="213" class="head">Sanity Studio</text><text x="1135" y="244" class="text">Conteúdo multilíngue</text><text x="1135" y="270" class="text">Fallback versionado</text>
+
+  <rect x="1110" y="345" width="220" height="120" rx="24" class="box"/>
+  <text x="1135" y="383" class="head">Vercel APIs</text><text x="1135" y="414" class="text">Waitlist e preferências</text><text x="1135" y="440" class="text">Segredos server-side</text>
+
+  <rect x="1110" y="515" width="220" height="120" rx="24" class="night"/>
+  <text x="1135" y="553" class="head light">Serviços externos</text><text x="1135" y="584" class="text light">Workers AI · Resend</text><text x="1135" y="610" class="text light">Turnstile</text>
+
+  <path d="M320 377 H405" class="line"/><path d="M320 547 C360 547 365 420 405 400" class="line"/>
+  <path d="M665 365 C710 365 720 315 760 315" class="line"/><path d="M665 390 C720 420 715 525 760 525" class="line"/>
+  <path d="M1030 520 H1110" class="line"/><path d="M320 205 C650 105 930 145 1110 220" class="line"/>
+  <path d="M320 205 C620 180 900 390 1110 405" class="line"/><path d="M1030 300 C1070 300 1070 575 1110 575" class="line"/>
+
+  <rect x="70" y="700" width="1260" height="125" rx="24" class="night"/>
+  <text x="100" y="745" class="head light">Princípios transversais</text>
+  <text x="100" y="782" class="text light">Acessibilidade e movimento reduzido  ·  dados reais, sem progresso fictício  ·  modo local explícito  ·  idempotência</text>
+  <text x="100" y="812" class="text light">segredos apenas no servidor  ·  isolamento RLS  ·  degradação graciosa  ·  web e mobile compartilham regras</text>
+</svg>

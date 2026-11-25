@@ -1,0 +1,37 @@
+DoItBad — suíte E2E completa
+Executada em: 2026-10-15
+
+$ pnpm exec playwright test --workers=4 --reporter=line
+
+Running 76 tests using 4 workers
+
+Projetos:
+- desktop (Desktop Chrome)
+- mobile (Pixel 7)
+
+Arquivos exercitados:
+- tests/beta.spec.ts
+- tests/confirmation-email.spec.ts
+- tests/editorial.spec.ts
+- tests/landing.spec.ts
+- tests/preferences.spec.ts
+- tests/security.spec.ts
+- tests/workspace.spec.ts
+
+Resultado final:
+- 75 passed
+- 1 skipped
+- 0 failed
+- duração: 35.4s
+
+O cenário ignorado é a repetição mobile da matriz explícita de seis viewports do teste
+"compact, landscape and large layouts keep content within viewport". A matriz é executada
+uma vez no projeto desktop e ela própria alterna entre 320x568, 390x844, 844x390,
+768x1024, 1024x768 e 1440x900.
+
+Correção realizada antes desta execução:
+- atualização do teste beta para os textos e o histórico atuais;
+- abertura explícita da sidebar no viewport mobile;
+- restauração do botão de menu no cabeçalho compacto mobile;
+- validação isolada de tests/beta.spec.ts: 4 passed;
+- validação agregada posterior: 75 passed, 1 skipped, 0 failed.

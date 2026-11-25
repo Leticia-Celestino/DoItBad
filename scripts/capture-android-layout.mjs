@@ -1,0 +1,21 @@
+// Captures only DoItBad; refuses to capture another foreground application.
+import { execFileSync } from 'node:child_process';
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { setTimeout as delay } from 'node:timers/promises';
+const device=process.env.ANDROID_SERIAL;
+if(!device)throw new Error('Set ANDROID_SERIAL');
+const adb=(...args)=>execFileSync('adb',['-s',device,...args],{encoding:'utf8',timeout:30000,stdio:['ignore','pipe','pipe']});
+const route=process.argv[2] || 'boas-vindas';
+if(!/^[a-z-]+$/.test(route))throw new Error('Invalid route');
+if(route!=='current')adb('shell','am','start','-W','-a','android.intent.action.VIEW','-d',`doitbad://${route}`,'tech.doitbad.app');
+await delay(1800);
+const window=adb('shell','dumpsys','window');
+if(!window.split('\n').some(line=>line.includes('mCurrentFocus')&&line.includes('tech.doitbad.app')))throw new Error('DoItBad is not foreground; no screenshot taken');
+adb('shell','uiautomator','dump','/sdcard/doitbad-layout.xml');
+const xml=adb('shell','cat','/sdcard/doitbad-layout.xml');
+mkdirSync('/tmp/doitbad-layout-review',{recursive:true});
+writeFileSync(`/tmp/doitbad-layout-review/${route}.xml`,xml);
+adb('shell','screencap','-p','/sdcard/doitbad-layout.png');
+adb('pull','/sdcard/doitbad-layout.png',`/tmp/doitbad-layout-review/${route}.png`);
+console.log(`Captured ${route}: /tmp/doitbad-layout-review/${route}.png`);
+console.log([...xml.matchAll(/text="([^"]+)"/g)].map(m=>m[1]).filter(t=>!t.includes('token')).join('\n'));

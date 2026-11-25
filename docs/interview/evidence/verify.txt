@@ -1,0 +1,343 @@
+
+> doitbad-landing-page@0.1.0 verify /home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page
+> pnpm lint && pnpm check && pnpm --filter @doitbad/web check && pnpm --filter @doitbad/studio check && pnpm build && pnpm --filter @doitbad/web build
+
+
+> doitbad-landing-page@0.1.0 lint /home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page
+> eslint .
+
+
+> doitbad-landing-page@0.1.0 check /home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page
+> ASTRO_TELEMETRY_DISABLED=1 astro check
+
+17:32:08 [vite] Re-optimizing dependencies because vite config has changed
+17:32:08 [types] Generated 221ms
+17:32:08 [check] Getting diagnostics for Astro files in /home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page...
+Result (38 files): 
+- 0 errors
+- 0 warnings
+- 0 hints
+
+
+> @doitbad/web@0.1.0 check /home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/apps/web
+> tsc -b --pretty false
+
+
+> @doitbad/studio@0.1.0 check /home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/apps/studio
+> tsc --noEmit
+
+
+> doitbad-landing-page@0.1.0 build /home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page
+> ASTRO_TELEMETRY_DISABLED=1 astro build
+
+17:32:16 [types] Generated 35ms
+17:32:16 [build] output: "static"
+17:32:16 [build] mode: "static"
+17:32:16 [build] directory: /home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/
+17:32:16 [build] Collecting build info...
+17:32:16 [build] ✓ Completed in 54ms.
+17:32:16 [build] Building static entrypoints...
+17:32:17 [vite] ✓ built in 346ms
+17:32:17 [vite] ✓ built in 95ms
+17:32:17 [build] Rearranging server assets...
+
+ generating static routes 
+Sanity indisponível; usando conteúdo editorial versionado. TypeError: fetch failed
+    at node:internal/deps/undici/undici:13484:13
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async fetchSanityArticles (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/editorial_Cr7zIFS4.mjs:310:20)
+    at async getArticles (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/editorial_Cr7zIFS4.mjs:336:9)
+    at async file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/editorial_Cr7zIFS4.mjs:339:97
+    at async Promise.all (index 0)
+    at async getEditorialCatalog (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/editorial_Cr7zIFS4.mjs:339:18)
+    at async Module.getStaticPaths (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/_slug__C9Tm0Fpe.mjs:14:18)
+    at async callGetStaticPaths (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/node_modules/.pnpm/astro@7.3.5_@types+node@26.6.3_jiti@2.7.0_terser@5.51.2_yaml@2.9.1/node_modules/astro/dist/core/render/route-cache.js:32:17)
+    at async #getPathsForRoute (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/node_modules/.pnpm/astro@7.3.5_@types+node@26.6.3_jiti@2.7.0_terser@5.51.2_yaml@2.9.1/node_modules/astro/dist/runtime/prerender/static-paths.js:55:25) {
+  [cause]: Error: getaddrinfo EAI_AGAIN xqfqfioy.api.sanity.io
+      at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:120:26) {
+    errno: -3001,
+    code: 'EAI_AGAIN',
+    syscall: 'getaddrinfo',
+    hostname: 'xqfqfioy.api.sanity.io'
+  }
+}
+Sanity indisponível; usando conteúdo editorial versionado. TypeError: fetch failed
+    at node:internal/deps/undici/undici:13484:13
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async fetchSanityArticles (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/editorial_Cr7zIFS4.mjs:310:20)
+    at async getArticles (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/editorial_Cr7zIFS4.mjs:336:9)
+    at async file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/editorial_Cr7zIFS4.mjs:339:97
+    at async Promise.all (index 1)
+    at async getEditorialCatalog (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/editorial_Cr7zIFS4.mjs:339:18)
+    at async Module.getStaticPaths (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/_slug__C9Tm0Fpe.mjs:14:18)
+    at async callGetStaticPaths (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/node_modules/.pnpm/astro@7.3.5_@types+node@26.6.3_jiti@2.7.0_terser@5.51.2_yaml@2.9.1/node_modules/astro/dist/core/render/route-cache.js:32:17)
+    at async #getPathsForRoute (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/node_modules/.pnpm/astro@7.3.5_@types+node@26.6.3_jiti@2.7.0_terser@5.51.2_yaml@2.9.1/node_modules/astro/dist/runtime/prerender/static-paths.js:55:25) {
+  [cause]: Error: getaddrinfo EAI_AGAIN xqfqfioy.api.sanity.io
+      at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:120:26) {
+    errno: -3001,
+    code: 'EAI_AGAIN',
+    syscall: 'getaddrinfo',
+    hostname: 'xqfqfioy.api.sanity.io'
+  }
+}
+Sanity indisponível; usando conteúdo editorial versionado. TypeError: fetch failed
+    at node:internal/deps/undici/undici:13484:13
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async fetchSanityArticles (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/editorial_Cr7zIFS4.mjs:310:20)
+    at async getArticles (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/editorial_Cr7zIFS4.mjs:336:9)
+    at async file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/editorial_Cr7zIFS4.mjs:339:97
+    at async Promise.all (index 2)
+    at async getEditorialCatalog (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/editorial_Cr7zIFS4.mjs:339:18)
+    at async Module.getStaticPaths (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/_slug__C9Tm0Fpe.mjs:14:18)
+    at async callGetStaticPaths (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/node_modules/.pnpm/astro@7.3.5_@types+node@26.6.3_jiti@2.7.0_terser@5.51.2_yaml@2.9.1/node_modules/astro/dist/core/render/route-cache.js:32:17)
+    at async #getPathsForRoute (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/node_modules/.pnpm/astro@7.3.5_@types+node@26.6.3_jiti@2.7.0_terser@5.51.2_yaml@2.9.1/node_modules/astro/dist/runtime/prerender/static-paths.js:55:25) {
+  [cause]: Error: getaddrinfo EAI_AGAIN xqfqfioy.api.sanity.io
+      at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:120:26) {
+    errno: -3001,
+    code: 'EAI_AGAIN',
+    syscall: 'getaddrinfo',
+    hostname: 'xqfqfioy.api.sanity.io'
+  }
+}
+Sanity indisponível; usando conteúdo editorial versionado. TypeError: fetch failed
+    at node:internal/deps/undici/undici:13484:13
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async fetchSanityArticles (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/editorial_Cr7zIFS4.mjs:310:20)
+    at async getArticles (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/editorial_Cr7zIFS4.mjs:336:9)
+    at async file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/editorial_Cr7zIFS4.mjs:339:97
+    at async Promise.all (index 3)
+    at async getEditorialCatalog (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/editorial_Cr7zIFS4.mjs:339:18)
+    at async Module.getStaticPaths (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/_slug__C9Tm0Fpe.mjs:14:18)
+    at async callGetStaticPaths (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/node_modules/.pnpm/astro@7.3.5_@types+node@26.6.3_jiti@2.7.0_terser@5.51.2_yaml@2.9.1/node_modules/astro/dist/core/render/route-cache.js:32:17)
+    at async #getPathsForRoute (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/node_modules/.pnpm/astro@7.3.5_@types+node@26.6.3_jiti@2.7.0_terser@5.51.2_yaml@2.9.1/node_modules/astro/dist/runtime/prerender/static-paths.js:55:25) {
+  [cause]: Error: getaddrinfo EAI_AGAIN xqfqfioy.api.sanity.io
+      at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:120:26) {
+    errno: -3001,
+    code: 'EAI_AGAIN',
+    syscall: 'getaddrinfo',
+    hostname: 'xqfqfioy.api.sanity.io'
+  }
+}
+17:32:17   ├─ /404.html (+10ms) 
+17:32:17   ├─ /pt-br/404/index.html (+3ms) 
+17:32:17   ├─ /en/404/index.html (+1ms) 
+17:32:17   ├─ /es/404/index.html (+1ms) 
+17:32:17   ├─ /de/404/index.html (+2ms) 
+17:32:17   ├─ /pt-br/artigos/voltar-a-um-projeto-depois-de-semanas/index.html (+2ms) 
+17:32:17   ├─ /pt-br/artigos/quando-preparar-demais-adia-o-comeco/index.html (+1ms) 
+17:32:17   ├─ /pt-br/artigos/guardar-o-fio-da-meada-antes-de-pausar/index.html (+2ms) 
+17:32:17   ├─ /en/artigos/return-to-a-project-after-weeks/index.html (+4ms) 
+17:32:17   ├─ /en/artigos/when-preparation-delays-the-start/index.html (+2ms) 
+17:32:17   ├─ /en/artigos/keep-the-thread-before-a-pause/index.html (+2ms) 
+17:32:17   ├─ /es/artigos/volver-a-un-proyecto-despues-de-semanas/index.html (+2ms) 
+17:32:17   ├─ /es/artigos/cuando-preparar-demasiado-retrasa-el-comienzo/index.html (+1ms) 
+17:32:17   ├─ /es/artigos/guardar-el-hilo-antes-de-una-pausa/index.html (+1ms) 
+17:32:17   ├─ /de/artigos/nach-wochen-zu-einem-projekt-zurueckkehren/index.html (+2ms) 
+17:32:17   ├─ /de/artigos/wenn-vorbereitung-den-anfang-verzoegert/index.html (+1ms) 
+17:32:17   ├─ /de/artigos/vor-einer-pause-den-faden-bewahren/index.html (+1ms) 
+17:32:17   ├─ /pt-br/artigos/index.htmlSanity indisponível; usando conteúdo editorial versionado. TypeError: fetch failed
+    at node:internal/deps/undici/undici:13484:13
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async fetchSanityArticles (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/editorial_Cr7zIFS4.mjs:310:20)
+    at async getArticles (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/editorial_Cr7zIFS4.mjs:336:9)
+    at async file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/index_CktPbNX0.mjs:24:19
+    at async callComponentAsTemplateResultOrResponse (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/server_kB_RzTD3.mjs:7358:24)
+    at async renderToString (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/server_kB_RzTD3.mjs:7348:25)
+    at async renderPage (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/server_kB_RzTD3.mjs:7836:16)
+    at async handlePages (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/prerender-entry.ItNpiVk9.mjs:5841:16)
+    at async callMiddleware (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/prerender-entry.ItNpiVk9.mjs:6278:9) {
+  [cause]: Error: getaddrinfo EAI_AGAIN xqfqfioy.api.sanity.io
+      at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:120:26) {
+    errno: -3001,
+    code: 'EAI_AGAIN',
+    syscall: 'getaddrinfo',
+    hostname: 'xqfqfioy.api.sanity.io'
+  }
+}
+ (+5ms) 
+17:32:17   ├─ /en/artigos/index.htmlSanity indisponível; usando conteúdo editorial versionado. TypeError: fetch failed
+    at node:internal/deps/undici/undici:13484:13
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async fetchSanityArticles (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/editorial_Cr7zIFS4.mjs:310:20)
+    at async getArticles (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/editorial_Cr7zIFS4.mjs:336:9)
+    at async file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/index_CktPbNX0.mjs:24:19
+    at async callComponentAsTemplateResultOrResponse (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/server_kB_RzTD3.mjs:7358:24)
+    at async renderToString (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/server_kB_RzTD3.mjs:7348:25)
+    at async renderPage (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/server_kB_RzTD3.mjs:7836:16)
+    at async handlePages (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/prerender-entry.ItNpiVk9.mjs:5841:16)
+    at async callMiddleware (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/prerender-entry.ItNpiVk9.mjs:6278:9) {
+  [cause]: Error: getaddrinfo EAI_AGAIN xqfqfioy.api.sanity.io
+      at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:120:26) {
+    errno: -3001,
+    code: 'EAI_AGAIN',
+    syscall: 'getaddrinfo',
+    hostname: 'xqfqfioy.api.sanity.io'
+  }
+}
+ (+3ms) 
+17:32:17   ├─ /es/artigos/index.htmlSanity indisponível; usando conteúdo editorial versionado. TypeError: fetch failed
+    at node:internal/deps/undici/undici:13484:13
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async fetchSanityArticles (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/editorial_Cr7zIFS4.mjs:310:20)
+    at async getArticles (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/editorial_Cr7zIFS4.mjs:336:9)
+    at async file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/index_CktPbNX0.mjs:24:19
+    at async callComponentAsTemplateResultOrResponse (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/server_kB_RzTD3.mjs:7358:24)
+    at async renderToString (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/server_kB_RzTD3.mjs:7348:25)
+    at async renderPage (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/server_kB_RzTD3.mjs:7836:16)
+    at async handlePages (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/prerender-entry.ItNpiVk9.mjs:5841:16)
+    at async callMiddleware (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/prerender-entry.ItNpiVk9.mjs:6278:9) {
+  [cause]: Error: getaddrinfo EAI_AGAIN xqfqfioy.api.sanity.io
+      at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:120:26) {
+    errno: -3001,
+    code: 'EAI_AGAIN',
+    syscall: 'getaddrinfo',
+    hostname: 'xqfqfioy.api.sanity.io'
+  }
+}
+ (+3ms) 
+17:32:17   ├─ /de/artigos/index.htmlSanity indisponível; usando conteúdo editorial versionado. TypeError: fetch failed
+    at node:internal/deps/undici/undici:13484:13
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async fetchSanityArticles (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/editorial_Cr7zIFS4.mjs:310:20)
+    at async getArticles (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/editorial_Cr7zIFS4.mjs:336:9)
+    at async file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/index_CktPbNX0.mjs:24:19
+    at async callComponentAsTemplateResultOrResponse (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/server_kB_RzTD3.mjs:7358:24)
+    at async renderToString (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/server_kB_RzTD3.mjs:7348:25)
+    at async renderPage (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/server_kB_RzTD3.mjs:7836:16)
+    at async handlePages (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/prerender-entry.ItNpiVk9.mjs:5841:16)
+    at async callMiddleware (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/prerender-entry.ItNpiVk9.mjs:6278:9) {
+  [cause]: Error: getaddrinfo EAI_AGAIN xqfqfioy.api.sanity.io
+      at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:120:26) {
+    errno: -3001,
+    code: 'EAI_AGAIN',
+    syscall: 'getaddrinfo',
+    hostname: 'xqfqfioy.api.sanity.io'
+  }
+}
+ (+3ms) 
+17:32:17   ├─ /pt-br/preferencias/index.html (+3ms) 
+17:32:17   ├─ /en/preferencias/index.html (+1ms) 
+17:32:17   ├─ /es/preferencias/index.html (+2ms) 
+17:32:17   ├─ /de/preferencias/index.html (+1ms) 
+17:32:17   ├─ /pt-br/privacidade/index.html (+1ms) 
+17:32:17   ├─ /en/privacidade/index.html (+1ms) 
+17:32:17   ├─ /es/privacidade/index.html (+1ms) 
+17:32:17   ├─ /de/privacidade/index.html (+1ms) 
+17:32:17   ├─ /pt-br/index.htmlSanity indisponível; usando conteúdo editorial versionado. TypeError: fetch failed
+    at node:internal/deps/undici/undici:13484:13
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async fetchSanityArticles (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/editorial_Cr7zIFS4.mjs:310:20)
+    at async getArticles (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/editorial_Cr7zIFS4.mjs:336:9)
+    at async file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/index_r-PFWKVe.mjs:275:19
+    at async callComponentAsTemplateResultOrResponse (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/server_kB_RzTD3.mjs:7358:24)
+    at async renderToString (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/server_kB_RzTD3.mjs:7348:25)
+    at async renderPage (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/server_kB_RzTD3.mjs:7836:16)
+    at async handlePages (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/prerender-entry.ItNpiVk9.mjs:5841:16)
+    at async callMiddleware (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/prerender-entry.ItNpiVk9.mjs:6278:9) {
+  [cause]: Error: getaddrinfo EAI_AGAIN xqfqfioy.api.sanity.io
+      at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:120:26) {
+    errno: -3001,
+    code: 'EAI_AGAIN',
+    syscall: 'getaddrinfo',
+    hostname: 'xqfqfioy.api.sanity.io'
+  }
+}
+ (+11ms) 
+17:32:17   ├─ /en/index.htmlSanity indisponível; usando conteúdo editorial versionado. TypeError: fetch failed
+    at node:internal/deps/undici/undici:13484:13
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async fetchSanityArticles (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/editorial_Cr7zIFS4.mjs:310:20)
+    at async getArticles (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/editorial_Cr7zIFS4.mjs:336:9)
+    at async file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/index_r-PFWKVe.mjs:275:19
+    at async callComponentAsTemplateResultOrResponse (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/server_kB_RzTD3.mjs:7358:24)
+    at async renderToString (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/server_kB_RzTD3.mjs:7348:25)
+    at async renderPage (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/server_kB_RzTD3.mjs:7836:16)
+    at async handlePages (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/prerender-entry.ItNpiVk9.mjs:5841:16)
+    at async callMiddleware (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/prerender-entry.ItNpiVk9.mjs:6278:9) {
+  [cause]: Error: getaddrinfo EAI_AGAIN xqfqfioy.api.sanity.io
+      at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:120:26)
+      at GetAddrInfoReqWrap.callbackTrampoline (node:internal/async_hooks:130:17) {
+    errno: -3001,
+    code: 'EAI_AGAIN',
+    syscall: 'getaddrinfo',
+    hostname: 'xqfqfioy.api.sanity.io'
+  }
+}
+ (+4ms) 
+17:32:17   ├─ /es/index.htmlSanity indisponível; usando conteúdo editorial versionado. TypeError: fetch failed
+    at node:internal/deps/undici/undici:13484:13
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async fetchSanityArticles (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/editorial_Cr7zIFS4.mjs:310:20)
+    at async getArticles (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/editorial_Cr7zIFS4.mjs:336:9)
+    at async file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/index_r-PFWKVe.mjs:275:19
+    at async callComponentAsTemplateResultOrResponse (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/server_kB_RzTD3.mjs:7358:24)
+    at async renderToString (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/server_kB_RzTD3.mjs:7348:25)
+    at async renderPage (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/server_kB_RzTD3.mjs:7836:16)
+    at async handlePages (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/prerender-entry.ItNpiVk9.mjs:5841:16)
+    at async callMiddleware (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/prerender-entry.ItNpiVk9.mjs:6278:9) {
+  [cause]: Error: getaddrinfo EAI_AGAIN xqfqfioy.api.sanity.io
+      at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:120:26)
+      at GetAddrInfoReqWrap.callbackTrampoline (node:internal/async_hooks:130:17) {
+    errno: -3001,
+    code: 'EAI_AGAIN',
+    syscall: 'getaddrinfo',
+    hostname: 'xqfqfioy.api.sanity.io'
+  }
+}
+ (+4ms) 
+17:32:17   ├─ /de/index.htmlSanity indisponível; usando conteúdo editorial versionado. TypeError: fetch failed
+    at node:internal/deps/undici/undici:13484:13
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async fetchSanityArticles (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/editorial_Cr7zIFS4.mjs:310:20)
+    at async getArticles (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/editorial_Cr7zIFS4.mjs:336:9)
+    at async file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/index_r-PFWKVe.mjs:275:19
+    at async callComponentAsTemplateResultOrResponse (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/server_kB_RzTD3.mjs:7358:24)
+    at async renderToString (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/server_kB_RzTD3.mjs:7348:25)
+    at async renderPage (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/chunks/server_kB_RzTD3.mjs:7836:16)
+    at async handlePages (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/prerender-entry.ItNpiVk9.mjs:5841:16)
+    at async callMiddleware (file:///home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/dist/.prerender/prerender-entry.ItNpiVk9.mjs:6278:9) {
+  [cause]: Error: getaddrinfo EAI_AGAIN xqfqfioy.api.sanity.io
+      at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:120:26)
+      at GetAddrInfoReqWrap.callbackTrampoline (node:internal/async_hooks:130:17) {
+    errno: -3001,
+    code: 'EAI_AGAIN',
+    syscall: 'getaddrinfo',
+    hostname: 'xqfqfioy.api.sanity.io'
+  }
+}
+ (+4ms) 
+17:32:17   ├─ /index.html (+2ms) 
+17:32:17 ✓ Completed in 194ms.
+
+17:32:17 [build] ✓ Completed in 673ms.
+17:32:17 [@astrojs/sitemap] `sitemap-index.xml` created at `dist`
+17:32:17 [build] 34 page(s) built in 752ms
+17:32:17 [build] Complete!
+
+> @doitbad/web@0.1.0 build /home/leticia/Documents/Dev/Projects/DoItBad/DoItBad-Landing-Page/apps/web
+> tsc -b && vite build
+
+vite v8.3.1 building client environment for production...
+transforming...
+✓ 83 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                                                0.52 kB │ gzip:  0.31 kB
+dist/assets/quicksand-vietnamese-wght-normal-ei70gACF.woff2    8.84 kB
+dist/assets/inter-vietnamese-wght-normal-CBcvBZtf.woff2       10.25 kB
+dist/assets/inter-greek-ext-wght-normal-DlzME5K_.woff2        11.23 kB
+dist/assets/fraunces-vietnamese-wght-normal-CnvboYUG.woff2    11.57 kB
+dist/assets/inter-cyrillic-wght-normal-DqGufNeO.woff2         18.74 kB
+dist/assets/inter-greek-wght-normal-CkhJZR-_.woff2            18.99 kB
+dist/assets/inter-cyrillic-ext-wght-normal-BOeWTOD4.woff2     25.96 kB
+dist/assets/quicksand-latin-ext-wght-normal-CrJ75Ewg.woff2    26.61 kB
+dist/assets/quicksand-latin-wght-normal-Buj9m_3d.woff2        28.24 kB
+dist/assets/fraunces-latin-ext-wght-normal-Ca2vKHc0.woff2     33.58 kB
+dist/assets/fraunces-latin-wght-normal-ukD16Tqj.woff2         36.62 kB
+dist/assets/inter-latin-wght-normal-Dx4kXJAl.woff2            48.25 kB
+dist/assets/inter-latin-ext-wght-normal-DO1Apj_S.woff2        85.06 kB
+dist/assets/zen-Df-xnRSb.wav                                 352.84 kB
+dist/assets/index-BkIZei2q.css                                26.99 kB │ gzip:  6.63 kB
+dist/assets/index-CC7TSVLb.js                                228.64 kB │ gzip: 73.33 kB
+
+✓ built in 167ms
