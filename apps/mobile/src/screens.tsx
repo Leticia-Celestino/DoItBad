@@ -1,18 +1,30 @@
+import {
+  RhythmDefaults,
+  TaskRhythmFields,
+  TaskRhythmActions,
+  RhythmStart,
+  RhythmTimer,
+} from './Rhythm';
 import { useEffect, useRef, useState } from 'react';
 import { Pressable, Text, View, BackHandler, Alert, ScrollView } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import {
   colors,
   dayKey,
+  type RhythmConfig,
+  focusRecordedSeconds,
+  actOnRhythm,
   elapsedSeconds,
   formatTime,
   summarize,
   type Item,
   type Priority,
+  type CognitiveLoad,
   type Recurrence,
   type DayPeriod,
   dayPeriodLabels,
   priorityLabels,
+  cognitiveLoadLabels,
   recurrenceLabels,
   projectColors,
   isTaskBlocked,
@@ -41,7 +53,7 @@ import {
   choiceState,
   s,
 } from './ui';
-import { SunOverHills, NightScene, Sprout } from './illustrations';
+import { Companion, NightScene } from './illustrations';
 import { Icon, Ring, MoodChart, PathMap } from './visuals';
 import { MonthGrid } from './calendar';
 import Ambience from './Ambience';
@@ -51,8 +63,12 @@ import { acceptRecommendation, recommendNextStep, type AIRecommendation } from '
 const go = (path: string) => router.push(path as never);
 export function Dashboard() {
   const { items, session, night, toggleNight } = useStore();
+  const [profileName, setProfileName] = useState('');
   const [signOutError, setSignOutError] = useState('');
   const [range, setRange] = useState<'Semana' | 'Mês' | 'Ano'>('Semana');
+  useEffect(() => {
+    void AsyncStorage.getItem('doitbad:profile-name').then((value) => setProfileName(value ?? ''));
+  }, []);
   const stats = summarize(
     items.filter(
       (i) =>
@@ -109,12 +125,20 @@ export function Dashboard() {
         </View>
       </View>
       {!!signOutError && <Copy style={{ color: colors.terracotta }}>{signOutError}</Copy>}
-      <View style={{ gap: 2 }}>
-        <Text style={s.eyebrow}>{greetingForHour()}</Text>
-        <Text style={[s.subtitle, night && { color: colors.nightInk }]}>
-          {firstName(String(session?.user.user_metadata?.name ?? ''), session?.user.email)}, seu
-          próximo passo pode ser pequeno.
-        </Text>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+        <View style={{ flex: 1, gap: 2 }}>
+          <Text style={s.eyebrow}>{greetingForHour()}</Text>
+          <Text style={[s.subtitle, night && { color: colors.nightInk }]}>
+            {firstName(
+              profileName || String(session?.user.user_metadata?.name ?? ''),
+              session?.user.email,
+            )}
+            , seu próximo passo pode ser pequeno.
+          </Text>
+        </View>
+        <View style={{ width: 86 }}>
+          <Companion state="welcome" height={104} />
+        </View>
       </View>
       <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap' }}>
         <View style={{ flex: 1, minWidth: 150, gap: 4 }}>
@@ -321,7 +345,7 @@ export function Dashboard() {
           key={item.id}
           icon="check"
           title={item.payload.title}
-          meta={`${formatTime(item.payload.elapsed)} · ${new Date(item.created_at).toLocaleDateString('pt-BR')}`}
+          meta={`${formatTime(focusRecordedSeconds(item.payload))} · ${new Date(item.created_at).toLocaleDateString('pt-BR')}`}
           onPress={() => go(`/conclusao?id=${item.id}`)}
         />
       ))}
@@ -347,6 +371,7 @@ export function Tasks() {
   const [title, setTitle] = useState('');
   const [project, setProject] = useState('');
   const [priority, setPriority] = useState<Priority>('media');
+  const [cognitiveLoad, setCognitiveLoad] = useState<CognitiveLoad>(2);
   const [recurrence, setRecurrence] = useState<Recurrence>('none');
   const [timeOfDay, setTimeOfDay] = useState<DayPeriod>(requestedPeriod);
   const [dependsOn, setDependsOn] = useState('');
@@ -356,6 +381,7 @@ export function Tasks() {
   const [filter, setFilter] = useState<'Todas' | 'Pendentes' | 'Concluídas'>('Todas');
   const [query, setQuery] = useState('');
   const [projectFilter, setProjectFilter] = useState('Todos');
+  const [rhythm, setRhythm] = useState<RhythmConfig | null>(null);
   const [editing, setEditing] = useState<Item<'task'> | undefined>();
   const [expanded, setExpanded] = useState<string | null>(null);
   const [recommendation, setRecommendation] = useState<AIRecommendation | null>(null);
@@ -579,6 +605,36 @@ export function Tasks() {
               </Pressable>
             ))}
           </View>
+          <Copy>Quanto de energia mental isso parece pedir?</Copy>
+          <View style={s.row}>
+            {([1, 2, 3] as CognitiveLoad[]).map((value) => (
+              <Pressable
+                key={value}
+                accessibilityRole="radio"
+                accessibilityLabel={`Carga cognitiva ${cognitiveLoadLabels[value]}`}
+                accessibilityState={{ selected: cognitiveLoad === value }}
+                onPress={() => setCognitiveLoad(value)}
+                style={[s.pill, choiceState(night, cognitiveLoad === value)]}
+              >
+                <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 2 }}>
+                  {[1, 2, 3].map((level) => (
+                    <View
+                      key={level}
+                      style={{
+                        width: 4,
+                        height: 5 + level * 3,
+                        borderRadius: 2,
+                        backgroundColor: level <= value ? colors.terracotta : colors.line,
+                      }}
+                    />
+                  ))}
+                </View>
+                <Text style={[s.text, { color: night ? colors.nightInk : colors.ink }]}>
+                  {cognitiveLoadLabels[value]}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
           <Copy>Repetir</Copy>
           <View style={s.row}>
             {(Object.keys(recurrenceLabels) as Recurrence[]).map((value) => (
@@ -645,6 +701,7 @@ export function Tasks() {
             multiline
             maxLength={2000}
           />
+          <TaskRhythmFields value={rhythm} onChange={setRhythm} />
           <Button
             disabled={busy || !title.trim() || !/^\d{4}-\d{2}-\d{2}$/.test(date)}
             onPress={async () => {
@@ -672,6 +729,8 @@ export function Tasks() {
                     ...editing?.payload,
                     title: title.trim(),
                     priority,
+                    cognitiveLoad,
+                    rhythm,
                     recurrence,
                     timeOfDay,
                     dependsOn: dependsOn ? [dependsOn] : [],
@@ -693,9 +752,11 @@ export function Tasks() {
                 setTitle('');
                 setSteps('');
                 setEditing(undefined);
+                setRhythm(null);
                 setAdding(false);
                 setProject('');
                 setPriority('media');
+                setCognitiveLoad(2);
                 setRecurrence('none');
                 setTimeOfDay('anytime');
                 setDependsOn('');
@@ -708,10 +769,12 @@ export function Tasks() {
             <Button
               onPress={() => {
                 setEditing(undefined);
+                setRhythm(null);
                 setTitle('');
                 setSteps('');
                 setProject('');
                 setPriority('media');
+                setCognitiveLoad(2);
                 setRecurrence('none');
                 setTimeOfDay('anytime');
                 setDependsOn('');
@@ -787,19 +850,16 @@ export function Tasks() {
               <>
                 <Text style={s.eyebrow}>Microações</Text>
                 <MicroSteps task={t} />
-                <Button
-                  disabled={isTaskBlocked(t, items)}
-                  onPress={() => go(`/tarefa?task=${t.id}`)}
-                >
-                  {isTaskBlocked(t, items) ? 'Conclua a tarefa anterior' : 'Focar nesta tarefa'}
-                </Button>
+                <TaskRhythmActions task={t} />
                 <Button
                   variant="text"
                   onPress={() => {
                     setEditing(t);
+                    setRhythm(t.payload.rhythm ?? null);
                     setTitle(t.payload.title);
                     setProject(t.payload.project);
                     setPriority(t.payload.priority ?? 'media');
+                    setCognitiveLoad(t.payload.cognitiveLoad ?? 2);
                     setRecurrence(t.payload.recurrence ?? 'none');
                     setTimeOfDay(t.payload.timeOfDay ?? 'anytime');
                     setDependsOn(t.payload.dependsOn?.[0] ?? '');
@@ -888,6 +948,23 @@ function TaskTags({
         <Copy style={{ fontSize: 10, lineHeight: 14, color: priorityColor }}>
           {priorityLabels[priority]}
         </Copy>
+      </View>
+      <View
+        accessibilityLabel={`Carga cognitiva ${cognitiveLoadLabels[task.payload.cognitiveLoad ?? 2]}`}
+        style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 2, paddingHorizontal: 4 }}
+      >
+        {[1, 2, 3].map((level) => (
+          <View
+            key={level}
+            style={{
+              width: 4,
+              height: 5 + level * 3,
+              borderRadius: 2,
+              backgroundColor:
+                level <= (task.payload.cognitiveLoad ?? 2) ? colors.terracotta : colors.line,
+            }}
+          />
+        ))}
       </View>
       {(task.payload.recurrence ?? 'none') !== 'none' && (
         <Copy style={{ fontSize: 10, lineHeight: 20 }}>
@@ -1053,7 +1130,7 @@ export function History() {
               key={item.id}
               icon="check"
               title={item.payload.title}
-              meta={`${formatTime(item.payload.elapsed)} · ${new Date(item.created_at).toLocaleDateString('pt-BR')}`}
+              meta={`${formatTime(focusRecordedSeconds(item.payload))} · ${new Date(item.created_at).toLocaleDateString('pt-BR')}`}
               onPress={() => go(`/conclusao?id=${item.id}`)}
             />
           ))
@@ -1113,13 +1190,6 @@ function Start() {
       '',
   );
   const [blockers, setBlockers] = useState<string[]>([]);
-  const [minutes, setMinutes] = useState(2);
-  useEffect(() => {
-    void AsyncStorage.getItem('doitbad:focus-minutes').then((value) => {
-      const saved = Number(value);
-      if ([2, 5, 10, 15, 25].includes(saved)) setMinutes(saved);
-    });
-  }, []);
   useEffect(() => {
     const listener = BackHandler.addEventListener('hardwareBackPress', () => {
       if (stage > 0) {
@@ -1155,8 +1225,8 @@ function Start() {
     >
       {stage === 0 ? (
         <>
-          <View style={{ width: 56, marginTop: 16, marginBottom: 8 }}>
-            <Sprout height={56} />
+          <View style={{ width: 108, marginTop: 4, marginBottom: -8, alignSelf: 'flex-end' }}>
+            <Companion state="focus" height={116} />
           </View>
           <Title>O que você precisa fazer?</Title>
           <Copy>Qual é a missão de hoje?</Copy>
@@ -1350,7 +1420,6 @@ function Start() {
               >
                 Diminuir este passo
               </Button>
-              <Duration value={minutes} onChange={setMinutes} />
             </>
           )}
           <View style={{ flex: 1, minHeight: 8 }} />
@@ -1362,7 +1431,8 @@ function Start() {
                 title,
                 step,
                 blockers,
-                target: minutes * 60,
+                purpose: 'start',
+                target: 2 * 60,
                 elapsed: 0,
                 runningSince: Date.now(),
                 status: 'active',
@@ -1372,7 +1442,7 @@ function Start() {
               if (item) router.replace(`/foco?id=${item.id}` as never);
             }}
           >
-            {`Iniciar ${minutes} minutos`}
+            Iniciar 2 minutos
           </Button>
           <Button variant="text" onPress={() => setStage(0)}>
             Quero outro passo
@@ -1382,25 +1452,17 @@ function Start() {
     </Page>
   );
 }
-function Duration({ value, onChange }: { value: number; onChange: (n: number) => void }) {
-  const { night } = useStore();
-  return (
-    <View style={s.row}>
-      {[2, 5, 10, 15, 25].map((n) => (
-        <Pressable
-          key={n}
-          accessibilityRole="radio"
-          accessibilityState={{ selected: value === n }}
-          style={[s.pill, choiceState(night, value === n)]}
-          onPress={() => onChange(n)}
-        >
-          <Text style={[s.text, { color: night ? colors.nightInk : colors.ink }]}>{n} min</Text>
-        </Pressable>
-      ))}
-    </View>
+function Timer() {
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const { items } = useStore();
+  const item = items.find((i): i is Item<'focus'> => i.kind === 'focus' && i.id === id);
+  return item?.payload.rhythm && item.payload.status === 'active' ? (
+    <RhythmTimer key={item.id} item={item} />
+  ) : (
+    <LegacyTimer />
   );
 }
-function Timer() {
+function LegacyTimer() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { items, save, busy } = useStore();
   const [now, setNow] = useState(Date.now());
@@ -1421,7 +1483,16 @@ function Timer() {
     finishing.current = true;
     void save(
       'focus',
-      { ...item.payload, elapsed: item.payload.target, runningSince: null, status: 'complete' },
+      {
+        ...item.payload,
+        elapsed: item.payload.target,
+        runningSince: null,
+        status: 'complete',
+        completedAt:
+          item.payload.runningSince === null
+            ? Date.now()
+            : item.payload.runningSince + (item.payload.target - item.payload.elapsed) * 1000,
+      },
       item,
     ).then((saved) => {
       if (saved) router.replace(`/conclusao?id=${item.id}` as never);
@@ -1464,6 +1535,9 @@ function Timer() {
                 : 'Uma pausa também cabe'
           }
         />
+        <View style={{ width: 104, alignSelf: 'flex-end', marginTop: -68, marginRight: 8 }}>
+          <Companion state={f.runningSince ? 'focus' : 'pause'} height={112} />
+        </View>
       </View>
       {f.status === 'active' ? (
         <>
@@ -1504,7 +1578,17 @@ function Timer() {
             disabled={busy}
             onPress={async () => {
               if (
-                await save('focus', { ...f, elapsed, runningSince: null, status: 'complete' }, item)
+                await save(
+                  'focus',
+                  {
+                    ...f,
+                    elapsed,
+                    runningSince: null,
+                    status: 'complete',
+                    completedAt: Date.now(),
+                  },
+                  item,
+                )
               )
                 router.replace(`/conclusao?id=${id}` as never);
             }}
@@ -1550,13 +1634,19 @@ function Done() {
           <Icon name="check" size={36} />
         </View>
         <Title style={{ textAlign: 'center' }}>
-          Você <Text style={{ color: colors.terracotta }}>começou.</Text>
+          {item?.payload.purpose === 'rhythm' ? (
+            'Seu momento ficou registrado.'
+          ) : (
+            <>
+              Você <Text style={{ color: colors.terracotta }}>começou.</Text>
+            </>
+          )}
         </Title>
-        <Copy style={{ textAlign: 'center' }}>E isso já é mais do que ontem.</Copy>
+        <Copy style={{ textAlign: 'center' }}>Esse passo já faz parte do seu caminho.</Copy>
       </View>
       <Card style={{ padding: 0, gap: 0, overflow: 'hidden', marginTop: 16 }}>
-        <View style={{ backgroundColor: colors.canvasSoft }}>
-          <SunOverHills height={190} />
+        <View style={{ backgroundColor: colors.canvasSoft, paddingTop: 8 }}>
+          <Companion state="complete" height={190} />
         </View>
         <View style={{ padding: 24, alignItems: 'center', gap: 12 }}>
           <Pill>Desafio concluído</Pill>
@@ -1567,7 +1657,7 @@ function Done() {
               { fontSize: 46, lineHeight: 54, color: colors.terracotta, textAlign: 'center' },
             ]}
           >
-            {item ? formatTime(item.payload.elapsed) : '—'}
+            {item ? formatTime(focusRecordedSeconds(item.payload)) : '—'}
           </Text>
           <Copy>à sua tarefa.</Copy>
           <View
@@ -1575,11 +1665,25 @@ function Done() {
           />
           <Icon name="flag" color={colors.butter} />
           <Copy style={{ fontSize: 14, textAlign: 'center' }}>
-            A meta nunca foi terminar.{'\n'}Era começar.
+            {item?.payload.purpose === 'rhythm' ? (
+              'Você pode encerrar e retomar quando fizer sentido.'
+            ) : (
+              <>A meta nunca foi terminar.{'\n'}Era começar.</>
+            )}
           </Copy>
         </View>
       </Card>
-      <Button onPress={() => go('/tarefa')}>Continuar por mais 2 minutos</Button>
+      {item &&
+        item.payload.purpose !== 'rhythm' &&
+        item.payload.purpose !== 'rest' &&
+        !task?.payload.done && (
+          <Button onPress={() => go(`/ritmo?from=${item.id}${task ? `&task=${task.id}` : ''}`)}>
+            Continuar
+          </Button>
+        )}
+      <Button variant="outline" onPress={() => router.replace('/' as never)}>
+        Encerrar por agora
+      </Button>
       <Button variant="text" onPress={() => router.replace('/historico')}>
         Ver meu histórico
       </Button>
@@ -1591,7 +1695,7 @@ function Done() {
       {item && showNote && (
         <Card>
           <Copy>
-            {item.payload.title} · {formatTime(item.payload.elapsed)}
+            {item.payload.title} · {formatTime(focusRecordedSeconds(item.payload))}
           </Copy>
           <Field
             label="Uma pista para quando voltar"
@@ -1729,6 +1833,7 @@ function Intentions() {
   );
 }
 export function Detail({ screen, embedded = false }: { screen: string; embedded?: boolean }) {
+  if (screen === 'ritmo') return <RhythmStart />;
   if (screen === 'tarefa') return <Start />;
   if (screen === 'foco') return <Timer />;
   if (screen === 'conclusao') return <Done />;
@@ -1740,17 +1845,21 @@ export function Detail({ screen, embedded = false }: { screen: string; embedded?
 function Settings() {
   const { session, night, toggleNight } = useStore();
   const [name, setName] = useState(String(session?.user.user_metadata?.name ?? ''));
-  const [focusMinutes, setFocusMinutes] = useState(2);
+  const [section, setSection] = useState<'perfil' | 'aparencia' | 'foco' | 'privacidade'>('perfil');
   const [soundVolume, setSoundVolume] = useState(25);
   const [message, setMessage] = useState('');
   const [saving, setSaving] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordMessage, setPasswordMessage] = useState('');
+  const [savingPassword, setSavingPassword] = useState(false);
   useEffect(() => {
     void Promise.all([
-      AsyncStorage.getItem('doitbad:focus-minutes'),
       AsyncStorage.getItem('doitbad:sound-volume'),
-    ]).then(([focus, volume]) => {
-      if ([2, 5, 10, 15, 25].includes(Number(focus))) setFocusMinutes(Number(focus));
+      AsyncStorage.getItem('doitbad:profile-name'),
+    ]).then(([volume, profileName]) => {
       if ([0, 15, 25, 40].includes(Number(volume))) setSoundVolume(Number(volume));
+      if (profileName) setName(profileName);
     });
   }, []);
   return (
@@ -1759,109 +1868,172 @@ function Settings() {
       <Title>Configurações</Title>
       <Copy>Ajustes simples para o DoItBad acompanhar seu ritmo.</Copy>
 
-      <Card>
-        <Pill>Perfil</Pill>
-        <Title style={{ fontSize: 23, lineHeight: 29 }}>Como podemos chamar você?</Title>
-        <Field label="Seu nome" value={name} maxLength={80} onChangeText={setName} />
-        <Field label="E-mail da conta" value={session?.user.email ?? ''} editable={false} />
-        <Button
-          disabled={saving || !name.trim()}
-          onPress={async () => {
-            setSaving(true);
-            setMessage('');
-            try {
-              const result = await supabase?.auth.updateUser({ data: { name: name.trim() } });
-              if (result?.error) throw result.error;
-              setMessage('Nome atualizado. Que bom ter você por aqui.');
-            } catch {
-              setMessage('Não foi possível atualizar agora.');
-            } finally {
-              setSaving(false);
-            }
-          }}
-        >
-          {saving ? 'Salvando…' : 'Salvar nome'}
-        </Button>
-        {!!message && <Copy>{message}</Copy>}
-      </Card>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+        <View style={[s.row, { flexWrap: 'nowrap', paddingVertical: 4 }]}>
+          {(
+            [
+              ['perfil', 'Perfil'],
+              ['aparencia', 'Aparência'],
+              ['foco', 'Foco e som'],
+              ['privacidade', 'Privacidade'],
+            ] as const
+          ).map(([value, label]) => (
+            <Pressable
+              key={value}
+              accessibilityRole="tab"
+              accessibilityState={{ selected: section === value }}
+              onPress={() => setSection(value)}
+              style={[s.pill, choiceState(night, section === value)]}
+            >
+              <Text style={[s.text, { color: night ? colors.nightInk : colors.ink }]}>{label}</Text>
+            </Pressable>
+          ))}
+        </View>
+      </ScrollView>
 
-      <Card>
-        <Pill>Aparência</Pill>
-        <Title style={{ fontSize: 23, lineHeight: 29 }}>Uma luz confortável para você.</Title>
-        <Copy>A paleta creme ou a noite verde profunda seguem a mesma identidade do DoItBad.</Copy>
-        <View style={s.row}>
-          {['Claro', 'Noturno'].map((label, index) => {
-            const selected = night === Boolean(index);
-            return (
+      {section === 'perfil' && (
+        <Card>
+          <Pill>Perfil</Pill>
+          <Title style={{ fontSize: 23, lineHeight: 29 }}>Como podemos chamar você?</Title>
+          <Field label="Seu nome" value={name} maxLength={80} onChangeText={setName} />
+          <Field label="E-mail da conta" value={session?.user.email ?? ''} editable={false} />
+          <Button
+            disabled={saving || !name.trim()}
+            onPress={async () => {
+              setSaving(true);
+              setMessage('');
+              try {
+                await AsyncStorage.setItem('doitbad:profile-name', name.trim());
+                const result = await supabase?.auth.updateUser({ data: { name: name.trim() } });
+                if (result?.error) throw result.error;
+                setMessage('Nome atualizado. Que bom ter você por aqui.');
+              } catch {
+                setMessage('Não foi possível atualizar agora.');
+              } finally {
+                setSaving(false);
+              }
+            }}
+          >
+            {saving ? 'Salvando…' : 'Salvar nome'}
+          </Button>
+          {!!message && <Copy>{message}</Copy>}
+          <View style={{ height: 1, backgroundColor: night ? colors.nightLine : colors.line }} />
+          <Title style={{ fontSize: 20, lineHeight: 26 }}>Alterar senha</Title>
+          <Copy>Use pelo menos 8 caracteres.</Copy>
+          <Field
+            label="Nova senha"
+            value={newPassword}
+            onChangeText={setNewPassword}
+            secureTextEntry
+            autoComplete="new-password"
+          />
+          <Field
+            label="Confirmar nova senha"
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+            secureTextEntry
+            autoComplete="new-password"
+          />
+          <Button
+            disabled={savingPassword || newPassword.length < 8 || !confirmPassword}
+            onPress={async () => {
+              setPasswordMessage('');
+              if (newPassword !== confirmPassword) {
+                setPasswordMessage('As senhas precisam ser iguais.');
+                return;
+              }
+              setSavingPassword(true);
+              try {
+                const result = await supabase?.auth.updateUser({ password: newPassword });
+                if (!supabase || result?.error) throw result?.error ?? new Error('Sem sessão');
+                setNewPassword('');
+                setConfirmPassword('');
+                setPasswordMessage('Senha atualizada com segurança.');
+              } catch {
+                setPasswordMessage('Não foi possível atualizar a senha agora.');
+              } finally {
+                setSavingPassword(false);
+              }
+            }}
+          >
+            {savingPassword ? 'Atualizando…' : 'Atualizar senha'}
+          </Button>
+          {!!passwordMessage && <Copy>{passwordMessage}</Copy>}
+        </Card>
+      )}
+
+      {section === 'aparencia' && (
+        <Card>
+          <Pill>Aparência</Pill>
+          <Title style={{ fontSize: 23, lineHeight: 29 }}>Uma luz confortável para você.</Title>
+          <Copy>
+            A paleta creme ou a noite verde profunda seguem a mesma identidade do DoItBad.
+          </Copy>
+          <View style={s.row}>
+            {['Claro', 'Noturno'].map((label, index) => {
+              const selected = night === Boolean(index);
+              return (
+                <Pressable
+                  key={label}
+                  accessibilityRole="radio"
+                  accessibilityState={{ selected }}
+                  style={[s.pill, choiceState(night, selected)]}
+                  onPress={() => selected || toggleNight()}
+                >
+                  <Text style={[s.text, { color: night ? colors.nightInk : colors.ink }]}>
+                    {label}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        </Card>
+      )}
+
+      {section === 'foco' && (
+        <Card>
+          <Pill>Foco e som</Pill>
+          <Title style={{ fontSize: 23, lineHeight: 29 }}>Começar com o tamanho certo.</Title>
+          <Copy>
+            Dois minutos para quando começar estiver difícil. Você também pode entrar diretamente no
+            seu ritmo.
+          </Copy>
+          <RhythmDefaults />
+          <Copy>Volume dos sons suaves</Copy>
+          <View style={s.row}>
+            {[0, 15, 25, 40].map((value) => (
               <Pressable
-                key={label}
+                key={value}
                 accessibilityRole="radio"
-                accessibilityState={{ selected }}
-                style={[s.pill, choiceState(night, selected)]}
-                onPress={() => selected || toggleNight()}
+                accessibilityState={{ selected: soundVolume === value }}
+                style={[s.pill, choiceState(night, soundVolume === value)]}
+                onPress={() => {
+                  setSoundVolume(value);
+                  void AsyncStorage.setItem('doitbad:sound-volume', String(value));
+                }}
               >
                 <Text style={[s.text, { color: night ? colors.nightInk : colors.ink }]}>
-                  {label}
+                  {value === 0 ? 'Sem som' : `${value}%`}
                 </Text>
               </Pressable>
-            );
-          })}
-        </View>
-      </Card>
+            ))}
+          </View>
+        </Card>
+      )}
 
-      <Card>
-        <Pill>Foco e som</Pill>
-        <Title style={{ fontSize: 23, lineHeight: 29 }}>Começar com o tamanho certo.</Title>
-        <Copy>Duração sugerida para um novo foco</Copy>
-        <View style={s.row}>
-          {[2, 5, 10, 15, 25].map((value) => (
-            <Pressable
-              key={value}
-              accessibilityRole="radio"
-              accessibilityState={{ selected: focusMinutes === value }}
-              style={[s.pill, choiceState(night, focusMinutes === value)]}
-              onPress={() => {
-                setFocusMinutes(value);
-                void AsyncStorage.setItem('doitbad:focus-minutes', String(value));
-              }}
-            >
-              <Text style={[s.text, { color: night ? colors.nightInk : colors.ink }]}>
-                {value} min
-              </Text>
-            </Pressable>
-          ))}
-        </View>
-        <Copy>Volume dos sons suaves</Copy>
-        <View style={s.row}>
-          {[0, 15, 25, 40].map((value) => (
-            <Pressable
-              key={value}
-              accessibilityRole="radio"
-              accessibilityState={{ selected: soundVolume === value }}
-              style={[s.pill, choiceState(night, soundVolume === value)]}
-              onPress={() => {
-                setSoundVolume(value);
-                void AsyncStorage.setItem('doitbad:sound-volume', String(value));
-              }}
-            >
-              <Text style={[s.text, { color: night ? colors.nightInk : colors.ink }]}>
-                {value === 0 ? 'Sem som' : `${value}%`}
-              </Text>
-            </Pressable>
-          ))}
-        </View>
-      </Card>
-
-      <Card>
-        <Pill>Dados e privacidade</Pill>
-        <Title style={{ fontSize: 23, lineHeight: 29 }}>Seu espaço continua sendo seu.</Title>
-        <Copy>
-          Suas tarefas, sessões e registros ficam ligados à conta para sincronizar web e aplicativo.
-        </Copy>
-        <Copy>
-          A exclusão definitiva terá uma confirmação protegida para evitar perdas acidentais.
-        </Copy>
-      </Card>
+      {section === 'privacidade' && (
+        <Card>
+          <Pill>Dados e privacidade</Pill>
+          <Title style={{ fontSize: 23, lineHeight: 29 }}>Seu espaço continua sendo seu.</Title>
+          <Copy>
+            Suas tarefas, sessões e registros ficam ligados à conta para sincronizar web e
+            aplicativo.
+          </Copy>
+          <Copy>
+            A exclusão definitiva terá uma confirmação protegida para evitar perdas acidentais.
+          </Copy>
+        </Card>
+      )}
     </Page>
   );
 }
@@ -2138,6 +2310,7 @@ function Explore({ screen, embedded = false }: { screen: string; embedded?: bool
                       </View>
                     </View>
                   </Pressable>
+                  <TaskRhythmActions task={t} />
                 </Card>
               ))}
               {!periodTasks.length && (
@@ -2333,10 +2506,14 @@ function Explore({ screen, embedded = false }: { screen: string; embedded?: bool
                   await save(
                     'focus',
                     {
-                      ...active.payload,
+                      ...(active.payload.rhythm
+                        ? actOnRhythm(active.payload, 'pause', Date.now())
+                        : {
+                            ...active.payload,
+                            elapsed: elapsedSeconds(active.payload),
+                            runningSince: null,
+                          }),
                       note,
-                      elapsed: elapsedSeconds(active.payload),
-                      runningSince: null,
                     },
                     active,
                   )
@@ -2558,6 +2735,7 @@ function Explore({ screen, embedded = false }: { screen: string; embedded?: bool
             }
             const i = await save('focus', {
               taskId: null,
+              purpose: 'rest',
               title: 'Um momento de pausa',
               step: 'Respirar e estar aqui',
               blockers: [],

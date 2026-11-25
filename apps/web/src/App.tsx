@@ -1,3 +1,4 @@
+import { RhythmStartPage } from './components/Rhythm';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import AppShell from './components/AppShell';
@@ -95,6 +96,7 @@ export default function App() {
         <Route path="/atividade" element={<Dashboard />} />
         <Route path="/intencoes" element={<ActivityPage />} />
         <Route path="/tarefas" element={<TasksPage key={location.key} />} />
+        <Route path="/ritmo" element={<RhythmStartPage />} />
         <Route path="/tarefa" element={<StartPage />} />
         <Route path="/foco/:id" element={<TimerPage />} />
         <Route path="/conclusao/:id" element={<DonePage />} />

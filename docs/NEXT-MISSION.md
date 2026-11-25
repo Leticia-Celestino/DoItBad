@@ -126,3 +126,32 @@ atualizado para o texto real do dashboard e remove a conta temporária no bloco 
 Próxima ação: instalar este APK quando o aparelho reaparecer, percorrer as 18 telas com
 `scripts/review-android-screens.mjs` e comparar as capturas com a referência. iOS permanece
 pendente.
+
+## Entrega local de 2026-11-25 — Ritmo e pequenos começos
+
+Implementados fluxos distintos para destravar e sustentar a atividade, preservando
+o desafio fixo de dois minutos. A continuidade usa o motor compartilhado em
+`packages/core/src/rhythm.ts`; as interfaces ficam em `apps/web/src/components/Rhythm.tsx`
+e `apps/mobile/src/Rhythm.tsx`. Preferência pessoal é um registro privado
+`rhythm_preferences`; a tarefa pode guardar uma exceção. Cada sessão recebe uma
+cópia da configuração, finalidade e vínculo com o começo anterior.
+
+O fim do bloco aguarda decisão, sem marcar tarefa concluída. Descanso também
+aguarda confirmação para iniciar outro bloco. Micropausas aceitas cabem no tempo
+reservado e são excluídas do foco registrado. O próximo lembrete visual é carregado
+de um pequeno começo recente (até cinco minutos); sessões antigas não encurtam
+o intervalo de uma nova sessão.
+
+Validações: testes do domínio; 43 testes web em desktop/celular/tablet, com dois
+casos repetidos ignorados pelo próprio roteiro; acessibilidade automatizada;
+checagens TypeScript; lint; build web; exportação de bundles Android/iOS.
+A migração `202611250001_rhythm.sql` passou em PostgreSQL 16 temporário, incluindo
+compatibilidade legada, configuração inválida, unicidade, histórico e isolamento RLS.
+Roteiro reproduzível: `scripts/verify-rhythm-migration.sql`, executado apenas em
+banco descartável via `scripts/verify-rhythm-postgres.sh`.
+
+Nenhum deploy nem migração remota realizados. Os avisos sonoros são opt-in na
+tela aberta; não há agendamento de notificações com o app fechado. A sincronização
+em primeiro plano usa consultas a cada três segundos e revisão otimista, não
+Realtime nem fila offline. Confirmar áudio, segundo plano e leitura de tela em
+aparelhos antes de distribuir builds.

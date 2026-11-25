@@ -214,6 +214,11 @@ export default function DayHome() {
             </div>
           )}
           <div className="invitation-actions">
+            {!active && next && !recommendation && (
+              <Link className="button secondary" to={`/ritmo?task=${next.id}`}>
+                Começar meu ritmo
+              </Link>
+            )}
             {!recommendation && (
               <Link
                 className="button"
@@ -230,7 +235,7 @@ export default function DayHome() {
                     ? 'Continuar daqui'
                     : 'Voltar ao meu foco'
                   : next
-                    ? 'Começar por aqui'
+                    ? 'Me ajude a começar'
                     : 'Colocar uma coisa no papel'}{' '}
                 <span aria-hidden="true">↗</span>
               </Link>

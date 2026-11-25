@@ -1,3 +1,11 @@
+import {
+  focusRecordedSeconds,
+  validateRhythmConfig,
+  validateRhythmState,
+  type RhythmConfig,
+  type RhythmState,
+} from './rhythm.ts';
+export * from './rhythm.ts';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 export const colors = {
@@ -46,6 +54,7 @@ export type Task = {
   recurrence?: Recurrence;
   timeOfDay?: DayPeriod;
   projectId?: string | null;
+  rhythm?: RhythmConfig | null;
 };
 export const projectColors = ['#526148', '#985033', '#E8C77F', '#E8AF8D', '#635E53'];
 export const priorityLabels = { alta: 'Alta', media: 'Média', baixa: 'Baixa' };
@@ -151,6 +160,10 @@ export function editSteps(
   return { steps, completedSteps };
 }
 export type Focus = {
+  purpose?: 'start' | 'rhythm' | 'rest';
+  previousFocusId?: string;
+  completedAt?: number;
+  rhythm?: RhythmState;
   taskId: string | null;
   title: string;
   step: string;
@@ -180,7 +193,13 @@ export type ActivityEvent = {
   occurredAt: string;
   metadata: Record<string, unknown>;
 };
-export type Payloads = { task: Task; focus: Focus; mood: Mood; project: Project };
+export type Payloads = {
+  task: Task;
+  focus: Focus;
+  mood: Mood;
+  project: Project;
+  rhythm_preferences: { config: RhythmConfig };
+};
 export type Kind = keyof Payloads;
 export type Item<K extends Kind = Kind> = K extends Kind
   ? { id: string; kind: K; payload: Payloads[K]; revision: number; created_at: string }
@@ -228,7 +247,7 @@ export function summarize(items: Item[]) {
   return {
     sessions,
     steps: sessions.length,
-    minutes: Math.floor(sessions.reduce((n, i) => n + i.payload.elapsed, 0) / 60),
+    minutes: Math.floor(sessions.reduce((n, i) => n + focusRecordedSeconds(i.payload), 0) / 60),
     days: new Set(sessions.map((i) => dayKey(new Date(i.created_at)))).size,
   };
 }
@@ -260,7 +279,7 @@ export function deriveActivityEvents(items: Item[]): ActivityEvent[] {
           metadata: {
             title: item.payload.title,
             step: item.payload.step,
-            seconds: item.payload.elapsed,
+            seconds: focusRecordedSeconds(item.payload),
             historical: true,
           },
         },
@@ -330,8 +349,11 @@ export function presenceDays(events: ActivityEvent[], today = new Date()) {
   return result;
 }
 export function validate<K extends Kind>(kind: K, payload: Payloads[K]) {
+  if (kind === 'rhythm_preferences')
+    validateRhythmConfig((payload as Payloads['rhythm_preferences']).config);
   if (kind === 'task') {
     const p = payload as Task;
+    if (p.rhythm) validateRhythmConfig(p.rhythm);
     if (!p.title.trim() || p.title.length > 240)
       throw new Error('Escreva uma tarefa com até 240 caracteres.');
     if (
@@ -365,6 +387,7 @@ export function validate<K extends Kind>(kind: K, payload: Payloads[K]) {
   }
   if (kind === 'focus') {
     const p = payload as Focus;
+    validateRhythmState(p);
     if (
       !p.title.trim() ||
       !p.step.trim() ||
@@ -473,6 +496,8 @@ export function createRepository(
       return data as Item<K>;
     }
     const items = await list();
+    if (!previous && kind === 'rhythm_preferences' && items.some((i) => i.kind === kind))
+      throw new Error('Seu ritmo mudou em outra tela. Atualize antes de salvar.');
     if (
       !previous &&
       kind === 'focus' &&

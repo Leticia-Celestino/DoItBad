@@ -23,6 +23,9 @@ O beta web está em `apps/web`. Use `pnpm --filter @doitbad/web dev` para execut
 variáveis públicas estão configuradas; o modo local de desenvolvimento é identificado na interface.
 O aplicativo Android/iOS está em `apps/mobile`; consulte [as instruções nativas](apps/mobile/README.md).
 Tarefas, foco e registros de humor exigem a nova migração `202610080001_workspace.sql`.
+O modo Ritmo (ciclos por tarefa, cronômetro livre e cuidados 20-20-20) exige também
+`202611250001_rhythm.sql`. A rota de dois minutos continua dedicada à ajuda para começar.
+A migração de Ritmo foi validada localmente; aplicar no ambiente de destino antes de publicar.
 As recomendações de próximo passo usam FastAPI/Python e Llama no Cloudflare Workers AI. A API
 publicada está em `https://doitbad-ai.doitbad-app.workers.dev`; o código e as instruções de deploy
 ficam em [`apps/ai-api`](apps/ai-api/README.md). O recurso exige também a migração

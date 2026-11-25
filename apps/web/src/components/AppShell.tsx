@@ -1,3 +1,4 @@
+import { RhythmMini } from './Rhythm';
 import { useEffect, useLayoutEffect, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { signOut } from '../lib/auth';
@@ -280,6 +281,7 @@ export default function AppShell() {
               </button>
             </div>
           )}
+          {ready && !location.pathname.startsWith('/foco/') && <RhythmMini />}
           {ready ? <Outlet /> : !dataError && <p role="status">Preparando seu espaço…</p>}
         </main>
         <footer className="app-footer">

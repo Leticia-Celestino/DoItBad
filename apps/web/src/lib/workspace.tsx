@@ -42,9 +42,9 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState('');
   const lock = useRef(false);
   const version = useRef(0);
-  async function reload() {
+  async function reload(silent = false) {
     if (lock.current) return;
-    setLoading(true);
+    if (!silent) setLoading(true);
     const started = version.current;
     try {
       const next = await repository.list();
@@ -64,9 +64,15 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     const refresh = () => {
       void reload();
     };
+    const poll = window.setInterval(() => {
+      if (document.visibilityState === 'visible' && navigator.onLine) void reload(true);
+    }, 3000);
+    window.addEventListener('online', refresh);
     window.addEventListener('focus', refresh);
     window.addEventListener('storage', refresh);
     return () => {
+      window.clearInterval(poll);
+      window.removeEventListener('online', refresh);
       window.removeEventListener('focus', refresh);
       window.removeEventListener('storage', refresh);
     };
@@ -84,7 +90,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     try {
       const saved = await repository.save(kind, payload, previous);
       const next = [saved, ...items.filter((i) => i.id !== saved.id)];
-      setItems(next);
+      setItems((current) => [saved, ...current.filter((i) => i.id !== saved.id)]);
       setEvents(await loadActivityEvents(supabase, next));
       return saved;
     } catch (e) {

@@ -1,7 +1,18 @@
+import {
+  RhythmDefaults,
+  TaskRhythmFields,
+  TaskRhythmActions,
+  RhythmTimer,
+} from '../components/Rhythm';
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
   dayKey,
+  type RhythmConfig,
+  taskRhythm,
+  rhythmSummary,
+  focusRecordedSeconds,
+  actOnRhythm,
   elapsedSeconds,
   formatTime,
   summarize,
@@ -80,6 +91,7 @@ export function TasksPage() {
   const [steps, setSteps] = useState('');
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all');
+  const [rhythm, setRhythm] = useState<RhythmConfig | null>(null);
   const [editing, setEditing] = useState<Item<'task'> | undefined>();
   const [editorOpen, setEditorOpen] = useState(query.get('new') === '1');
   const [selectedDate, setSelectedDate] = useState(initialDate);
@@ -109,6 +121,7 @@ export function TasksPage() {
   );
   function resetEditor() {
     setEditing(undefined);
+    setRhythm(null);
     setTitle('');
     setProject('');
     setSteps('');
@@ -127,6 +140,7 @@ export function TasksPage() {
   }
   function openTaskEditor(task: Item<'task'>) {
     setEditing(task);
+    setRhythm(task.payload.rhythm ?? null);
     setTitle(task.payload.title);
     setProject(task.payload.project);
     setPriority(task.payload.priority ?? 'media');
@@ -174,6 +188,7 @@ export function TasksPage() {
           title: title.trim(),
           priority,
           cognitiveLoad,
+          rhythm,
           recurrence,
           timeOfDay,
           dependsOn: dependsOn ? [dependsOn] : [],
@@ -416,18 +431,17 @@ export function TasksPage() {
                             </span>
                             {blocked && <span>Bloqueada por outra tarefa</span>}
                           </div>
+                          <p className="rhythm-summary">
+                            {rhythmSummary(taskRhythm(task.payload, items))}
+                          </p>
                           {task.payload.steps.length > 0 && (
                             <details className="task-steps-details">
                               <summary>Ver pequenos passos</summary>
                               <MicroSteps task={task} />
                             </details>
                           )}
+                          {!blocked && !task.payload.done && <TaskRhythmActions task={task} />}
                         </div>
-                        {!blocked && !task.payload.done && (
-                          <Link className="task-focus-link" to={`/tarefa?task=${task.id}`}>
-                            Focar
-                          </Link>
-                        )}
                         <details className="task-row-menu">
                           <summary aria-label={`Mais opções para ${task.payload.title}`}>
                             •••
@@ -523,6 +537,7 @@ export function TasksPage() {
                 placeholder="Abrir o documento&#10;Escrever uma frase"
               />
             </label>
+            <TaskRhythmFields value={rhythm} onChange={setRhythm} />
             <fieldset className="cognitive-load-options">
               <legend>Quanto de energia mental isso parece pedir?</legend>
               {([1, 2, 3] as CognitiveLoad[]).map((value) => (
@@ -659,6 +674,7 @@ export function StartPage() {
       title,
       step,
       blockers,
+      purpose: 'start',
       target: 2 * 60,
       elapsed: 0,
       runningSince: Date.now(),
@@ -820,6 +836,16 @@ export function StartPage() {
 }
 export function TimerPage() {
   const { id } = useParams();
+  const { items } = useWorkspace();
+  const item = items.find((i): i is Item<'focus'> => i.kind === 'focus' && i.id === id);
+  return item?.payload.rhythm && item.payload.status === 'active' ? (
+    <RhythmTimer key={item.id} item={item} />
+  ) : (
+    <LegacyTimerPage />
+  );
+}
+function LegacyTimerPage() {
+  const { id } = useParams();
   const { items, save, busy, loading } = useWorkspace();
   const nav = useNavigate();
   const [now, setNow] = useState(Date.now());
@@ -840,7 +866,16 @@ export function TimerPage() {
     finishing.current = true;
     void save(
       'focus',
-      { ...item.payload, elapsed: item.payload.target, runningSince: null, status: 'complete' },
+      {
+        ...item.payload,
+        elapsed: item.payload.target,
+        runningSince: null,
+        status: 'complete',
+        completedAt:
+          item.payload.runningSince === null
+            ? Date.now()
+            : item.payload.runningSince + (item.payload.target - item.payload.elapsed) * 1000,
+      },
       item,
     ).then((saved) => {
       if (saved) nav(`/conclusao/${item.id}`, { replace: true });
@@ -908,7 +943,16 @@ export function TimerPage() {
                 className="button"
                 disabled={busy}
                 onClick={() =>
-                  void update({ ...focus, elapsed, runningSince: null, status: 'complete' }, true)
+                  void update(
+                    {
+                      ...focus,
+                      elapsed,
+                      runningSince: null,
+                      status: 'complete',
+                      completedAt: Date.now(),
+                    },
+                    true,
+                  )
                 }
               >
                 Encerrar e registrar
@@ -950,11 +994,16 @@ export function DonePage() {
         <span className="celebration" aria-hidden="true">
           ✦
         </span>
-        <Heading tag="Uma pequena vitória" title="Você começou.">
+        <Heading
+          tag="Um momento do seu caminho"
+          title={
+            item.payload.purpose === 'rhythm' ? 'Seu momento ficou registrado.' : 'Você começou.'
+          }
+        >
           Esse passo já faz parte do seu caminho.
         </Heading>
         <p>
-          {item.payload.title} · {formatTime(item.payload.elapsed)} de presença
+          {item.payload.title} · {formatTime(focusRecordedSeconds(item.payload))} de presença
         </p>
         <label>
           O que fica para o próximo passo?
@@ -992,7 +1041,20 @@ export function DonePage() {
           </label>
         )}
         <div className="button-row">
-          <Link className="button" to="/tarefa">
+          {item.payload.purpose !== 'rhythm' &&
+            item.payload.purpose !== 'rest' &&
+            !task?.payload.done && (
+              <Link
+                className="button"
+                to={`/ritmo?from=${item.id}${task ? `&task=${task.id}` : ''}`}
+              >
+                Continuar
+              </Link>
+            )}
+          <Link className="button secondary" to="/atividade">
+            Encerrar por agora
+          </Link>
+          <Link className="text-button" to="/tarefa">
             Dar outro passo
           </Link>
           <Link to="/historico">Ver meu histórico</Link>
@@ -1073,7 +1135,7 @@ export function HistoryPage() {
               <h3>{i.payload.title}</h3>
               <p>{i.payload.step}</p>
               <small>
-                {formatTime(i.payload.elapsed)} ·{' '}
+                {formatTime(focusRecordedSeconds(i.payload))} ·{' '}
                 {new Date(i.created_at).toLocaleDateString('pt-BR')}
               </small>
               {i.payload.note && <blockquote>{i.payload.note}</blockquote>}
@@ -1317,6 +1379,8 @@ export function CalendarPage() {
                         <small>{recurrenceLabels[t.payload.recurrence ?? 'none']}</small>
                       )}
                     </div>
+                    <p className="rhythm-summary">{rhythmSummary(taskRhythm(t.payload, items))}</p>
+                    <TaskRhythmActions task={t} />
                     {t.payload.steps.length > 0 && (
                       <ul
                         className="agenda-microactions"
@@ -1487,10 +1551,14 @@ export function RecoveryPage() {
                   await save(
                     'focus',
                     {
-                      ...active.payload,
+                      ...(active.payload.rhythm
+                        ? actOnRhythm(active.payload, 'pause', Date.now())
+                        : {
+                            ...active.payload,
+                            elapsed: elapsedSeconds(active.payload),
+                            runningSince: null,
+                          }),
                       note,
-                      elapsed: elapsedSeconds(active.payload),
-                      runningSince: null,
                     },
                     active,
                   )
@@ -1622,6 +1690,7 @@ export function ZenPage() {
         onClick={async () => {
           const i = await save('focus', {
             taskId: null,
+            purpose: 'rest',
             title: 'Um momento de pausa',
             step: 'Respirar e estar aqui',
             blockers: [],
@@ -1882,9 +1951,10 @@ export function SettingsPage() {
                 </span>
               </header>
               <div className="two-minute-principle">
-                <strong>Todo começo parte de 2 minutos.</strong>
-                <p>Depois desse primeiro ciclo, continuar é sempre uma escolha sua.</p>
+                <strong>Dois minutos para quando começar estiver difícil.</strong>
+                <p>Quando você já sabe como começar, pode entrar diretamente no seu ritmo.</p>
               </div>
+              <RhythmDefaults />
               <label className="volume-setting">
                 <span>
                   <strong>Volume dos sons suaves</strong>

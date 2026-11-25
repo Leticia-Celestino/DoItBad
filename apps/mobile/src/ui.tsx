@@ -1,3 +1,4 @@
+import RhythmMini from './RhythmMini';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -179,6 +180,7 @@ export function Page({
             },
           ]}
         >
+          <RhythmMini />
           {(back || brand || step !== undefined) && (
             <View
               style={{

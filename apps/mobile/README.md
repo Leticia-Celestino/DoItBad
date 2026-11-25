@@ -111,8 +111,10 @@ Nunca envie a chave `service_role` do Supabase para builds mobile ou para o nave
 Alterações remotas usam revisão para rejeitar edições antigas. Uma resposta perdida
 pode ser repetida com o mesmo ID enquanto o processo continua, evitando duplicações.
 O timer usa horário de início e tempo acumulado, preservando a contagem ao reabrir.
-O app sincroniza ao retornar ao primeiro plano; não há fila offline nem garantia
-de atualização instantânea entre dois dispositivos abertos simultaneamente.
+O app sincroniza ao retornar ao primeiro plano e consulta alterações a cada três segundos
+enquanto está aberto. A entrega Ritmo acrescenta os mesmos comandos e estados do web;
+revisões rejeitam gravações desatualizadas. Não há fila offline nem garantia de atualização
+instantânea entre dispositivos ou entrega de alertas com o aplicativo fechado.
 
 Tarefas e sessões do protótipo não são importadas como dados reais. Intenções existentes
 continuam usando a tabela original. Áudio opcional: `packages/assets/zen.wav`, gerado
@@ -120,3 +122,17 @@ pelo script versionado `scripts/generate-zen-audio.mjs`.
 
 Antes do lançamento: testar autenticação/deep links em build instalado, sincronização
 entre contas/dispositivos, comportamento em segundo plano e VoiceOver/TalkBack.
+
+## Ritmo e pequenos começos — 25/11/2026
+
+`Me ajude a começar` mantém a microação de dois minutos sem configuração.
+`Começar meu ritmo` inicia diretamente blocos personalizados ou contagem livre;
+`Sem cronômetro` mantém a atividade disponível sem criar uma sessão medida.
+Preferências por conta e exceções por tarefa são compartilhadas com a web.
+
+Aplicar `202611250001_rhythm.sql` antes de liberar estes clientes com Supabase.
+A migração foi validada em PostgreSQL temporário, sem alteração do projeto remoto.
+Os avisos 20-20-20 são opcionais. Os sinais sonoros exigem ativação em cada tela de
+foco; notificações locais com o app fechado não fazem parte desta entrega.
+A exportação de bundles Android/iOS foi validada; testes em aparelhos continuam
+necessários para conferir áudio, acessibilidade e suspensão pelo sistema operacional.

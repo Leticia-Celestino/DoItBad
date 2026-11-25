@@ -117,13 +117,19 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, []);
   useEffect(() => {
     if (!supabase || session) void refresh();
+    const poll = setInterval(() => {
+      if (AppState.currentState === 'active' && (!supabase || session)) void refresh();
+    }, 3000);
     const sub = AppState.addEventListener('change', (state) => {
       if (state === 'active') {
         supabase?.auth.startAutoRefresh();
         if (!supabase || session) void refresh();
       } else supabase?.auth.stopAutoRefresh();
     });
-    return () => sub.remove();
+    return () => {
+      clearInterval(poll);
+      sub.remove();
+    };
   }, [session?.user.id]);
   async function save<K extends Kind>(
     kind: K,
@@ -140,7 +146,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       const item = await repo.save(kind, payload, previous);
       if (current !== generation.current) return null;
       const next = [item, ...items.filter((i) => i.id !== item.id)];
-      setItems(next);
+      setItems((currentItems) => [item, ...currentItems.filter((i) => i.id !== item.id)]);
       setEvents(await loadActivityEvents(supabase, next));
       return item;
     } catch (e) {
