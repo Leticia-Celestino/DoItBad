@@ -11,7 +11,7 @@ class RecommendationDraft(BaseModel):
     task_id: str = Field(min_length=1)
     microaction: str = Field(min_length=3, max_length=180)
     reason: str = Field(min_length=3, max_length=220)
-    estimated_minutes: int = Field(ge=1, le=15)
+    estimated_minutes: Literal[2] = 2
 
 
 class RecommendationResponse(RecommendationDraft):
@@ -28,6 +28,7 @@ class TaskPayload(BaseModel):
     done: bool = False
     steps: list[str] = Field(default_factory=list)
     priority: Literal["alta", "media", "baixa"] = "media"
+    cognitiveLoad: Literal[1, 2, 3] = 2
     completedSteps: list[int] = Field(default_factory=list)
     dependsOn: list[str] = Field(default_factory=list)
 
@@ -37,4 +38,3 @@ class TaskRecord(BaseModel):
     revision: int
     created_at: str
     payload: TaskPayload
-

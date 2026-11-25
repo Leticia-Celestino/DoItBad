@@ -105,6 +105,7 @@ async def choose_with_llama(env, tasks: list[TaskRecord]) -> RecommendationRespo
             "title": task.payload.title,
             "tag": task.payload.project,
             "priority": task.payload.priority,
+            "cognitive_load": task.payload.cognitiveLoad,
             "pending_steps": [
                 step
                 for index, step in enumerate(task.payload.steps)
@@ -115,8 +116,10 @@ async def choose_with_llama(env, tasks: list[TaskRecord]) -> RecommendationRespo
     ]
     prompt = (
         "Escolha exatamente uma tarefa e proponha uma microação concreta, acolhedora e executável "
-        "em até 15 minutos. Não invente IDs, tarefas ou fatos. Evite cobrança e frases genéricas. "
-        "Responda apenas JSON com task_id, microaction, reason e estimated_minutes.\n"
+        "em exatamente 2 minutos. A ação deve poder ser interrompida com segurança ao fim desses "
+        "2 minutos, mesmo que a tarefa maior continue incompleta. Não invente IDs, tarefas ou fatos. "
+        "Evite cobrança e frases genéricas. estimated_minutes deve ser 2. Responda apenas JSON com "
+        "task_id, microaction, reason e estimated_minutes.\n"
         f"Tarefas elegíveis: {json.dumps(candidates, ensure_ascii=False)}"
     )
     try:

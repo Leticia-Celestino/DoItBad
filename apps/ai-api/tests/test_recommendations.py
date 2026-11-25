@@ -22,6 +22,7 @@ def task(
                 "done": done,
                 "steps": steps or [],
                 "priority": priority,
+                "cognitiveLoad": 2,
                 "completedSteps": [],
                 "dependsOn": depends_on or [],
             },
@@ -43,5 +44,5 @@ def test_deterministic_uses_first_pending_microaction() -> None:
     recommendation = deterministic([task("one", steps=["Abrir o arquivo", "Escrever o título"])])
     assert recommendation.task_id == "one"
     assert recommendation.microaction == "Abrir o arquivo"
+    assert recommendation.estimated_minutes == 2
     assert recommendation.source == "deterministic"
-
