@@ -1,8 +1,9 @@
 import { expect, test } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+const base = 'http://127.0.0.1:4324';
 const config = { mode: 'cycles', focusMinutes: 50, breakMinutes: 10, blocks: 2, eyeCare: true };
 test.beforeEach(async ({ page }) => {
-  await page.goto('/atividade');
+  await page.goto(`${base}/atividade`);
   await page.evaluate((rhythm) => {
     localStorage.clear();
     const date = new Date();
@@ -33,7 +34,7 @@ test.beforeEach(async ({ page }) => {
 test('two entry paths, optional planning and direct rhythm start in the calendar', async ({
   page,
 }) => {
-  await page.goto('/calendario');
+  await page.goto(`${base}/calendario`);
   await expect(page.getByText('2 blocos de 50 min', { exact: false })).toBeVisible();
   await expect(page.getByRole('link', { name: 'Me ajude a começar', exact: true })).toBeVisible();
   await page.getByRole('link', { name: 'Começar meu ritmo', exact: true }).click();
@@ -53,7 +54,7 @@ test('20-20-20, check-in, rest and next block keep separate totals across reload
   page,
 }) => {
   await page.clock.install();
-  await page.goto('/ritmo?task=task-study');
+  await page.goto(`${base}/ritmo?task=task-study`);
   await page.getByRole('button', { name: 'Começar meu ritmo', exact: true }).click();
   await page.clock.fastForward(20 * 60 * 1000);
   await page.getByRole('button', { name: 'Começar 20 segundos' }).click();
@@ -111,7 +112,7 @@ test('a small beginning offers continuation without changing the two-minute rout
     });
     localStorage.setItem('doitbad-workspace-v1', JSON.stringify(rows));
   });
-  await page.goto('/conclusao/small-start');
+  await page.goto(`${base}/conclusao/small-start`);
   await expect(page.getByRole('link', { name: 'Encerrar por agora' })).toBeVisible();
   await page.getByRole('link', { name: 'Continuar', exact: true }).click();
   await expect(page.getByLabel('O que você quer fazer neste momento?')).toHaveValue('Questão 8');
@@ -128,11 +129,11 @@ test('a small beginning offers continuation without changing the two-minute rout
 });
 
 test('personal preference, task override and no-timer mode persist', async ({ page }) => {
-  await page.goto('/configuracoes?section=foco');
+  await page.goto(`${base}/configuracoes?section=foco`);
   await page.getByLabel('Quantidade de blocos').fill('3');
   await page.getByRole('button', { name: 'Salvar meu ritmo' }).click();
   await expect(page.getByText('Seu ritmo foi salvo.', { exact: false })).toBeVisible();
-  await page.goto('/tarefas');
+  await page.goto(`${base}/tarefas`);
   await page.getByLabel('Mais opções para Estudar Química').click();
   await page.getByRole('button', { name: 'Editar', exact: true }).click();
   await page.getByText('Ritmo para quando eu começar · opcional', { exact: true }).click();
@@ -156,7 +157,7 @@ test('another open client receives pause and resume; navigation retains a compac
   page,
   context,
 }) => {
-  await page.goto('/ritmo?task=task-study');
+  await page.goto(`${base}/ritmo?task=task-study`);
   await page.getByRole('button', { name: 'Começar meu ritmo', exact: true }).click();
   const second = await context.newPage();
   await second.goto(page.url());
@@ -172,7 +173,7 @@ test('another open client receives pause and resume; navigation retains a compac
   await expect(page.getByLabel('Quando voltar, qual é o próximo gesto?')).toHaveValue(
     'Retomar na questão 10',
   );
-  await second.goto('/tarefas');
+  await second.goto(`${base}/tarefas`);
   await expect(second.locator('.rhythm-mini')).toContainText('Estudar Química');
   await second.close();
 });
